@@ -1,4 +1,4 @@
-package org.example.eurekaserver;
+package org.example.discoveryservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
