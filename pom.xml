@@ -18,6 +18,8 @@
 
   <modules>
     <module>discovery-service</module>
+    <module>gateway-service</module>
+    <module>demo</module>
   </modules>
 
   <properties>
