@@ -16,6 +16,10 @@
     <version>3.2.4</version>
   </parent>
 
+  <modules>
+    <module>eureka-server</module>
+  </modules>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>21</maven.compiler.source>
