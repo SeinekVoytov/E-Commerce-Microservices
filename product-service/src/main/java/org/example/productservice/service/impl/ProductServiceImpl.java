@@ -3,6 +3,7 @@ package org.example.productservice.service.impl;
 import org.example.productservice.dto.PageProductShortDto;
 import org.example.productservice.dto.ProductLongDto;
 import org.example.productservice.dto.ProductShortDto;
+import org.example.productservice.exception.ProductNotFoundException;
 import org.example.productservice.model.ProductLong;
 import org.example.productservice.model.ProductShort;
 import org.example.productservice.repository.ProductLongRepository;
@@ -49,7 +50,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductLongDto getById(int id) {
-        ProductLong productLong = productLongRepository.findById(id).orElseThrow();
+        ProductLong productLong = productLongRepository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product could not be updated"));
         return mapToLongDto(productLong);
     }
 
