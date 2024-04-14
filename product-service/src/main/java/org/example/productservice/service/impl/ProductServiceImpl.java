@@ -1,10 +1,13 @@
 package org.example.productservice.service.impl;
 
 import org.example.productservice.dto.PageProductShortDto;
+import org.example.productservice.dto.ProductLongDto;
 import org.example.productservice.dto.ProductShortDto;
+import org.example.productservice.model.ProductLong;
 import org.example.productservice.model.ProductShort;
+import org.example.productservice.repository.ProductLongRepository;
 import org.example.productservice.repository.ProductShortRepository;
-import org.example.productservice.service.ProductShortService;
+import org.example.productservice.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,13 +17,15 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class ProductShortServiceImpl implements ProductShortService {
+public class ProductServiceImpl implements ProductService {
 
     private final ProductShortRepository productShortRepository;
+    private final ProductLongRepository productLongRepository;
 
     @Autowired
-    public ProductShortServiceImpl(ProductShortRepository productShortRepository) {
+    public ProductServiceImpl(ProductShortRepository productShortRepository, ProductLongRepository productLongRepository) {
         this.productShortRepository = productShortRepository;
+        this.productLongRepository = productLongRepository;
     }
 
     @Override
@@ -30,7 +35,7 @@ public class ProductShortServiceImpl implements ProductShortService {
         Page<ProductShort> shortProducts = productShortRepository.findAll(pageable);
 
         List<ProductShortDto> pageContent = shortProducts.getContent().stream()
-                .map(this::mapToDto)
+                .map(this::mapToShortDto)
                 .toList();
 
         return PageProductShortDto.builder()
@@ -42,13 +47,34 @@ public class ProductShortServiceImpl implements ProductShortService {
                 .build();
     }
 
-    private ProductShortDto mapToDto(ProductShort productShort) {
+    @Override
+    public ProductLongDto getById(int id) {
+        ProductLong productLong = productLongRepository.findById(id).orElseThrow();
+        return mapToLongDto(productLong);
+    }
+
+    private ProductShortDto mapToShortDto(ProductShort productShort) {
         return ProductShortDto.builder()
                 .id(productShort.getId())
                 .name(productShort.getName())
                 .imgUri(productShort.getImgUri())
                 .price(productShort.getPrice())
                 .categories(productShort.getCategories())
+                .build();
+    }
+
+    private ProductLongDto mapToLongDto(ProductLong productLong) {
+        return ProductLongDto.builder()
+                .id(productLong.getId())
+                .name(productLong.getProductShort().getName())
+                .imgUri(productLong.getProductShort().getImgUri())
+                .price(productLong.getProductShort().getPrice())
+                .categories(productLong.getProductShort().getCategories())
+                .lengthInM(productLong.getLengthInM())
+                .widthInM(productLong.getWidthInM())
+                .heightInM(productLong.getHeightInM())
+                .netWeightInKg(productLong.getNetWeightInKg())
+                .grossWeightInKg(productLong.getGrossWeightInKg())
                 .build();
     }
 }

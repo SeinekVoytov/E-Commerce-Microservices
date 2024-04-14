@@ -1,7 +1,8 @@
 package org.example.productservice.controller;
 
 import org.example.productservice.dto.PageProductShortDto;
-import org.example.productservice.service.ProductShortService;
+import org.example.productservice.dto.ProductLongDto;
+import org.example.productservice.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,11 +12,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/products")
 public class ProductController {
 
-    private final ProductShortService productShortService;
+    private final ProductService productService;
 
     @Autowired
-    public ProductController(ProductShortService productShortService) {
-        this.productShortService = productShortService;
+    public ProductController(ProductService productService) {
+        this.productService = productService;
     }
 
     @GetMapping()
@@ -23,6 +24,11 @@ public class ProductController {
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
             @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
     ) {
-        return new ResponseEntity<>(productShortService.getAllShortProduct(pageNo, pageSize), HttpStatus.OK);
+        return new ResponseEntity<>(productService.getAllShortProduct(pageNo, pageSize), HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductLongDto> productDetails(@PathVariable("id") int id) {
+        return ResponseEntity.ok(productService.getById(id));
     }
 }
