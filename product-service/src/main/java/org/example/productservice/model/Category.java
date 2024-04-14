@@ -1,5 +1,6 @@
 package org.example.productservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -15,6 +16,7 @@ public class Category {
     private int id;
 
     @ManyToMany(mappedBy = "categories", cascade = CascadeType.PERSIST)
+    @JsonIgnore
     private List<ProductShort> products;
 
     private String name;

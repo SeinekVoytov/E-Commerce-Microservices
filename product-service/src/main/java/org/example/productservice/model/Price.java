@@ -1,5 +1,6 @@
 package org.example.productservice.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -13,6 +14,7 @@ public class Price {
     private int id;
 
     @OneToOne(mappedBy = "price", cascade = CascadeType.PERSIST)
+    @JsonIgnore
     private ProductShort product;
 
     private float amount;
