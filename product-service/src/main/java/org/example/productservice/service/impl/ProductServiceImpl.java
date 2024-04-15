@@ -58,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
         return ProductShortDto.builder()
                 .id(productShort.getId())
                 .name(productShort.getName())
-                .imgUri(productShort.getImgUri())
+                .imgUrls(productShort.getImgUrls())
                 .price(productShort.getPrice())
                 .categories(productShort.getCategories())
                 .build();
@@ -68,7 +68,7 @@ public class ProductServiceImpl implements ProductService {
         return ProductLongDto.builder()
                 .id(productLong.getId())
                 .name(productLong.getProductShort().getName())
-                .imgUri(productLong.getProductShort().getImgUri())
+                .imgUrls(productLong.getProductShort().getImgUrls())
                 .price(productLong.getProductShort().getPrice())
                 .categories(productLong.getProductShort().getCategories())
                 .lengthInM(productLong.getLengthInM())

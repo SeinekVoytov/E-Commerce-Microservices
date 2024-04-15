@@ -2,6 +2,7 @@ package org.example.productservice.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.example.productservice.util.converter.TextToStringListConverter;
 
 import java.util.List;
 
@@ -19,8 +20,9 @@ public class ProductShort {
 
     private String name;
 
-    @Column(name = "img_uri")
-    private String imgUri;
+    @Column(name = "img_urls", columnDefinition = "text[]")
+    @Convert(converter = TextToStringListConverter.class)
+    private List<String> imgUrls;
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "price_id", referencedColumnName = "id")

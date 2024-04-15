@@ -12,7 +12,7 @@ import java.util.List;
 public class ProductLongDto {
     private int id;
     private String name;
-    private String imgUri;
+    private List<String> imgUrls;
     private Price price;
     private List<Category> categories;
     private float lengthInM;
