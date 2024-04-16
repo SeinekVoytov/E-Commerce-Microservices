@@ -20,9 +20,8 @@ public class ProductShort {
 
     private String name;
 
-    @Column(name = "img_urls", columnDefinition = "text[]")
-    @Convert(converter = TextToStringListConverter.class)
-    private List<String> imgUrls;
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.PERSIST)
+    private List<Image> images;
 
     @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "price_id", referencedColumnName = "id")

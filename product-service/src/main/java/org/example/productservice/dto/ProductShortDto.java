@@ -12,7 +12,7 @@ import java.util.List;
 public class ProductShortDto {
     private int id;
     private String name;
-    private List<String> imgUrls;
+    private List<String> images;
     private Price price;
     private List<Category> categories;
 }

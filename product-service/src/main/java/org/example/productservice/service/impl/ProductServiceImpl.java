@@ -4,6 +4,7 @@ import org.example.productservice.dto.PageProductShortDto;
 import org.example.productservice.dto.ProductLongDto;
 import org.example.productservice.dto.ProductShortDto;
 import org.example.productservice.exception.ProductNotFoundException;
+import org.example.productservice.model.Image;
 import org.example.productservice.model.ProductLong;
 import org.example.productservice.model.ProductShort;
 import org.example.productservice.repository.ProductLongRepository;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -77,7 +79,6 @@ public class ProductServiceImpl implements ProductService {
 
         ProductShort insideProduct = toBeUpdated.getProductShort();
         insideProduct.setName(updated.getName());
-        insideProduct.setImgUrls(updated.getImgUrls());
         insideProduct.setPrice(updated.getPrice());
         insideProduct.setCategories(updated.getCategories());
     }
@@ -86,7 +87,7 @@ public class ProductServiceImpl implements ProductService {
         return ProductShortDto.builder()
                 .id(productShort.getId())
                 .name(productShort.getName())
-                .imgUrls(productShort.getImgUrls())
+                .images(unwrapUrls(productShort.getImages()))
                 .price(productShort.getPrice())
                 .categories(productShort.getCategories())
                 .build();
@@ -96,7 +97,7 @@ public class ProductServiceImpl implements ProductService {
         return ProductLongDto.builder()
                 .id(productLong.getId())
                 .name(productLong.getProductShort().getName())
-                .imgUrls(productLong.getProductShort().getImgUrls())
+                .images(unwrapUrls(productLong.getProductShort().getImages()))
                 .price(productLong.getProductShort().getPrice())
                 .categories(productLong.getProductShort().getCategories())
                 .lengthInM(productLong.getLengthInM())
@@ -105,5 +106,11 @@ public class ProductServiceImpl implements ProductService {
                 .netWeightInKg(productLong.getNetWeightInKg())
                 .grossWeightInKg(productLong.getGrossWeightInKg())
                 .build();
+    }
+
+    private List<String> unwrapUrls(List<Image> images) {
+        return images.stream()
+                .map(Image::getUrl)
+                .toList();
     }
 }
