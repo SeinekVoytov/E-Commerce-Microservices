@@ -3,6 +3,7 @@ package org.example.productservice.service.impl;
 import org.example.productservice.dto.PageProductShortDto;
 import org.example.productservice.dto.ProductLongDto;
 import org.example.productservice.dto.ProductShortDto;
+import org.example.productservice.exception.InvalidQueryParameterException;
 import org.example.productservice.exception.ProductNotFoundException;
 import org.example.productservice.model.Image;
 import org.example.productservice.model.ProductLong;
@@ -18,9 +19,13 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ProductServiceImpl implements ProductService {
+
+    private static final Set<String> AVAILABLE_SORT_PARAMETERS = Set.of("price.amount");
+    private static final Set<String> AVAILABLE_ORDER = Set.of("asc", "desc");
 
     private final ProductShortRepository productShortRepository;
     private final ProductLongRepository productLongRepository;
@@ -86,6 +91,10 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private Sort createSort(String order, String sortParam) {
+
+        if (!AVAILABLE_ORDER.contains(order) || !AVAILABLE_SORT_PARAMETERS.contains(sortParam)) {
+            throw new InvalidQueryParameterException("Invalid query parameter value");
+        }
 
         if (order.equals("desc")) {
             return Sort.by(sortParam).descending();
