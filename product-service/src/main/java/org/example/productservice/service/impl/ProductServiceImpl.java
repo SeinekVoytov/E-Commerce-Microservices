@@ -1,13 +1,13 @@
 package org.example.productservice.service.impl;
 
+import org.example.productservice.dto.CreateProductDto;
 import org.example.productservice.dto.PageProductShortDto;
 import org.example.productservice.dto.ProductLongDto;
 import org.example.productservice.dto.ProductShortDto;
 import org.example.productservice.exception.InvalidQueryParameterException;
 import org.example.productservice.exception.ProductNotFoundException;
-import org.example.productservice.model.Image;
-import org.example.productservice.model.ProductLong;
-import org.example.productservice.model.ProductShort;
+import org.example.productservice.model.*;
+import org.example.productservice.repository.CategoryRepository;
 import org.example.productservice.repository.ProductLongRepository;
 import org.example.productservice.repository.ProductShortRepository;
 import org.example.productservice.service.ProductService;
@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -29,11 +30,13 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductShortRepository productShortRepository;
     private final ProductLongRepository productLongRepository;
+    private final CategoryRepository categoryRepository;
 
     @Autowired
-    public ProductServiceImpl(ProductShortRepository productShortRepository, ProductLongRepository productLongRepository) {
+    public ProductServiceImpl(ProductShortRepository productShortRepository, ProductLongRepository productLongRepository, CategoryRepository categoryRepository) {
         this.productShortRepository = productShortRepository;
         this.productLongRepository = productLongRepository;
+        this.categoryRepository = categoryRepository;
     }
 
     @Override
@@ -74,6 +77,38 @@ public class ProductServiceImpl implements ProductService {
         ProductLong productToBeUpdated = productLongRepository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product could not be updated"));
         updateProduct(productToBeUpdated, updatedProduct);
         return mapToLongDto(productLongRepository.save(productToBeUpdated));
+    }
+
+    @Override
+    public ProductLongDto createProduct(CreateProductDto newProductData) {
+
+        ProductLong createdProduct = new ProductLong();
+        createdProduct.setLengthInM(newProductData.getLengthInM());
+        createdProduct.setWidthInM(newProductData.getWidthInM());
+        createdProduct.setHeightInM(newProductData.getHeightInM());
+        createdProduct.setNetWeightInKg(newProductData.getNetWeightInKg());
+        createdProduct.setGrossWeightInKg(newProductData.getGrossWeightInKg());
+
+        ProductShort productShort = new ProductShort();
+        productShort.setName(newProductData.getName());
+        Iterable<Category> selectedCategories = categoryRepository.findAllById(newProductData.getCategoryIds());
+
+        List<Category> categoriesToBeSaved = new ArrayList<>();
+        for (Category selectedCategory : selectedCategories) {
+            categoriesToBeSaved.add(selectedCategory);
+        }
+
+        productShort.setCategories(categoriesToBeSaved);
+
+        Price priceToBeSaved = new Price();
+        priceToBeSaved.setAmount(newProductData.getPriceAmount());
+        priceToBeSaved.setCurrency(newProductData.getPriceCurrency());
+
+        productShort.setPrice(priceToBeSaved);
+        productShort.setImages(new ArrayList<>());
+        createdProduct.setProductShort(productShort);
+
+        return mapToLongDto(productLongRepository.save(createdProduct));
     }
 
     private void updateProduct(ProductLong toBeUpdated, ProductLongDto updated) {

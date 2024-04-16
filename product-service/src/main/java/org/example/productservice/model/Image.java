@@ -2,6 +2,7 @@ package org.example.productservice.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 @Entity
 @Table(name = "image")
@@ -14,6 +15,7 @@ public class Image {
 
     @ManyToOne()
     @JoinColumn(name = "owner_id",  referencedColumnName = "id")
+    @ToString.Exclude
     private ProductShort owner;
 
     private String url;

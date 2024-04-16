@@ -2,6 +2,7 @@ package org.example.productservice.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class ProductShort {
     private int id;
 
     @OneToOne(mappedBy = "productShort", cascade = CascadeType.PERSIST)
+    @ToString.Exclude
     private ProductLong productLong;
 
     private String name;
