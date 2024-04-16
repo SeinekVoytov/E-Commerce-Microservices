@@ -22,9 +22,10 @@ public class ProductController {
     @GetMapping()
     public ResponseEntity<PageProductShortDto> getPage(
             @RequestParam(value = "pageNo", defaultValue = "0", required = false) int pageNo,
-            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize
+            @RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize,
+            @RequestParam(value = "order", defaultValue = "price.amount:asc", required = false) String order
     ) {
-        return new ResponseEntity<>(productService.getAllShortProduct(pageNo, pageSize), HttpStatus.OK);
+        return new ResponseEntity<>(productService.getAllShortProduct(pageNo, pageSize, order), HttpStatus.OK);
     }
 
     @GetMapping("/{id}")

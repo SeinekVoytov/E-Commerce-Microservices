@@ -14,9 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -32,9 +32,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public PageProductShortDto getAllShortProduct(int pageNo, int pageSize) {
+    public PageProductShortDto getAllShortProduct(int pageNo, int pageSize, String order) {
 
-        Pageable pageable = PageRequest.of(pageNo, pageSize);
+        String[] sortingParams = order.trim().split(":");
+
+        Pageable pageable = PageRequest.of(pageNo, pageSize, createSort(sortingParams[1], sortingParams[0]));
         Page<ProductShort> shortProducts = productShortRepository.findAll(pageable);
 
         List<ProductShortDto> pageContent = shortProducts.getContent().stream()
@@ -81,6 +83,15 @@ public class ProductServiceImpl implements ProductService {
         insideProduct.setName(updated.getName());
         insideProduct.setPrice(updated.getPrice());
         insideProduct.setCategories(updated.getCategories());
+    }
+
+    private Sort createSort(String order, String sortParam) {
+
+        if (order.equals("desc")) {
+            return Sort.by(sortParam).descending();
+        }
+
+        return Sort.by(sortParam).ascending();
     }
 
     private ProductShortDto mapToShortDto(ProductShort productShort) {

@@ -2,7 +2,6 @@ package org.example.productservice.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import org.example.productservice.util.converter.TextToStringListConverter;
 
 import java.util.List;
 

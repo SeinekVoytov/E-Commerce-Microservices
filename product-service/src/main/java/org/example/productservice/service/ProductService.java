@@ -5,7 +5,7 @@ import org.example.productservice.dto.ProductLongDto;
 
 public interface ProductService {
 
-    PageProductShortDto getAllShortProduct(int pageNo, int pageSize);
+    PageProductShortDto getAllShortProduct(int pageNo, int pageSize, String order);
     ProductLongDto getById(int id);
     void deleteProductById(int id);
     ProductLongDto updateProduct(int id, ProductLongDto updatedProduct);
