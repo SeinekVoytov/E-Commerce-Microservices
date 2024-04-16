@@ -7,4 +7,6 @@ public interface ProductService {
 
     PageProductShortDto getAllShortProduct(int pageNo, int pageSize);
     ProductLongDto getById(int id);
+    void deleteProductById(int id);
+    ProductLongDto updateProduct(int id, ProductLongDto updatedProduct);
 }

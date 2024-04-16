@@ -50,8 +50,36 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductLongDto getById(int id) {
-        ProductLong productLong = productLongRepository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product could not be updated"));
+        ProductLong productLong = productLongRepository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product could not be found"));
         return mapToLongDto(productLong);
+    }
+
+    @Override
+    public void deleteProductById(int id) {
+        ProductLong productToBeDeleted = productLongRepository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product could not be deleted"));
+        productLongRepository.delete(productToBeDeleted);
+    }
+
+    @Override
+    public ProductLongDto updateProduct(int id, ProductLongDto updatedProduct) {
+        ProductLong productToBeUpdated = productLongRepository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product could not be updated"));
+        updateProduct(productToBeUpdated, updatedProduct);
+        return mapToLongDto(productLongRepository.save(productToBeUpdated));
+    }
+
+    private void updateProduct(ProductLong toBeUpdated, ProductLongDto updated) {
+
+        toBeUpdated.setLengthInM(updated.getLengthInM());
+        toBeUpdated.setWidthInM(updated.getWidthInM());
+        toBeUpdated.setHeightInM(updated.getHeightInM());
+        toBeUpdated.setNetWeightInKg(updated.getNetWeightInKg());
+        toBeUpdated.setGrossWeightInKg(updated.getGrossWeightInKg());
+
+        ProductShort insideProduct = toBeUpdated.getProductShort();
+        insideProduct.setName(updated.getName());
+        insideProduct.setImgUrls(updated.getImgUrls());
+        insideProduct.setPrice(updated.getPrice());
+        insideProduct.setCategories(updated.getCategories());
     }
 
     private ProductShortDto mapToShortDto(ProductShort productShort) {
