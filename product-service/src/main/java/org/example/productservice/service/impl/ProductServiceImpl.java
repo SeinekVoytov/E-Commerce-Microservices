@@ -67,7 +67,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public void deleteProductById(int id) {
+    public void deleteById(int id) {
         ProductLong productToBeDeleted = productLongRepository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product could not be deleted"));
         productLongRepository.delete(productToBeDeleted);
     }
@@ -113,16 +113,39 @@ public class ProductServiceImpl implements ProductService {
 
     private void updateProduct(ProductLong toBeUpdated, ProductLongDto updated) {
 
-        toBeUpdated.setLengthInM(updated.getLengthInM());
-        toBeUpdated.setWidthInM(updated.getWidthInM());
-        toBeUpdated.setHeightInM(updated.getHeightInM());
-        toBeUpdated.setNetWeightInKg(updated.getNetWeightInKg());
-        toBeUpdated.setGrossWeightInKg(updated.getGrossWeightInKg());
+        if (updated.getLengthInM() != null) {
+            toBeUpdated.setLengthInM(updated.getLengthInM());
+        }
+
+        if (updated.getWidthInM() != null) {
+            toBeUpdated.setWidthInM(updated.getWidthInM());
+        }
+
+        if (updated.getHeightInM() != null) {
+            toBeUpdated.setHeightInM(updated.getHeightInM());
+        }
+
+        if (updated.getNetWeightInKg() != null) {
+            toBeUpdated.setNetWeightInKg(updated.getNetWeightInKg());
+        }
+
+        if (updated.getGrossWeightInKg() != null) {
+            toBeUpdated.setGrossWeightInKg(updated.getGrossWeightInKg());
+        }
 
         ProductShort insideProduct = toBeUpdated.getProductShort();
-        insideProduct.setName(updated.getName());
-        insideProduct.setPrice(updated.getPrice());
-        insideProduct.setCategories(updated.getCategories());
+
+        if (updated.getName() != null) {
+            insideProduct.setName(updated.getName());
+        }
+
+        if (updated.getPrice() != null) {
+            insideProduct.setPrice(updated.getPrice());
+        }
+
+        if (updated.getCategories() != null) {
+            insideProduct.setCategories(updated.getCategories());
+        }
     }
 
     private Sort createSort(String order, String sortParam) {
