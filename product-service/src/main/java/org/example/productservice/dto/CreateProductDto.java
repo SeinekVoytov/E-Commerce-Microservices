@@ -14,7 +14,7 @@ import java.util.List;
 public class CreateProductDto {
 
     private String name;
-    private float priceAmount;
+    private Float priceAmount;
     private String priceCurrency;
     private List<Integer> categoryIds;
     private Float lengthInM;
