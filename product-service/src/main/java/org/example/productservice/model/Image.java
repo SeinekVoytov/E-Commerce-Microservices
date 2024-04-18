@@ -1,12 +1,15 @@
 package org.example.productservice.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 
 @Entity
 @Table(name = "image")
-@Data
 public class Image {
 
     @Id

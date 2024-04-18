@@ -1,14 +1,17 @@
 package org.example.productservice.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 
 import java.util.List;
 
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+
 @Entity
 @Table(name = "product_short")
-@Data
 public class ProductShort {
 
     @Id
