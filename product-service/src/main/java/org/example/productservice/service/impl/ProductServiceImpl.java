@@ -151,7 +151,7 @@ public class ProductServiceImpl implements ProductService {
     private Sort createSort(String order, String sortParam) {
 
         if (!AVAILABLE_ORDER.contains(order) || !AVAILABLE_SORT_PARAMETERS.contains(sortParam)) {
-            throw new InvalidQueryParameterException("Invalid query parameter value");
+            throw new InvalidQueryParameterException("Invalid query parameter <order> value");
         }
 
         if (order.equals("desc")) {
