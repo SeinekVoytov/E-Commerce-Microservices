@@ -22,6 +22,6 @@ public class Price {
     @ToString.Exclude
     private ProductShort product;
 
-    private float amount;
+    private Float amount;
     private String currency;
 }

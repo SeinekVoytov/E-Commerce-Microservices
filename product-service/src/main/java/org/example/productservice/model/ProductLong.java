@@ -24,17 +24,17 @@ public class ProductLong {
     private ProductShort productShort;
 
     @Column(name = "length_m")
-    private float lengthInM;
+    private Float lengthInM;
 
     @Column(name = "width_m")
-    private float widthInM;
+    private Float widthInM;
 
     @Column(name = "height_m")
-    private float heightInM;
+    private Float heightInM;
 
     @Column(name = "net_weight_kg")
-    private float netWeightInKg;
+    private Float netWeightInKg;
 
     @Column(name = "gross_weight_kg")
-    private float grossWeightInKg;
+    private Float grossWeightInKg;
 }

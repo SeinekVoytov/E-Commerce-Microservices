@@ -19,9 +19,9 @@ public class ProductLongDto {
     private List<String> images;
     private Price price;
     private List<Category> categories;
-    private float lengthInM;
-    private float widthInM;
-    private float heightInM;
-    private float netWeightInKg;
-    private float grossWeightInKg;
+    private Float lengthInM;
+    private Float widthInM;
+    private Float heightInM;
+    private Float netWeightInKg;
+    private Float grossWeightInKg;
 }

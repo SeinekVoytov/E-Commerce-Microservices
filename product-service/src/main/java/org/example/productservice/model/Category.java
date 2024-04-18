@@ -25,5 +25,5 @@ public class Category {
     private List<ProductShort> products;
 
     private String name;
-    private int count;
+    private Integer count;
 }

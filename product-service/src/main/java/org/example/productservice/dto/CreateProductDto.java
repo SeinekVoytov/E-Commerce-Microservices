@@ -17,9 +17,9 @@ public class CreateProductDto {
     private float priceAmount;
     private String priceCurrency;
     private List<Integer> categoryIds;
-    private float lengthInM;
-    private float widthInM;
-    private float heightInM;
-    private float netWeightInKg;
-    private float grossWeightInKg;
+    private Float lengthInM;
+    private Float widthInM;
+    private Float heightInM;
+    private Float netWeightInKg;
+    private Float grossWeightInKg;
 }
