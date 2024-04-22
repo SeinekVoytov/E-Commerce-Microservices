@@ -52,3 +52,9 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE TRIGGER tr_insert AFTER INSERT ON product_short FOR EACH ROW EXECUTE PROCEDURE increment_category_count();
 
 CREATE OR REPLACE TRIGGER tr_delete AFTER DELETE ON product_short FOR EACH ROW EXECUTE PROCEDURE decrement_category_count();
+
+CREATE TABLE IF NOT EXISTS image (
+    id SERIAL PRIMARY KEY,
+    owner_id INT REFERENCES product_short (id),
+    url TEXT NOT NULL
+);
