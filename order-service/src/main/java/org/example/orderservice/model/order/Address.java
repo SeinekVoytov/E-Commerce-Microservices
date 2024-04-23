@@ -1,4 +1,4 @@
-package org.example.orderservice.model;
+package org.example.orderservice.model.order;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,12 +12,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 
 @Entity
-@Table(name = "quantity")
-public class OrderItemQuantity {
+@Table(name = "address")
+public class Address {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private Integer quantity;
+    private String city;
+    private String country;
+
+    @Column(name = "street_address")
+    private String streetAddress;
+
+    private String apartment;
 }

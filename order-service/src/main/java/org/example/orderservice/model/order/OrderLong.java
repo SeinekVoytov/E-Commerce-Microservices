@@ -1,4 +1,4 @@
-package org.example.orderservice.model;
+package org.example.orderservice.model.order;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -14,18 +14,18 @@ import java.util.List;
 @AllArgsConstructor
 
 @Entity
-@Table(name = "order_short")
-public class OrderShort {
+@Table(name = "order_long")
+public class OrderLong {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @OneToOne
-    @JoinColumn(name = "delivery_id", referencedColumnName = "id")
-    private Delivery delivery;
+    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    private Address address;
 
     @OneToMany
-    @JoinColumn(name = "item_id", referencedColumnName = "id")
-    private List<OrderItemShort> items;
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
+    private List<OrderItemLong> items;
 }

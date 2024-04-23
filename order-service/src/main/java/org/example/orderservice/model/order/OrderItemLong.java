@@ -1,11 +1,11 @@
-package org.example.orderservice.model;
+package org.example.orderservice.model.order;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.example.orderservice.model.product.ProductShort;
+import org.example.orderservice.model.product.ProductLong;
 
 @Data
 @Builder
@@ -13,8 +13,8 @@ import org.example.orderservice.model.product.ProductShort;
 @AllArgsConstructor
 
 @Entity
-@Table(name = "order_item_short")
-public class OrderItemShort {
+@Table(name = "order_item_long")
+public class OrderItemLong {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +22,7 @@ public class OrderItemShort {
 
     @OneToOne
     @JoinColumn(name = "item_id", referencedColumnName = "id")
-    private ProductShort item;
+    private ProductLong item;
 
     @OneToOne
     @JoinColumn(name = "quantity_id", referencedColumnName = "id")
