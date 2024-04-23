@@ -27,6 +27,6 @@ public class OrderShort {
     private Delivery delivery;
 
     @OneToMany
-    @JoinColumn(name = "item_id", referencedColumnName = "id")
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
     private List<OrderItemShort> items;
 }
