@@ -2,7 +2,6 @@ target/
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
-config-service/src/main/resources/git.configrepo.credentials.properties
 
 ### IntelliJ IDEA ###
 .idea
