@@ -9,12 +9,14 @@ FROM openjdk:21
 VOLUME /tmp
 
 ARG DEPENDENCY=/target/dependency
+ARG CONFIG_DIR=/app/data
 
 COPY --from=build ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=build ${DEPENDENCY}/META-INF /app/META-INF
 COPY --from=build ${DEPENDENCY}/BOOT-INF/classes /app
 
-ENV CONFIG_DIR="/Users/sashavoytov/Downloads/configuration"
-ENV GITHUB_CONFIG_REPO_URI="https://github.com/SeinekVoytov/E-Commerce-Microservices-Properties"
+RUN mkdir $CONFIG_DIR
+
+ENV CONFIG_DIR=$CONFIG_DIR
 
 ENTRYPOINT ["java","-cp","app:app/lib/*","org/example/configservice/ConfigServiceApplication"]
