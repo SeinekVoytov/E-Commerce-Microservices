@@ -14,11 +14,6 @@
 	<name>config-service</name>
 	<description>config-service</description>
 
-	<properties>
-		<java.version>21</java.version>
-		<docker.image.prefix>e-commerce</docker.image.prefix>
-	</properties>
-
 	<dependencies>
 
 		<dependency>

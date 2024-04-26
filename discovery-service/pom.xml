@@ -14,10 +14,6 @@
 	<name>eureka-server</name>
 	<description>eureka-server</description>
 
-	<properties>
-		<java.version>21</java.version>
-	</properties>
-
 	<dependencies>
 
 		<dependency>
