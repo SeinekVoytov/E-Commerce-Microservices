@@ -11,8 +11,8 @@
 
 	<artifactId>discovery-service</artifactId>
 
-	<name>eureka-server</name>
-	<description>eureka-server</description>
+	<name>discovery-service</name>
+	<description>discovery-service</description>
 
 	<dependencies>
 
