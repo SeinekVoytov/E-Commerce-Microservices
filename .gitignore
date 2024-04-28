@@ -3,6 +3,7 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 config-service/src/main/resources/git.configrepo.credentials.properties
+docker-compose.env
 
 ### IntelliJ IDEA ###
 .idea
