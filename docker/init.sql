@@ -1,3 +1,5 @@
+\c e_commerce_microservices;
+
 CREATE TABLE IF NOT EXISTS price (
     id SERIAL PRIMARY KEY,
     amount REAL NOT NULL CHECK ( amount > 0 ),
@@ -82,7 +84,7 @@ CREATE TABLE IF NOT EXISTS quantity (
 
 CREATE TABLE IF NOT EXISTS order_short (
     id SERIAL PRIMARY KEY,
-delivery_id INT REFERENCES delivery (id) ON DELETE CASCADE
+    delivery_id INT REFERENCES delivery (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS order_item_short (
