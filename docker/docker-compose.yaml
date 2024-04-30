@@ -1,0 +1,99 @@
+services:
+  database:
+    container_name: postgres
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./init.sql:/docker-entrypoint-initdb.d/1-init.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      backend:
+        aliases:
+          - "database"
+
+  config-service:
+    container_name: config-service
+    image: e-commerce/config-service:latest
+    build:
+      ../config-service
+    restart: always
+    environment:
+      CONFIG_DIR: /app/data
+      GIT_CONFIG_REPO_URI: ${GIT_CONFIG_REPO_URI}
+      GIT_USERNAME: ${GIT_USERNAME}
+      GIT_PASSWORD: ${GIT_PASSWORD}
+    networks:
+      backend:
+        aliases:
+          - "configservice"
+
+  discovery-service:
+    container_name: discovery-service
+    image: e-commerce/discovery-service:latest
+    build:
+      ../discovery-service
+    restart: always
+    environment:
+      EUREKA_HOSTNAME: ${EUREKA_HOSTNAME}
+    depends_on:
+      config-service:
+        condition: service_healthy
+    networks:
+      backend:
+        aliases:
+          - "discoveryservice"
+
+  gateway-service:
+    container_name: gateway-service
+    image: e-commerce/gateway-service:latest
+    build:
+      ../gateway-service
+    restart: always
+    environment:
+      EUREKA_HOSTNAME: ${EUREKA_HOSTNAME}
+    depends_on:
+      config-service:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    networks:
+      backend:
+        aliases:
+          - "gatewayservice"
+
+  product-service:
+    container_name: product-service
+    image: e-commerce/product-service:latest
+    build:
+      ../product-service
+    restart: always
+    environment:
+      EUREKA_HOSTNAME: ${EUREKA_HOSTNAME}
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DRIVER: ${DB_DRIVER}
+    depends_on:
+      database:
+        condition: service_healthy
+      config-service:
+        condition: service_healthy
+      discovery-service:
+        condition: service_healthy
+    networks:
+      backend:
+        aliases:
+          - "productservice"
+
+networks:
+  backend:
+    driver: bridge
