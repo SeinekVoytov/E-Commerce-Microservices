@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: "config-service"
+
+  cloud:
+    config:
+      server:
+        git:
+          uri: ${GIT_CONFIG_REPO_URI}
+          clone-on-start: true
+          basedir: ${CONFIG_DIR}
+          username: ${GIT_USERNAME}
+          passphrase: ${GIT_PASSWORD}
+
+        default-label: master
+
+server:
+  port: 8888
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
