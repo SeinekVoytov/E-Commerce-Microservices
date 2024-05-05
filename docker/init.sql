@@ -17,8 +17,7 @@ CREATE TABLE IF NOT EXISTS product_short (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
     img_uri TEXT NOT NULL,
-    price_id INT REFERENCES price (id) ON DELETE CASCADE,
-    category_id INT REFERENCES category (id)
+    price_id INT REFERENCES price (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS product_short_category (
@@ -51,9 +50,9 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE TRIGGER tr_insert AFTER INSERT ON product_short FOR EACH ROW EXECUTE PROCEDURE increment_category_count();
+CREATE OR REPLACE TRIGGER tr_insert AFTER INSERT ON product_short_category FOR EACH ROW EXECUTE PROCEDURE increment_category_count();
 
-CREATE OR REPLACE TRIGGER tr_delete AFTER DELETE ON product_short FOR EACH ROW EXECUTE PROCEDURE decrement_category_count();
+CREATE OR REPLACE TRIGGER tr_delete AFTER DELETE ON product_short_category FOR EACH ROW EXECUTE PROCEDURE decrement_category_count();
 
 CREATE TABLE IF NOT EXISTS image (
     id SERIAL PRIMARY KEY,
