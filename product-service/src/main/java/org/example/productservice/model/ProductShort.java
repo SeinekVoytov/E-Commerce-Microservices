@@ -37,4 +37,9 @@ public class ProductShort {
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
     private List<Category> categories;
+
+    @PreRemove
+    private void removeMappingWithCategories() {
+        categories.forEach(category -> category.getProducts().remove(this));
+    }
 }
