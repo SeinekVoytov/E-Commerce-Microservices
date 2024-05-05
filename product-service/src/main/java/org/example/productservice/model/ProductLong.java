@@ -19,7 +19,7 @@ public class ProductLong {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "product_short_id", referencedColumnName = "id")
     private ProductShort productShort;
 

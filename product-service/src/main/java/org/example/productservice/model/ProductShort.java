@@ -24,10 +24,10 @@ public class ProductShort {
 
     private String name;
 
-    @OneToMany(mappedBy = "owner", cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "owner", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private List<Image> images;
 
-    @OneToOne(cascade = CascadeType.PERSIST)
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "price_id", referencedColumnName = "id")
     private Price price;
 
