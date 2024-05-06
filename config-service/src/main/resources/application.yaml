@@ -10,7 +10,7 @@ spring:
           clone-on-start: true
           basedir: ${CONFIG_DIR}
           username: ${GIT_USERNAME}
-          passphrase: ${GIT_PASSWORD}
+          password: ${GIT_PASSWORD}
 
         default-label: master
 
