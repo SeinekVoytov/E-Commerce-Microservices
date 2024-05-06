@@ -9,7 +9,7 @@
 		<version>1.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>orderservice</artifactId>
+	<artifactId>order-service</artifactId>
 
 	<name>order-service</name>
 	<description>order-service</description>
