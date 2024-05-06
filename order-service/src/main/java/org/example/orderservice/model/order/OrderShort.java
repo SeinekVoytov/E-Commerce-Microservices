@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.example.orderservice.model.order.delivery.Delivery;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -21,6 +22,9 @@ public class OrderShort {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name = "user_id")
+    private UUID userId;
 
     @OneToOne
     @JoinColumn(name = "delivery_id", referencedColumnName = "id")

@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -20,6 +21,9 @@ public class OrderLong {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name = "user_id")
+    private UUID userId;
 
     @OneToOne
     @JoinColumn(name = "address_id", referencedColumnName = "id")
