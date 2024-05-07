@@ -6,16 +6,15 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.UUID;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderShortDto {
+public class ProductShortDto {
 
-    private int id;
-    private UUID userId;
-    private DeliveryDto delivery;
-    private List<OrderItemShortDto> items;
+    private String name;
+    private List<String> images;
+    private PriceDto price;
+    private List<CategoryDto> categories;
 }
