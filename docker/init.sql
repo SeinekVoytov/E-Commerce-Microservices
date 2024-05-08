@@ -16,7 +16,6 @@ CREATE TABLE IF NOT EXISTS category (
 CREATE TABLE IF NOT EXISTS product_short (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    img_uri TEXT NOT NULL,
     price_id INT REFERENCES price (id) ON DELETE CASCADE
 );
 
@@ -83,7 +82,7 @@ CREATE TABLE IF NOT EXISTS quantity (
 
 CREATE TABLE IF NOT EXISTS order_short (
     id SERIAL PRIMARY KEY,
-    user_id UUID NOT NULL UNIQUE REFERENCES order_long(user_id),
+    user_id UUID NOT NULL UNIQUE,
     delivery_id INT REFERENCES delivery (id) ON DELETE CASCADE
 );
 
@@ -105,8 +104,10 @@ CREATE TABLE IF NOT EXISTS address (
 CREATE TABLE IF NOT EXISTS order_long (
     id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL UNIQUE,
+    delivery_id INT REFERENCES delivery (id) ON DELETE CASCADE,
     address_id INT REFERENCES address (id) ON DELETE CASCADE,
-    created_at TIMESTAMP NOT NULL
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT order_long_unique_complex UNIQUE (id, user_id, delivery_id)
 );
 
 CREATE TABLE IF NOT EXISTS order_item_long (
@@ -115,3 +116,6 @@ CREATE TABLE IF NOT EXISTS order_item_long (
     item_id INT REFERENCES product_long (id),
     quantity_id INT REFERENCES quantity (id)
 );
+
+ALTER TABLE order_short ADD CONSTRAINT order_short_order_long_complex
+    FOREIGN KEY (id, user_id, delivery_id) REFERENCES order_long (id, user_id, delivery_id);

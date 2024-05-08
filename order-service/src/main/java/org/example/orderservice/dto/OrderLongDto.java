@@ -16,6 +16,7 @@ public class OrderLongDto {
 
     private int id;
     private UUID userId;
+    private DeliveryDto delivery;
     private AddressDto address;
     private List<OrderItemLongDto> items;
 }

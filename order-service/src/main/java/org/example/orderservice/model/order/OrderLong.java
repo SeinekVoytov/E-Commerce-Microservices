@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.orderservice.model.order.delivery.Delivery;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,6 +25,10 @@ public class OrderLong {
 
     @Column(name = "user_id")
     private UUID userId;
+
+    @OneToOne
+    @JoinColumn(name = "delivery_id", referencedColumnName = "id")
+    private Delivery delivery;
 
     @OneToOne
     @JoinColumn(name = "address_id", referencedColumnName = "id")
