@@ -1,4 +1,4 @@
-package org.example.orderservice.dto;
+package org.example.orderservice.dto.product;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderItemShortDto {
+public class PriceDto {
 
-    private ProductShortDto product;
-    private int quantity;
+    private Float amount;
+    private String currency;
 }

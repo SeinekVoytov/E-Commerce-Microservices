@@ -1,9 +1,10 @@
-package org.example.orderservice.dto;
+package org.example.orderservice.dto.order;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.orderservice.dto.order.delivery.DeliveryDto;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,11 +13,10 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrderLongDto {
+public class OrderShortDto {
 
     private int id;
     private UUID userId;
     private DeliveryDto delivery;
-    private AddressDto address;
-    private List<OrderItemLongDto> items;
+    private List<OrderItemShortDto> items;
 }

@@ -1,6 +1,6 @@
 package org.example.orderservice.mapper;
 
-import org.example.orderservice.dto.ProductShortDto;
+import org.example.orderservice.dto.product.ProductShortDto;
 import org.example.orderservice.model.product.Image;
 import org.example.orderservice.model.product.ProductShort;
 import org.mapstruct.Mapper;

@@ -1,6 +1,6 @@
 package org.example.orderservice.mapper;
 
-import org.example.orderservice.dto.OrderShortDto;
+import org.example.orderservice.dto.order.OrderShortDto;
 import org.example.orderservice.model.order.OrderShort;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
