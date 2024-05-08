@@ -13,13 +13,13 @@ public interface ProductShortMapper {
     ProductShortDto toDto(ProductShort entity);
     ProductShort toEntity(ProductShortDto entity);
 
-    default List<String> mapImagesToUrls(List<Image> images) {
+    default List<String> imagesToUrls(List<Image> images) {
         return images.stream()
                 .map(Image::getUrl)
                 .toList();
     }
 
-    default List<Image> mapUrlsToImages(List<String> urls) {
+    default List<Image> urlsToImages(List<String> urls) {
         return urls.stream()
                 .map(url -> {
                     Image image = new Image();
