@@ -118,4 +118,4 @@ CREATE TABLE IF NOT EXISTS order_item_long (
 );
 
 ALTER TABLE order_short ADD CONSTRAINT order_short_order_long_complex
-    FOREIGN KEY (id, user_id, delivery_id) REFERENCES order_long (id, user_id, delivery_id);
+    FOREIGN KEY (id, user_id, delivery_id) REFERENCES order_long (id, user_id, delivery_id) ON UPDATE CASCADE;
