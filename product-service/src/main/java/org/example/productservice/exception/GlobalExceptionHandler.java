@@ -12,7 +12,7 @@ import java.util.Date;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<ErrorObject> handleProductNotFoundException(ProductNotFoundException exc, WebRequest request) {
+    public ResponseEntity<ErrorObject> handleProductNotFoundException(ProductNotFoundException exc) {
         ErrorObject errorObject = new ErrorObject();
 
         errorObject.setStatusCode(HttpStatus.NOT_FOUND.value());
@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler
-    public ResponseEntity<ErrorObject> handleInvalidQueryParameterException(InvalidQueryParameterException exc, WebRequest request) {
+    public ResponseEntity<ErrorObject> handleInvalidQueryParameterException(InvalidQueryParameterException exc) {
         ErrorObject errorObject = new ErrorObject();
 
         errorObject.setStatusCode(HttpStatus.BAD_REQUEST.value());
