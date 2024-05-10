@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS quantity (
 
 CREATE TABLE IF NOT EXISTS order_short (
     id SERIAL PRIMARY KEY,
-    user_id UUID NOT NULL UNIQUE,
+    user_id UUID NOT NULL,
     delivery_id INT REFERENCES delivery (id) ON DELETE CASCADE
 );
 
@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS address (
 
 CREATE TABLE IF NOT EXISTS order_long (
     id SERIAL PRIMARY KEY,
-    user_id UUID NOT NULL UNIQUE,
+    user_id UUID NOT NULL,
     delivery_id INT REFERENCES delivery (id) ON DELETE CASCADE,
     address_id INT REFERENCES address (id) ON DELETE CASCADE,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
