@@ -5,7 +5,7 @@ import org.example.orderservice.model.order.delivery.DeliveryStatus;
 import java.util.List;
 import java.util.UUID;
 
-public record OrderShortDto (
+public record OrderDto(
         int id,
         UUID userId,
         DeliveryStatus status,

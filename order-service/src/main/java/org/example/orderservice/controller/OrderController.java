@@ -1,7 +1,8 @@
 package org.example.orderservice.controller;
 
-import org.example.orderservice.dto.order.OrderLongDto;
-import org.example.orderservice.dto.order.OrderShortDto;
+import org.example.orderservice.dto.order.OrderDetailsDto;
+import org.example.orderservice.dto.order.OrderDto;
+import org.example.orderservice.repository.OrderDetailsRepository;
 import org.example.orderservice.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,17 +26,17 @@ public class OrderController {
     }
 
     @GetMapping
-    public ResponseEntity<List<OrderShortDto>> getOrderShortsByUserId(Authentication authentication) {
-        List<OrderShortDto> foundOrders = orderService.getUserOrdersShort(authentication);
+    public ResponseEntity<List<OrderDto>> getOrderShortsByUserId(Authentication authentication) {
+        List<OrderDto> foundOrders = orderService.getUserOrdersShort(authentication);
         return ResponseEntity.ok(foundOrders);
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<OrderLongDto> getUsersOrderById(
+    public ResponseEntity<OrderDetailsDto> getUsersOrderById(
             @PathVariable int orderId,
             Authentication authentication
     ) {
-        OrderLongDto requestedOrder = orderService.getUsersOrderLongById(authentication, orderId);
+        OrderDetailsDto requestedOrder = orderService.getUsersOrderLongById(authentication, orderId);
         return ResponseEntity.ok(requestedOrder);
     }
 }

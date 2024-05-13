@@ -1,14 +1,14 @@
 package org.example.orderservice.service.impl;
 
-import org.example.orderservice.dto.order.OrderLongDto;
-import org.example.orderservice.dto.order.OrderShortDto;
+import org.example.orderservice.dto.order.OrderDetailsDto;
+import org.example.orderservice.dto.order.OrderDto;
 import org.example.orderservice.exception.OrderNotFoundException;
-import org.example.orderservice.mapper.OrderLongMapper;
-import org.example.orderservice.mapper.OrderShortMapper;
-import org.example.orderservice.model.order.OrderLong;
-import org.example.orderservice.model.order.OrderShort;
-import org.example.orderservice.repository.OrderLongRepository;
-import org.example.orderservice.repository.OrderShortRepository;
+import org.example.orderservice.mapper.OrderDetailsMapper;
+import org.example.orderservice.mapper.OrderMapper;
+import org.example.orderservice.model.order.Order;
+import org.example.orderservice.model.order.OrderDetails;
+import org.example.orderservice.repository.OrderDetailsRepository;
+import org.example.orderservice.repository.OrderRepository;
 import org.example.orderservice.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -21,37 +21,37 @@ import java.util.UUID;
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    private final OrderShortRepository orderShortRepository;
-    private final OrderLongRepository orderLongRepository;
+    private final OrderRepository orderRepository;
+    private final OrderDetailsRepository orderDetailsRepository;
 
-    private final OrderShortMapper orderShortMapper;
-    private final OrderLongMapper orderLongMapper;
+    private final OrderMapper orderMapper;
+    private final OrderDetailsMapper orderDetailsMapper;
 
     @Autowired
     public OrderServiceImpl(
-            OrderShortRepository orderShortRepository,
-            OrderLongRepository orderLongRepository,
-            OrderShortMapper orderShortMapper,
-            OrderLongMapper orderLongMapper
+            OrderRepository orderRepository,
+            OrderDetailsRepository orderDetailsRepository,
+            OrderMapper orderMapper,
+            OrderDetailsMapper orderDetailsMapper
     ) {
-        this.orderShortRepository = orderShortRepository;
-        this.orderLongRepository = orderLongRepository;
-        this.orderShortMapper = orderShortMapper;
-        this.orderLongMapper = orderLongMapper;
+        this.orderRepository = orderRepository;
+        this.orderDetailsRepository = orderDetailsRepository;
+        this.orderMapper = orderMapper;
+        this.orderDetailsMapper = orderDetailsMapper;
     }
 
     @Override
-    public List<OrderShortDto> getUserOrdersShort(Authentication authentication) {
+    public List<OrderDto> getUserOrdersShort(Authentication authentication) {
         UUID userId = retrieveUserIdFromAuthentication(authentication);
-        List<OrderShort> foundOrders = orderShortRepository.findOrderShortsByUserId(userId);
-        return orderShortMapper.listToDtos(foundOrders);
+        List<Order> foundOrders = orderRepository.findOrderShortsByUserId(userId);
+        return orderMapper.listToDtos(foundOrders);
     }
 
     @Override
-    public OrderLongDto getUsersOrderLongById(Authentication authentication, int orderId) {
+    public OrderDetailsDto getUsersOrderLongById(Authentication authentication, int orderId) {
         UUID userId = retrieveUserIdFromAuthentication(authentication);
-        OrderLong requestedOrder = orderLongRepository.findOrderLongByIdAndUserId(orderId, userId).orElseThrow(() -> new OrderNotFoundException("Order could not be found"));
-        return orderLongMapper.toDto(requestedOrder);
+        OrderDetails requestedOrder = orderDetailsRepository.findOrderLongByIdAndUserId(orderId, userId).orElseThrow(() -> new OrderNotFoundException("Order could not be found"));
+        return orderDetailsMapper.toDto(requestedOrder);
     }
 
     private UUID retrieveUserIdFromAuthentication(Authentication authentication) {
