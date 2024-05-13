@@ -13,18 +13,20 @@ import org.example.orderservice.model.product.ProductLong;
 @AllArgsConstructor
 
 @Entity
-@Table(name = "order_item_long")
-public class OrderItemLong {
+@Table(name = "order_item")
+public class OrderItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(
+            name = "order_item_seq",
+            sequenceName = "order_item_seq"
+    )
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_item_seq")
     private int id;
 
     @OneToOne
     @JoinColumn(name = "item_id", referencedColumnName = "id")
     private ProductLong item;
 
-    @OneToOne
-    @JoinColumn(name = "quantity_id", referencedColumnName = "id")
-    private OrderItemQuantity quantity;
+    private int quantity;
 }

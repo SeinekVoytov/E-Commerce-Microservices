@@ -16,7 +16,12 @@ import lombok.AllArgsConstructor;
 public class Fee {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(
+            name = "fee_seq",
+            sequenceName = "fee_seq",
+            allocationSize = 20
+    )
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fee_seq")
     private int id;
 
     private Float amount;

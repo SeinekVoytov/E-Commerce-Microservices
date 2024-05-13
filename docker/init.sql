@@ -59,63 +59,58 @@ CREATE TABLE IF NOT EXISTS image (
     url TEXT NOT NULL
 );
 
+CREATE TYPE delivery_type AS ENUM ('STANDARD', 'EXPRESS', 'SAME_DAY', 'NEXT_DAY', 'SCHEDULED', 'IN_STORE_PICKING');
+CREATE TYPE delivery_status AS ENUM ('ORDER_RECEIVED', 'ORDER_PROCESSING', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED');
+
 CREATE TABLE IF NOT EXISTS fee (
-    id SERIAL PRIMARY KEY,
+    id INT PRIMARY KEY,
     amount REAL NOT NULL CHECK ( amount > 0 ),
     currency CHARACTER(3) NOT NULL
 );
 
-CREATE TYPE delivery_type AS ENUM ('STANDARD', 'EXPRESS', 'SAME_DAY', 'NEXT_DAY', 'SCHEDULED', 'IN_STORE_PICKING');
-CREATE TYPE delivery_status AS ENUM ('ORDER_RECEIVED', 'ORDER_PROCESSING', 'IN_TRANSIT', 'DELIVERED', 'CANCELLED');
+CREATE SEQUENCE IF NOT EXISTS fee_seq START 1 INCREMENT 20 OWNED BY fee.id;
 
 CREATE TABLE IF NOT EXISTS delivery (
-    id SERIAL PRIMARY KEY,
-    fee_id INT REFERENCES fee (id) ON DELETE CASCADE,
+    id INT PRIMARY KEY,
+    fee_id INT REFERENCES fee (id),
     status delivery_status NOT NULL,
     type delivery_type NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS quantity (
-    id SERIAL PRIMARY KEY,
+CREATE SEQUENCE IF NOT EXISTS delivery_seq START 1 INCREMENT 20 OWNED BY delivery.id;
+
+CREATE TABLE IF NOT EXISTS "order" (
+    id INT PRIMARY KEY,
+    delivery_id INT REFERENCES delivery (id),
+    user_id UUID NOT NULL
+);
+
+CREATE SEQUENCE IF NOT EXISTS order_seq START 1 INCREMENT 20 OWNED BY "order".id;
+
+CREATE TABLE IF NOT EXISTS order_item (
+    id INT PRIMARY KEY,
+    order_id INT REFERENCES "order" (id),
+    item_id INT REFERENCES product_long (id),
     quantity INT NOT NULL CHECK ( quantity > 0 )
 );
 
-CREATE TABLE IF NOT EXISTS order_short (
-    id SERIAL PRIMARY KEY,
-    user_id UUID NOT NULL,
-    delivery_id INT REFERENCES delivery (id) ON DELETE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS order_item_short (
-    id SERIAL PRIMARY KEY,
-    order_id INT REFERENCES order_short (id),
-    item_id INT REFERENCES product_short (id),
-    quantity_id INT REFERENCES quantity (id)
-);
+CREATE SEQUENCE IF NOT EXISTS order_item_seq START 1 INCREMENT 50 OWNED BY order_item.id;
 
 CREATE TABLE IF NOT EXISTS address (
-    id SERIAL PRIMARY KEY,
+    id INT PRIMARY KEY,
     city VARCHAR(64) NOT NULL,
     country VARCHAR(64) NOT NULL,
     street_address TEXT NOT NULL,
     apartment TEXT NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS order_long (
-    id SERIAL PRIMARY KEY,
-    user_id UUID NOT NULL,
-    delivery_id INT REFERENCES delivery (id) ON DELETE CASCADE,
-    address_id INT REFERENCES address (id) ON DELETE CASCADE,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT order_long_unique_complex UNIQUE (id, user_id, delivery_id)
+CREATE SEQUENCE IF NOT EXISTS address_seq START 1 INCREMENT 20 OWNED BY address.id;
+
+CREATE TABLE IF NOT EXISTS order_details (
+    id INT PRIMARY KEY,
+    order_id INT REFERENCES "order" (id),
+    address_id INT REFERENCES address (id),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS order_item_long (
-    id SERIAL PRIMARY KEY REFERENCES order_item_short (id) ON DELETE CASCADE,
-    order_id INT REFERENCES order_long (id),
-    item_id INT REFERENCES product_long (id),
-    quantity_id INT REFERENCES quantity (id)
-);
-
-ALTER TABLE order_short ADD CONSTRAINT order_short_order_long_complex
-    FOREIGN KEY (id, user_id, delivery_id) REFERENCES order_long (id, user_id, delivery_id) ON UPDATE CASCADE;
+CREATE SEQUENCE IF NOT EXISTS order_details_seq START 1 INCREMENT 20 OWNED BY order_details.id;
