@@ -1,14 +1,15 @@
 package org.example.orderservice.dto.order;
 
-import org.example.orderservice.model.order.delivery.DeliveryStatus;
+import org.example.orderservice.dto.order.delivery.DeliveryDto;
 
 import java.util.List;
 import java.util.UUID;
 
-public record OrderShortDto (
+public record OrderDetailsDto (
         int id,
         UUID userId,
-        DeliveryStatus status,
+        DeliveryDto delivery,
+        AddressDto address,
         List<OrderItemDto> items
 ) {
 }
