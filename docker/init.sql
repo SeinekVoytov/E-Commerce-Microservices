@@ -116,7 +116,7 @@ CREATE TABLE IF NOT EXISTS order_item_long (
 
 CREATE TABLE IF NOT EXISTS cart (
     id UUID PRIMARY KEY,
-    user_id UUID
+    user_id UUID UNIQUE
 );
 
 CREATE TABLE IF NOT EXISTS cart_item (
