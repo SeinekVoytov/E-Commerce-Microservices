@@ -1,4 +1,4 @@
-package org.example.userservice.model;
+package org.example.userservice.model.cart;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
