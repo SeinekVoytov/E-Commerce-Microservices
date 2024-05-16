@@ -113,3 +113,17 @@ CREATE TABLE IF NOT EXISTS order_item_long (
     item_id INT REFERENCES product_long (id),
     quantity_id INT REFERENCES quantity (id)
 );
+
+CREATE TABLE IF NOT EXISTS cart (
+    id UUID PRIMARY KEY,
+    user_id UUID
+);
+
+CREATE TABLE IF NOT EXISTS cart_item (
+    id INT PRIMARY KEY,
+    product_id INT REFERENCES product_long (id),
+    quantity INT NOT NULL,
+    cart_id UUID REFERENCES cart (id)
+);
+
+CREATE SEQUENCE cart_item_seq START 1 INCREMENT 75 OWNED BY cart_item.id;
