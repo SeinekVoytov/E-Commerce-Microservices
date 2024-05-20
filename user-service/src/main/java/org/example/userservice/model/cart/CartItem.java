@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.userservice.model.product.ProductLong;
 
 @Data
 @Builder
@@ -24,6 +25,9 @@ public class CartItem {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cart_item_seq")
     private int id;
 
-    private int productId;
+    @OneToOne
+    @JoinColumn(name = "product_id", referencedColumnName = "id")
+    private ProductLong product;
+
     private int quantity;
 }
