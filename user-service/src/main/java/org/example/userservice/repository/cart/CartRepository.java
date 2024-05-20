@@ -1,4 +1,4 @@
-package org.example.userservice.repository;
+package org.example.userservice.repository.cart;
 
 import org.example.userservice.model.cart.Cart;
 import org.springframework.data.jpa.repository.JpaRepository;
