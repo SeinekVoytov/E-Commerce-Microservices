@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.print.attribute.standard.MediaSize;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -28,6 +29,9 @@ public class Cart {
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "cart_id", referencedColumnName = "id")
     private List<CartItem> items;
+
+    @Column(name = "updated_at")
+    private Date updatedAt;
 
     @Column(name = "created_at")
     private Date createdAt;
