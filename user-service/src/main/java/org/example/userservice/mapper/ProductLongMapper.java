@@ -10,8 +10,7 @@ import org.mapstruct.Mapping;
 import java.util.List;
 
 @Mapper(
-        componentModel = "spring",
-        injectionStrategy = InjectionStrategy.CONSTRUCTOR
+        componentModel = "spring"
 )
 public interface ProductLongMapper {
 
