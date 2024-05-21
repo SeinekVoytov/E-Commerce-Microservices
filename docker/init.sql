@@ -129,3 +129,13 @@ CREATE TABLE IF NOT EXISTS cart_item (
 );
 
 CREATE SEQUENCE cart_item_seq START 1 INCREMENT 75 OWNED BY cart_item.id;
+
+CREATE OR REPLACE FUNCTION on_item_added_to_cart() RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE cart SET updated_at = CURRENT_TIMESTAMP WHERE NEW.cart_id = id;
+    UPDATE cart SET updated_at = CURRENT_TIMESTAMP WHERE OLD.cart_id = id;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER tr_update_updated_at AFTER INSERT OR DELETE ON cart_item FOR EACH ROW EXECUTE PROCEDURE on_item_added_to_cart();
