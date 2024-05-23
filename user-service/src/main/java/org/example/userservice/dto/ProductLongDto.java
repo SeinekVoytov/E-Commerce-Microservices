@@ -9,7 +9,7 @@ public record ProductLongDto (
      int id,
      String name,
      List<String> images,
-     Price price,
+     PriceDto price,
      List<Category> categories,
      Float lengthInM,
      Float widthInM,

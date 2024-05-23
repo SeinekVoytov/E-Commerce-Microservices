@@ -49,12 +49,13 @@ public class CartServiceImpl implements CartService {
         if (auth != null) {
 
             UUID userId = retrieveUserIdFromAuthentication(auth);
+            CartItem newCartItem = buildNewCartItem(request.productId(), request.quantity());
+
             if (cartIdFromCookie != null) {
                 assignCartToUser(userId, cartIdFromCookie);
                 deleteCartIdCookie(response);
             }
 
-            CartItem newCartItem = buildNewCartItem(request.productId(), request.quantity());
             Optional<Cart> supposedCart = cartRepository.findByUserId(userId);
 
             if (supposedCart.isEmpty()) {
@@ -142,7 +143,7 @@ public class CartServiceImpl implements CartService {
     private void assignCartToUser(UUID userId, UUID cartId) {
 
         Cart cartToBeAssigned = cartRepository.findById(cartId)
-                .filter(cart -> cart.getUserId() != null)
+                .filter(cart -> cart.getUserId() == null)
                 .orElseThrow(() -> new InvalidCartIdCookieException("Invalid cart id cookie parameter"));
 
         cartToBeAssigned.setUserId(userId);
