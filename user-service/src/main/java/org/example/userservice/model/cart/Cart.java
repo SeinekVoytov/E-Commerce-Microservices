@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicInsert;
 
 import javax.print.attribute.standard.MediaSize;
 import java.util.Date;
@@ -18,6 +19,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "cart")
+@DynamicInsert
 public class Cart {
 
     @Id
@@ -30,9 +32,15 @@ public class Cart {
     @JoinColumn(name = "cart_id", referencedColumnName = "id")
     private List<CartItem> items;
 
-    @Column(name = "updated_at")
+    @Column(
+            name = "updated_at",
+            columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP"
+    )
     private Date updatedAt;
 
-    @Column(name = "created_at")
+    @Column(
+            name = "created_at",
+            columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP"
+    )
     private Date createdAt;
 }
