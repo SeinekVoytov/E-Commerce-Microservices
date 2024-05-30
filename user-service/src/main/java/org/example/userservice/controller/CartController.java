@@ -31,4 +31,14 @@ public class CartController {
         CartItemResponse result = cartService.addItemToCart(auth, request, cartId, response);
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
+
+    @PutMapping("/quantity")
+    public ResponseEntity<CartItemResponse> updateItemQuantity(Authentication auth,
+                                                               @RequestBody CartItemRequest request,
+                                                               @CookieValue(name = "cartId", required = false) UUID cartId,
+                                                               HttpServletResponse response) {
+
+        CartItemResponse result = cartService.updateItemQuantity(auth, request, cartId, response);
+        return new ResponseEntity<>(result, HttpStatus.CREATED);
+    }
 }

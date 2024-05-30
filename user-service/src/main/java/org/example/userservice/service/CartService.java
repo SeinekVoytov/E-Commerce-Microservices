@@ -14,7 +14,11 @@ public interface CartService {
                                    UUID cartIdFromCookie,
                                    HttpServletResponse response);
 
-    void updateItemQuantity(Authentication auth, CartItemRequest request);
+    CartItemResponse updateItemQuantity(Authentication auth,
+                                        CartItemRequest request,
+                                        UUID cartIdFromCookie,
+                                        HttpServletResponse response);
+
     CartItemResponse deleteItemFromCart(Authentication auth, CartItemRequest request);
     void order(Authentication auth);
 }

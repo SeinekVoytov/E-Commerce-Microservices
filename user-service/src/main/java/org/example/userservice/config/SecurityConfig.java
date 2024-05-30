@@ -29,13 +29,14 @@ public class SecurityConfig {
         http
                 .oauth2ResourceServer(
                         oauth2Configurer -> oauth2Configurer.jwt(
-                                customizer ->customizer.jwtAuthenticationConverter(jwtConverter())
+                                customizer -> customizer.jwtAuthenticationConverter(jwtConverter())
                         )
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         authManager -> authManager
                                 .requestMatchers(HttpMethod.POST, "/cart/add").permitAll()
+                                .requestMatchers(HttpMethod.PUT, "/cart/quantity").permitAll()
                                 .anyRequest().authenticated()
                 );
 

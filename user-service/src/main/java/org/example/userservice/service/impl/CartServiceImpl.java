@@ -2,18 +2,21 @@ package org.example.userservice.service.impl;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import org.example.userservice.dto.CartItemRequest;
 import org.example.userservice.dto.CartItemResponse;
+import org.example.userservice.exception.CartItemNotFoundException;
+import org.example.userservice.exception.CartNotFoundException;
 import org.example.userservice.exception.InvalidCartIdCookieException;
 import org.example.userservice.exception.ProductNotFoundException;
 import org.example.userservice.mapper.CartItemMapper;
 import org.example.userservice.model.cart.Cart;
 import org.example.userservice.model.cart.CartItem;
 import org.example.userservice.model.product.ProductLong;
+import org.example.userservice.repository.cart.CartItemRepository;
 import org.example.userservice.repository.cart.CartRepository;
 import org.example.userservice.repository.product.ProductLongRepository;
 import org.example.userservice.service.CartService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -23,22 +26,14 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@AllArgsConstructor
 public class CartServiceImpl implements CartService {
 
-    private final CartRepository cartRepository;
-    private final ProductLongRepository productLongRepository;
+    private final CartRepository cartRepo;
+    private final CartItemRepository cartItemRepo;
+    private final ProductLongRepository productLongRepo;
 
     private final CartItemMapper cartItemMapper;
-
-    @Autowired
-    public CartServiceImpl(CartRepository cartRepository,
-                           ProductLongRepository productLongRepository,
-                           CartItemMapper cartItemMapper) {
-
-        this.cartRepository = cartRepository;
-        this.productLongRepository = productLongRepository;
-        this.cartItemMapper = cartItemMapper;
-    }
 
     @Override
     public CartItemResponse addItemToCart(Authentication auth,
@@ -50,13 +45,9 @@ public class CartServiceImpl implements CartService {
 
             UUID userId = retrieveUserIdFromAuthentication(auth);
             CartItem newCartItem = buildNewCartItem(request.productId(), request.quantity());
+            verifyCartIdCookie(cartIdFromCookie, userId, response);
 
-            if (cartIdFromCookie != null) {
-                assignCartToUser(userId, cartIdFromCookie);
-                deleteCartIdCookie(response);
-            }
-
-            Optional<Cart> supposedCart = cartRepository.findByUserId(userId);
+            Optional<Cart> supposedCart = cartRepo.findByUserId(userId);
 
             if (supposedCart.isEmpty()) {
                 Cart newCart = Cart.builder()
@@ -64,11 +55,11 @@ public class CartServiceImpl implements CartService {
                         .items(Collections.singletonList(newCartItem))
                         .build();
 
-                cartRepository.save(newCart);
+                cartRepo.save(newCart);
             } else {
                 Cart cart = supposedCart.get();
                 cart.getItems().add(newCartItem);
-                cartRepository.save(cart);
+                cartRepo.save(cart);
             }
 
             return cartItemMapper.toResponse(newCartItem);
@@ -89,15 +80,15 @@ public class CartServiceImpl implements CartService {
                     .items(Collections.singletonList(newCartItem))
                     .build();
 
-            cartId = cartRepository.save(newCart).getId();
+            cartId = cartRepo.save(newCart).getId();
         } else {
 
-            Cart anonymousUserCart = cartRepository.findById(cartIdFromCookie)
+            Cart anonymousUserCart = cartRepo.findById(cartIdFromCookie)
                     .orElseThrow(() -> new InvalidCartIdCookieException("Invalid cart id cookie parameter"));
 
             cartId = anonymousUserCart.getId();
             anonymousUserCart.getItems().add(newCartItem);
-            cartRepository.save(anonymousUserCart);
+            cartRepo.save(anonymousUserCart);
         }
 
         addCartIdCookie(response, cartId);
@@ -106,8 +97,39 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void updateItemQuantity(Authentication auth, CartItemRequest request) {
+    public CartItemResponse updateItemQuantity(Authentication auth,
+                                               CartItemRequest request,
+                                               UUID cartIdFromCookie,
+                                               HttpServletResponse response) {
 
+        Cart cart;
+
+        if (auth != null) {
+
+            UUID userId = retrieveUserIdFromAuthentication(auth);
+            verifyCartIdCookie(cartIdFromCookie, userId, response);
+            cart = cartRepo.findByUserId(userId)
+                    .orElseThrow(() -> new CartNotFoundException(
+                            "Could not update item quantity: no cart associated with user found")
+                    );
+        } else {
+            cart = cartRepo.findById(cartIdFromCookie)
+                    .orElseThrow(() -> new InvalidCartIdCookieException("Invalid cart id cookie parameter"));
+        }
+
+        CartItem cartItemToBeUpdated = cart.getItems().stream()
+                .filter(item -> item.getProduct().getId() == request.productId())
+                .findAny()
+                .orElseThrow(
+                        () -> new CartItemNotFoundException(
+                                "Could not update item quantity: no item found in user's cart"
+                        )
+                );
+
+        cartItemToBeUpdated.setQuantity(request.quantity());
+        cartItemRepo.save(cartItemToBeUpdated);
+
+        return cartItemMapper.toResponse(cartItemToBeUpdated);
     }
 
     @Override
@@ -136,18 +158,25 @@ public class CartServiceImpl implements CartService {
     }
 
     private ProductLong getProductByIdOrThrowException(int id) {
-        return productLongRepository.findById(id)
+        return productLongRepo.findById(id)
                 .orElseThrow(() -> new ProductNotFoundException("Product could not be found"));
     }
 
     private void assignCartToUser(UUID userId, UUID cartId) {
 
-        Cart cartToBeAssigned = cartRepository.findById(cartId)
+        Cart cartToBeAssigned = cartRepo.findById(cartId)
                 .filter(cart -> cart.getUserId() == null)
                 .orElseThrow(() -> new InvalidCartIdCookieException("Invalid cart id cookie parameter"));
 
         cartToBeAssigned.setUserId(userId);
-        cartRepository.save(cartToBeAssigned);
+        cartRepo.save(cartToBeAssigned);
+    }
+
+    private void verifyCartIdCookie(UUID cookieVal, UUID userId, HttpServletResponse response) {
+        if (cookieVal != null) {
+            assignCartToUser(userId, cookieVal);
+            deleteCartIdCookie(response);
+        }
     }
 
     private void addCartIdCookie(HttpServletResponse response, UUID cartId) {

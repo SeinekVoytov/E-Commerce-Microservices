@@ -10,8 +10,10 @@ import java.util.Date;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<ErrorObject> handleProductNotFoundException(ProductNotFoundException exc) {
+    @ExceptionHandler(
+            {ProductNotFoundException.class, CartItemNotFoundException.class, CartNotFoundException.class}
+    )
+    public ResponseEntity<ErrorObject> handleNotFoundExceptions(ProductNotFoundException exc) {
         return new ResponseEntity<>(
                 buildErrorObject(HttpStatus.NOT_FOUND.value(), exc.getMessage()),
                 HttpStatus.NOT_FOUND
