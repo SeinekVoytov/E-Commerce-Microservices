@@ -110,9 +110,14 @@ public class CartServiceImpl implements CartService {
             verifyCartIdCookie(cartIdFromCookie, userId, response);
             cart = cartRepo.findByUserId(userId)
                     .orElseThrow(() -> new CartNotFoundException(
-                            "Could not update item quantity: no cart associated with user found")
+                            "Could not update item quantity: no cart associated with this user")
                     );
         } else {
+
+            if (cartIdFromCookie == null) {
+                throw new InvalidCartIdCookieException("Invalid cart id cookie parameter");
+            }
+
             cart = cartRepo.findById(cartIdFromCookie)
                     .orElseThrow(() -> new InvalidCartIdCookieException("Invalid cart id cookie parameter"));
         }
