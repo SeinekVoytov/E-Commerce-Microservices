@@ -19,6 +19,9 @@ public interface CartService {
                                         UUID cartIdFromCookie,
                                         HttpServletResponse response);
 
-    CartItemResponse deleteItemFromCart(Authentication auth, CartItemRequest request);
+    CartItemResponse deleteItemFromCart(Authentication auth,
+                                        CartItemRequest request,
+                                        UUID cartIdFromCookie,
+                                        HttpServletResponse response);
     void order(Authentication auth);
 }

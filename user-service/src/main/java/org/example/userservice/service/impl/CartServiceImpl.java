@@ -102,44 +102,60 @@ public class CartServiceImpl implements CartService {
                                                UUID cartIdFromCookie,
                                                HttpServletResponse response) {
 
-        Cart cart;
+        CartItem cartItemToBeUpdated = retrieveRequestedCartItem(auth, request, cartIdFromCookie, response);
+        cartItemToBeUpdated.setQuantity(request.quantity());
+        cartItemRepo.save(cartItemToBeUpdated);
+        return cartItemMapper.toResponse(cartItemToBeUpdated);
+    }
 
+    @Override
+    public CartItemResponse deleteItemFromCart(Authentication auth,
+                                               CartItemRequest request,
+                                               UUID cartIdFromCookie,
+                                               HttpServletResponse response) {
+
+        CartItem cartItemToBeDeleted = retrieveRequestedCartItem(auth, request, cartIdFromCookie, response);
+        cartItemRepo.delete(cartItemToBeDeleted);
+        return cartItemMapper.toResponse(cartItemToBeDeleted);
+    }
+
+    private CartItem retrieveRequestedCartItem(Authentication auth,
+                                               CartItemRequest request,
+                                               UUID cartIdFromCookie,
+                                                HttpServletResponse response) {
+
+        Cart cart;
         if (auth != null) {
 
             UUID userId = retrieveUserIdFromAuthentication(auth);
             verifyCartIdCookie(cartIdFromCookie, userId, response);
             cart = cartRepo.findByUserId(userId)
-                    .orElseThrow(() -> new CartNotFoundException(
-                            "Could not update item quantity: no cart associated with this user")
+                    .orElseThrow(
+                            () -> new CartNotFoundException(
+                                    "No cart associated with this user"
+                            )
                     );
-        } else {
+        }
+        else {
 
             if (cartIdFromCookie == null) {
                 throw new InvalidCartIdCookieException("Invalid cart id cookie parameter");
             }
 
-            cart = cartRepo.findById(cartIdFromCookie)
+            cart = cartRepo.findById(cartIdFromCookie).stream()
+                    .filter(c -> c.getUserId() == null)
+                    .findAny()
                     .orElseThrow(() -> new InvalidCartIdCookieException("Invalid cart id cookie parameter"));
         }
 
-        CartItem cartItemToBeUpdated = cart.getItems().stream()
+        return cart.getItems().stream()
                 .filter(item -> item.getProduct().getId() == request.productId())
                 .findAny()
                 .orElseThrow(
                         () -> new CartItemNotFoundException(
-                                "Could not update item quantity: no item found in user's cart"
+                                "No such item found in user's cart"
                         )
                 );
-
-        cartItemToBeUpdated.setQuantity(request.quantity());
-        cartItemRepo.save(cartItemToBeUpdated);
-
-        return cartItemMapper.toResponse(cartItemToBeUpdated);
-    }
-
-    @Override
-    public CartItemResponse deleteItemFromCart(Authentication auth, CartItemRequest request) {
-        return null;
     }
 
     @Override
