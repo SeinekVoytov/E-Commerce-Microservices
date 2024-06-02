@@ -18,11 +18,17 @@ import org.example.userservice.repository.cart.CartItemRepository;
 import org.example.userservice.repository.cart.CartRepository;
 import org.example.userservice.repository.product.ProductLongRepository;
 import org.example.userservice.service.CartService;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -158,6 +164,17 @@ public class CartServiceImpl implements CartService {
                 .orElseThrow(
                         () -> new CartItemNotFoundException("No such item found in user's cart")
                 );
+    }
+
+    @Override
+    @Scheduled(initialDelay = 300_000L, fixedDelay = 300_000L)
+    @Transactional
+    public void deleteExpiredCarts() {
+        LocalDate expiryLocalDate = LocalDate.now().minusDays(1);
+        Instant instant = expiryLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
+        Date expiryDate = Date.from(instant);
+        System.out.println("EXECUTING SCHEDULED TASK");
+        cartRepo.deleteByUpdatedAtBefore(expiryDate);
     }
 
     @Override

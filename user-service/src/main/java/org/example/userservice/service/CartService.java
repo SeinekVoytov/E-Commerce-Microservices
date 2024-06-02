@@ -25,5 +25,8 @@ public interface CartService {
                                         long itemId,
                                         UUID cartIdFromCookie,
                                         HttpServletResponse response);
+
+    void deleteExpiredCarts();
+
     void order(Authentication auth);
 }
