@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.example.userservice.dto.CartItemRequest;
 import org.example.userservice.dto.CartItemResponse;
+import org.example.userservice.dto.UpdateQuantityRequest;
 import org.example.userservice.exception.CartItemNotFoundException;
 import org.example.userservice.exception.CartNotFoundException;
 import org.example.userservice.exception.InvalidCartIdCookieException;
@@ -98,11 +99,12 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartItemResponse updateItemQuantity(Authentication auth,
-                                               CartItemRequest request,
+                                               long itemId,
+                                               UpdateQuantityRequest request,
                                                UUID cartIdFromCookie,
                                                HttpServletResponse response) {
 
-        CartItem cartItemToBeUpdated = retrieveRequestedCartItem(auth, request, cartIdFromCookie, response);
+        CartItem cartItemToBeUpdated = retrieveRequestedCartItem(auth, itemId, cartIdFromCookie, response);
         cartItemToBeUpdated.setQuantity(request.quantity());
         cartItemRepo.save(cartItemToBeUpdated);
         return cartItemMapper.toResponse(cartItemToBeUpdated);
@@ -110,19 +112,19 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartItemResponse deleteItemFromCart(Authentication auth,
-                                               CartItemRequest request,
+                                               long itemId,
                                                UUID cartIdFromCookie,
                                                HttpServletResponse response) {
 
-        CartItem cartItemToBeDeleted = retrieveRequestedCartItem(auth, request, cartIdFromCookie, response);
+        CartItem cartItemToBeDeleted = retrieveRequestedCartItem(auth, itemId, cartIdFromCookie, response);
         cartItemRepo.delete(cartItemToBeDeleted);
         return cartItemMapper.toResponse(cartItemToBeDeleted);
     }
 
     private CartItem retrieveRequestedCartItem(Authentication auth,
-                                               CartItemRequest request,
+                                               long itemId,
                                                UUID cartIdFromCookie,
-                                                HttpServletResponse response) {
+                                               HttpServletResponse response) {
 
         Cart cart;
         if (auth != null) {
@@ -145,16 +147,16 @@ public class CartServiceImpl implements CartService {
             cart = cartRepo.findById(cartIdFromCookie).stream()
                     .filter(c -> c.getUserId() == null)
                     .findAny()
-                    .orElseThrow(() -> new InvalidCartIdCookieException("Invalid cart id cookie parameter"));
+                    .orElseThrow(
+                            () -> new InvalidCartIdCookieException("Invalid cart id cookie parameter")
+                    );
         }
 
         return cart.getItems().stream()
-                .filter(item -> item.getProduct().getId() == request.productId())
+                .filter(item -> item.getId() == itemId)
                 .findAny()
                 .orElseThrow(
-                        () -> new CartItemNotFoundException(
-                                "No such item found in user's cart"
-                        )
+                        () -> new CartItemNotFoundException("No such item found in user's cart")
                 );
     }
 
