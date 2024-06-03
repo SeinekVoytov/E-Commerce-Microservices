@@ -1,12 +1,12 @@
 package org.example.productservice.service.impl;
 
-import org.example.productservice.dto.CreateProductDto;
-import org.example.productservice.dto.PageProductShortDto;
-import org.example.productservice.dto.ProductLongDto;
-import org.example.productservice.dto.ProductShortDto;
+import org.example.productservice.dto.*;
 import org.example.productservice.exception.InvalidQueryParameterException;
 import org.example.productservice.exception.ProductNotFoundException;
-import org.example.productservice.model.Image;
+import org.example.productservice.mapper.CategoryMapper;
+import org.example.productservice.mapper.PriceMapper;
+import org.example.productservice.mapper.ProductLongMapper;
+import org.example.productservice.mapper.ProductShortMapper;
 import org.example.productservice.model.Price;
 import org.example.productservice.model.ProductLong;
 import org.example.productservice.model.ProductShort;
@@ -33,97 +33,122 @@ import static org.mockito.Mockito.*;
 class ProductServiceImplTest {
 
     @Mock
-    private ProductLongRepository longRepository;
+    private ProductLongRepository longRepo;
 
     @Mock
-    private ProductShortRepository shortRepository;
+    private ProductShortRepository shortRepo;
 
     @Mock
-    private CategoryRepository categoryRepository;
+    private CategoryRepository categoryRepo;
+
+    @Mock
+    private ProductLongMapper longMapper;
+
+    @Mock
+    private ProductShortMapper shortMapper;
 
     @InjectMocks
     private ProductServiceImpl service;
 
     private ProductLong productLong;
+    private ProductLongDto longDto;
+
     private ProductShort productShort;
+    private ProductShortDto shortDto;
 
     @BeforeEach
     void setUp() {
 
+        final int id = 1;
+        final String name = "name";
+        final Float priceAmount = 10f;
+        final String currency = "USD";
+        final Float lengthInM = 1.0f;
+        final Float widthInM = 1.0f;
+        final Float heightInM = 1.0f;
+        final Float netWeightInKg = 1.0f;
+        final Float grossWeightInKg = 1.0f;
+
         productShort = ProductShort.builder()
-                .id(1)
-                .name("product")
+                .id(id)
+                .name(name)
                 .price(Price.builder()
-                        .id(1)
-                        .amount(10f)
-                        .currency("USD")
+                        .id(id)
+                        .amount(priceAmount)
+                        .currency(currency)
                         .build())
                 .categories(Collections.emptyList())
                 .images(Collections.emptyList())
                 .build();
 
         productLong = ProductLong.builder()
-                .id(1)
-                .lengthInM(1.0f)
-                .widthInM(1.0f)
-                .heightInM(1.0f)
-                .netWeightInKg(1.0f)
-                .grossWeightInKg(1.0f)
+                .id(id)
+                .lengthInM(lengthInM)
+                .widthInM(widthInM)
+                .heightInM(heightInM)
+                .netWeightInKg(netWeightInKg)
+                .grossWeightInKg(grossWeightInKg)
                 .productShort(productShort)
                 .build();
 
         productShort.setProductLong(productLong);
+
+        shortDto = new ProductShortDto(
+                id,
+                name,
+                Collections.emptyList(),
+                new PriceDto(priceAmount, currency),
+                Collections.emptyList()
+        );
+
+        longDto = new ProductLongDto(
+                id,
+                name,
+                Collections.emptyList(),
+                new PriceDto(priceAmount, currency),
+                Collections.emptyList(),
+                lengthInM,
+                widthInM,
+                heightInM,
+                netWeightInKg,
+                grossWeightInKg
+        );
     }
 
     @Test
     void getAllShortProduct_ShouldThrowInvalidQueryParameterException_WhenUnknownOrderSpecified() {
 
-        assertThrows(InvalidQueryParameterException.class, () -> service.getAllShortProduct(1, 1, "categories:asc"));
+        assertThrows(
+                InvalidQueryParameterException.class,
+                () -> service.getAllShortProduct(1, 1, "categories:asc")
+        );
 
-        verify(shortRepository, never()).findAll(any(Pageable.class));
+        verify(shortRepo, never()).findAll(any(Pageable.class));
     }
 
     @Test
     void getAllShortProduct_ShouldReturnListWithOneElement_WhenOneProductExists() {
 
-        final int testingPageSize = 10;
+        final int pageNumber = 1;
+        final int pageSize = 10;
+        final long totalElements = 1;
+        final int totalPages = 1;
 
         Page<ProductShort> resultPage = mock(Page.class);
-        when(resultPage.getContent())
-                .thenReturn(List.of(productShort));
+        when(resultPage.getContent()).thenReturn(List.of(productShort));
+        when(resultPage.getNumber()).thenReturn(pageNumber);
+        when(resultPage.getSize()).thenReturn(pageSize);
+        when(resultPage.getTotalElements()).thenReturn(totalElements);
+        when(resultPage.getTotalPages()).thenReturn(totalPages);
 
-        when(resultPage.getNumber())
-                .thenReturn(1);
+        when(shortRepo.findAll(any(Pageable.class))).thenReturn(resultPage);
+        when(shortMapper.toDto(any(ProductShort.class))).thenReturn(shortDto);
 
-        when(resultPage.getSize())
-                .thenReturn(testingPageSize);
+        PageProductShortDto actual = service.getAllShortProduct(pageNumber, pageSize, "price.amount:asc");
 
-        when(resultPage.getTotalElements())
-                .thenReturn(1L);
-
-        when(resultPage.getTotalPages())
-                .thenReturn(1);
-
-        when(shortRepository.findAll(any(Pageable.class)))
-                .thenReturn(resultPage);
-
-        PageProductShortDto actual = service.getAllShortProduct(1, testingPageSize, "price.amount:asc");
-
-        ProductShortDto shortDto = ProductShortDto.builder()
-                .id(productShort.getId())
-                .name(productShort.getName())
-                .images(unwrapImages(productShort.getImages()))
-                .price(productShort.getPrice())
-                .categories(productShort.getCategories())
-                .build();
-
-        PageProductShortDto expected = PageProductShortDto.builder()
-                .content(List.of(shortDto))
-                .pageNo(1)
-                .pageSize(10)
-                .totalElements(1)
-                .totalPages(1)
-                .build();
+        PageProductShortDto expected = new PageProductShortDto(
+                List.of(shortDto), pageNumber, pageSize, totalElements, totalPages
+        );
 
         assertEquals(expected, actual);
     }
@@ -131,21 +156,24 @@ class ProductServiceImplTest {
     @Test
     void getById_ShouldThrowProductNotFoundException_WhenNonExistentIdSpecified() {
 
-        when(longRepository.findById(productLong.getId()))
-                .thenReturn(Optional.empty());
+        int testingId = productLong.getId();
+        when(longRepo.findById(testingId)).thenReturn(Optional.empty());
 
-        assertThrows(ProductNotFoundException.class, () -> service.getById(productLong.getId()));
+        assertThrows(
+                ProductNotFoundException.class,
+                () -> service.getById(testingId)
+        );
     }
 
     @Test
     void getById_ShouldReturnFoundProductConvertedToDto_WhenExistentIdSpecified() {
 
-        when(longRepository.findById(productLong.getId()))
-                .thenReturn(Optional.of(productLong));
+        int testingId = productLong.getId();
+        when(longRepo.findById(testingId)).thenReturn(Optional.of(productLong));
+        when(longMapper.toDto(productLong)).thenReturn(longDto);
 
-        ProductLongDto expectedProductLongDto = mapToLongDto(productLong);
-
-        ProductLongDto actual = service.getById(productLong.getId());
+        ProductLongDto expectedProductLongDto = longDto;
+        ProductLongDto actual = service.getById(testingId);
 
         assertEquals(expectedProductLongDto, actual);
     }
@@ -153,106 +181,92 @@ class ProductServiceImplTest {
     @Test
     void deleteById_ShouldThrowProductNotFoundException_WhenNonExistentIdSpecified() {
 
-        when(longRepository.findById(productLong.getId()))
-                .thenReturn(Optional.empty());
+        int testingId = productLong.getId();
+        when(longRepo.findById(testingId)).thenReturn(Optional.empty());
 
-        assertThrows(ProductNotFoundException.class, () -> service.deleteById(productLong.getId()));
+        assertThrows(
+                ProductNotFoundException.class,
+                () -> service.deleteById(testingId)
+        );
 
-        verify(longRepository, never()).deleteById(anyInt());
+        verify(longRepo, never()).deleteById(anyInt());
     }
 
     @Test
     void deleteById_ShouldCallDeleteRepositoryMethod_WhenExistentIdSpecified() {
 
-        when(longRepository.findById(productLong.getId()))
-                .thenReturn(Optional.of(productLong));
+        int testingId = productLong.getId();
+        when(longRepo.findById(testingId)).thenReturn(Optional.of(productLong));
+        when(longMapper.toDto(productLong)).thenReturn(longDto);
 
-        doNothing().when(longRepository).delete(productLong);
+        ProductLongDto expected = longDto;
+        ProductLongDto actual = service.deleteById(testingId);
 
-        service.deleteById(productLong.getId());
-
-        verify(longRepository, times(1)).delete(productLong);
+        assertEquals(expected, actual);
+        verify(longRepo, times(1)).delete(productLong);
     }
 
     @Test
     void updateProduct_ShouldThrowProductNotFoundException_WhenNonExistentIdSpecified() {
 
-        when(longRepository.findById(productLong.getId()))
-                .thenReturn(Optional.empty());
+        int testingId = productLong.getId();
+        when(longRepo.findById(testingId)).thenReturn(Optional.empty());
+        ProductLongDto stub = mock(ProductLongDto.class);
 
-        ProductLongDto stub = new ProductLongDto();
+        assertThrows(
+                ProductNotFoundException.class,
+                () -> service.updateProduct(testingId, stub)
+        );
 
-        assertThrows(ProductNotFoundException.class, () -> service.updateProduct(productLong.getId(), stub));
-
-        verify(longRepository, never()).save(any());
+        verify(longRepo, never()).save(any());
     }
 
     @Test
     void updateProduct_ShouldReturnUpdatedProductConvertedToDto_WhenExistentIdSpecified() {
 
-        when(longRepository.findById(productLong.getId()))
-                .thenReturn(Optional.of(productLong));
+        int testingId = productLong.getId();
+        when(longRepo.findById(testingId)).thenReturn(Optional.of(productLong));
 
-        when(longRepository.save(any()))
-                .thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
+        when(longRepo.save(any(ProductLong.class))).thenAnswer(
+                invocationOnMock -> invocationOnMock.getArgument(0)
+        );
+
+        when(longMapper.toDto(productLong)).thenReturn(longDto);
+
+        String updatedName = "updated";
+        Float updatedLengthInM = 2.0f;
+        productLong.getProductShort().setName(updatedName);
+        productLong.setLengthInM(updatedLengthInM);
 
         ProductLongDto updated = ProductLongDto.builder()
-                        .name("updated")
-                        .price(Price.builder()
-                                    .amount(11f)
-                                    .build())
-                        .lengthInM(2.0f)
-                        .build();
-
-        ProductLongDto actual = service.updateProduct(productLong.getId(), updated);
-
-        ProductLongDto expected = ProductLongDto.builder()
-                .id(productLong.getId())
-                .name(updated.getName())
-                .images(unwrapImages(productShort.getImages()))
-                .price(Price.builder()
-                        .id(productShort.getPrice().getId())
-                        .amount(updated.getPrice().getAmount())
-                        .currency(productShort.getPrice().getCurrency())
-                        .build())
-                .categories(productShort.getCategories())
-                .lengthInM(updated.getLengthInM())
-                .widthInM(productLong.getWidthInM())
-                .heightInM(productLong.getHeightInM())
-                .netWeightInKg(productLong.getNetWeightInKg())
-                .grossWeightInKg(productLong.getGrossWeightInKg())
+                .name(updatedName)
+                .lengthInM(updatedLengthInM)
                 .build();
 
-        assertEquals(expected, actual);
+        ProductLongDto actual = service.updateProduct(testingId, updated);
+
+        assertEquals(longDto, actual);
     }
 
     @Test
     void updateProduct_ShouldReturnSameProduct_WhenEmptyUpdateDataSpecified() {
 
-        when(longRepository.findById(productLong.getId()))
-                .thenReturn(Optional.of(productLong));
+        int testingId = productLong.getId();
+        when(longRepo.findById(testingId)).thenReturn(Optional.of(productLong));
 
-        when(longRepository.save(any()))
-                .thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
+        when(longRepo.save(any())).thenAnswer(
+                invocationOnMock -> invocationOnMock.getArgument(0)
+        );
 
-        ProductLongDto emptyUpdateData = new ProductLongDto();
+        when(longMapper.toDto(productLong)).thenReturn(longDto);
 
-        ProductLongDto actual = service.updateProduct(productLong.getId(), emptyUpdateData);
+        ProductLongDto emptyUpdateData = ProductLongDto.builder().build();
 
-        ProductLongDto expected = ProductLongDto.builder()
-                .id(productLong.getId())
-                .name(productShort.getName())
-                .images(unwrapImages(productShort.getImages()))
-                .price(productShort.getPrice())
-                .categories(productShort.getCategories())
-                .lengthInM(productLong.getLengthInM())
-                .widthInM(productLong.getWidthInM())
-                .heightInM(productLong.getHeightInM())
-                .netWeightInKg(productLong.getNetWeightInKg())
-                .grossWeightInKg(productLong.getGrossWeightInKg())
-                .build();
+        ProductLongDto actual = service.updateProduct(testingId, emptyUpdateData);
 
-        assertEquals(expected, actual);
+        assertEquals(longDto, actual);
+        verify(longRepo, times(1)).findById(testingId);
+        verify(longRepo, times(1)).save(any());
     }
 
     @Test
@@ -260,52 +274,31 @@ class ProductServiceImplTest {
 
         doAnswer(invocationOnMock -> {
             ProductLong param = invocationOnMock.getArgument(0);
-            param.setId(2);
-            param.getProductShort().getPrice().setId(2);
+            param.setId(1);
+            param.getProductShort().getPrice().setId(1);
             return param;
-        }).when(longRepository).save(any(ProductLong.class));
+        }).when(longRepo).save(any(ProductLong.class));
 
-        when(categoryRepository.findAllById(any(Iterable.class)))
+        when(categoryRepo.findAllById(any(Iterable.class)))
                 .thenReturn(Collections.emptyList());
 
-        CreateProductDto newProductData = CreateProductDto.builder()
-                .name(productShort.getName())
-                .priceAmount(productShort.getPrice().getAmount())
-                .priceCurrency(productShort.getPrice().getCurrency())
-                .categoryIds(Collections.emptyList())
-                .lengthInM(productLong.getLengthInM())
-                .widthInM(productLong.getWidthInM())
-                .heightInM(productLong.getHeightInM())
-                .netWeightInKg(productLong.getNetWeightInKg())
-                .grossWeightInKg(productLong.getGrossWeightInKg())
-                .build();
+        when(longMapper.toDto(any(ProductLong.class))).thenReturn(longDto);
+
+        CreateProductDto newProductData = new CreateProductDto(
+                productShort.getName(),
+                productShort.getPrice().getAmount(),
+                productShort.getPrice().getCurrency(),
+                Collections.emptyList(),
+                productLong.getLengthInM(),
+                productLong.getWidthInM(),
+                productLong.getHeightInM(),
+                productLong.getNetWeightInKg(),
+                productLong.getGrossWeightInKg()
+        );
 
         ProductLongDto actual = service.createProduct(newProductData);
-        ProductLongDto expected = mapToLongDto(productLong);
-        expected.setId(2);
-        expected.getPrice().setId(2);
 
-        assertEquals(expected, actual);
-    }
-
-    private List<String> unwrapImages(List<Image> images) {
-        return images.stream()
-                .map(Image::getUrl)
-                .toList();
-    }
-
-    private ProductLongDto mapToLongDto(ProductLong productLong) {
-        return ProductLongDto.builder()
-                .id(productLong.getId())
-                .name(productLong.getProductShort().getName())
-                .images(unwrapImages(productLong.getProductShort().getImages()))
-                .price(productLong.getProductShort().getPrice())
-                .categories(productLong.getProductShort().getCategories())
-                .lengthInM(productLong.getLengthInM())
-                .widthInM(productLong.getWidthInM())
-                .heightInM(productLong.getHeightInM())
-                .netWeightInKg(productLong.getNetWeightInKg())
-                .grossWeightInKg(productLong.getGrossWeightInKg())
-                .build();
+        assertEquals(longDto, actual);
+        verify(longRepo, times(1)).save(any(ProductLong.class));
     }
 }

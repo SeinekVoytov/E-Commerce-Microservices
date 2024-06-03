@@ -1,17 +1,21 @@
 package org.example.productservice.service.impl;
 
+import lombok.AllArgsConstructor;
 import org.example.productservice.dto.CreateProductDto;
 import org.example.productservice.dto.PageProductShortDto;
 import org.example.productservice.dto.ProductLongDto;
 import org.example.productservice.dto.ProductShortDto;
 import org.example.productservice.exception.InvalidQueryParameterException;
 import org.example.productservice.exception.ProductNotFoundException;
+import org.example.productservice.mapper.CategoryMapper;
+import org.example.productservice.mapper.PriceMapper;
+import org.example.productservice.mapper.ProductLongMapper;
+import org.example.productservice.mapper.ProductShortMapper;
 import org.example.productservice.model.*;
 import org.example.productservice.repository.CategoryRepository;
 import org.example.productservice.repository.ProductLongRepository;
 import org.example.productservice.repository.ProductShortRepository;
 import org.example.productservice.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -23,21 +27,20 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@AllArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
     private static final Set<String> AVAILABLE_SORT_PARAMETERS = Set.of("price.amount");
     private static final Set<String> AVAILABLE_ORDER = Set.of("asc", "desc");
 
-    private final ProductShortRepository productShortRepository;
-    private final ProductLongRepository productLongRepository;
-    private final CategoryRepository categoryRepository;
+    private final ProductShortRepository shortRepo;
+    private final ProductLongRepository longRepo;
+    private final CategoryRepository categoryRepo;
 
-    @Autowired
-    public ProductServiceImpl(ProductShortRepository productShortRepository, ProductLongRepository productLongRepository, CategoryRepository categoryRepository) {
-        this.productShortRepository = productShortRepository;
-        this.productLongRepository = productLongRepository;
-        this.categoryRepository = categoryRepository;
-    }
+    private final ProductLongMapper longMapper;
+    private final ProductShortMapper shortMapper;
+    private final PriceMapper priceMapper;
+    private final CategoryMapper categoryMapper;
 
     @Override
     public PageProductShortDto getAllShortProduct(int pageNo, int pageSize, String order) {
@@ -45,53 +48,58 @@ public class ProductServiceImpl implements ProductService {
         String[] sortingParams = order.trim().split(":");
 
         Pageable pageable = PageRequest.of(pageNo, pageSize, createSort(sortingParams[1], sortingParams[0]));
-        Page<ProductShort> shortProducts = productShortRepository.findAll(pageable);
+        Page<ProductShort> shortProducts = shortRepo.findAll(pageable);
 
         List<ProductShortDto> pageContent = shortProducts.getContent().stream()
-                .map(this::mapToShortDto)
+                .map(shortMapper::toDto)
                 .toList();
 
-        return PageProductShortDto.builder()
-                .content(pageContent)
-                .pageNo(shortProducts.getNumber())
-                .pageSize(shortProducts.getSize())
-                .totalElements(shortProducts.getTotalElements())
-                .totalPages(shortProducts.getTotalPages())
-                .build();
+        return new PageProductShortDto(
+                pageContent,
+                shortProducts.getNumber(),
+                shortProducts.getSize(),
+                shortProducts.getTotalElements(),
+                shortProducts.getTotalPages()
+        );
     }
 
     @Override
     public ProductLongDto getById(int id) {
-        ProductLong productLong = productLongRepository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product could not be found"));
-        return mapToLongDto(productLong);
+        ProductLong productLong = longRepo.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Product could not be found"));
+        return longMapper.toDto(productLong);
     }
 
     @Override
-    public void deleteById(int id) {
-        ProductLong productToBeDeleted = productLongRepository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product could not be deleted"));
-        productLongRepository.delete(productToBeDeleted);
+    public ProductLongDto deleteById(int id) {
+        ProductLong productToBeDeleted = longRepo.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Product could not be deleted"));
+        longRepo.delete(productToBeDeleted);
+        return longMapper.toDto(productToBeDeleted);
     }
 
     @Override
     public ProductLongDto updateProduct(int id, ProductLongDto updatedProduct) {
-        ProductLong productToBeUpdated = productLongRepository.findById(id).orElseThrow(() -> new ProductNotFoundException("Product could not be updated"));
+        ProductLong productToBeUpdated = longRepo.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException("Product could not be updated"));
         updateProduct(productToBeUpdated, updatedProduct);
-        return mapToLongDto(productLongRepository.save(productToBeUpdated));
+        productToBeUpdated = longRepo.save(productToBeUpdated);
+        return longMapper.toDto(productToBeUpdated);
     }
 
     @Override
     public ProductLongDto createProduct(CreateProductDto newProductData) {
 
         ProductLong createdProduct = new ProductLong();
-        createdProduct.setLengthInM(newProductData.getLengthInM());
-        createdProduct.setWidthInM(newProductData.getWidthInM());
-        createdProduct.setHeightInM(newProductData.getHeightInM());
-        createdProduct.setNetWeightInKg(newProductData.getNetWeightInKg());
-        createdProduct.setGrossWeightInKg(newProductData.getGrossWeightInKg());
+        createdProduct.setLengthInM(newProductData.lengthInM());
+        createdProduct.setWidthInM(newProductData.widthInM());
+        createdProduct.setHeightInM(newProductData.heightInM());
+        createdProduct.setNetWeightInKg(newProductData.netWeightInKg());
+        createdProduct.setGrossWeightInKg(newProductData.grossWeightInKg());
 
         ProductShort productShort = new ProductShort();
-        productShort.setName(newProductData.getName());
-        Iterable<Category> selectedCategories = categoryRepository.findAllById(newProductData.getCategoryIds());
+        productShort.setName(newProductData.name());
+        Iterable<Category> selectedCategories = categoryRepo.findAllById(newProductData.categoryIds());
 
         List<Category> categoriesToBeSaved = new ArrayList<>();
         for (Category selectedCategory : selectedCategories) {
@@ -101,50 +109,52 @@ public class ProductServiceImpl implements ProductService {
         productShort.setCategories(categoriesToBeSaved);
 
         Price priceToBeSaved = new Price();
-        priceToBeSaved.setAmount(newProductData.getPriceAmount());
-        priceToBeSaved.setCurrency(newProductData.getPriceCurrency());
+        priceToBeSaved.setAmount(newProductData.priceAmount());
+        priceToBeSaved.setCurrency(newProductData.priceCurrency());
 
         productShort.setPrice(priceToBeSaved);
         productShort.setImages(new ArrayList<>());
         createdProduct.setProductShort(productShort);
 
-        return mapToLongDto(productLongRepository.save(createdProduct));
+        createdProduct = longRepo.save(createdProduct);
+
+        return longMapper.toDto(createdProduct);
     }
 
     private void updateProduct(ProductLong toBeUpdated, ProductLongDto updated) {
 
-        if (updated.getLengthInM() != null) {
-            toBeUpdated.setLengthInM(updated.getLengthInM());
+        if (updated.lengthInM() != null) {
+            toBeUpdated.setLengthInM(updated.lengthInM());
         }
 
-        if (updated.getWidthInM() != null) {
-            toBeUpdated.setWidthInM(updated.getWidthInM());
+        if (updated.widthInM() != null) {
+            toBeUpdated.setWidthInM(updated.widthInM());
         }
 
-        if (updated.getHeightInM() != null) {
-            toBeUpdated.setHeightInM(updated.getHeightInM());
+        if (updated.heightInM() != null) {
+            toBeUpdated.setHeightInM(updated.heightInM());
         }
 
-        if (updated.getNetWeightInKg() != null) {
-            toBeUpdated.setNetWeightInKg(updated.getNetWeightInKg());
+        if (updated.netWeightInKg() != null) {
+            toBeUpdated.setNetWeightInKg(updated.netWeightInKg());
         }
 
-        if (updated.getGrossWeightInKg() != null) {
-            toBeUpdated.setGrossWeightInKg(updated.getGrossWeightInKg());
+        if (updated.grossWeightInKg() != null) {
+            toBeUpdated.setGrossWeightInKg(updated.grossWeightInKg());
         }
 
         ProductShort insideProduct = toBeUpdated.getProductShort();
 
-        if (updated.getName() != null) {
-            insideProduct.setName(updated.getName());
+        if (updated.name() != null) {
+            insideProduct.setName(updated.name());
         }
 
-        if (updated.getPrice() != null) {
-            insideProduct.setPrice(updated.getPrice());
+        if (updated.price() != null) {
+            insideProduct.setPrice(priceMapper.toEntity(updated.price()));
         }
 
-        if (updated.getCategories() != null) {
-            insideProduct.setCategories(updated.getCategories());
+        if (updated.categories() != null) {
+            insideProduct.setCategories(categoryMapper.toEntitiesList(updated.categories()));
         }
     }
 
@@ -159,36 +169,5 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return Sort.by(sortParam).ascending();
-    }
-
-    private ProductShortDto mapToShortDto(ProductShort productShort) {
-        return ProductShortDto.builder()
-                .id(productShort.getId())
-                .name(productShort.getName())
-                .images(unwrapUrls(productShort.getImages()))
-                .price(productShort.getPrice())
-                .categories(productShort.getCategories())
-                .build();
-    }
-
-    private ProductLongDto mapToLongDto(ProductLong productLong) {
-        return ProductLongDto.builder()
-                .id(productLong.getId())
-                .name(productLong.getProductShort().getName())
-                .images(unwrapUrls(productLong.getProductShort().getImages()))
-                .price(productLong.getProductShort().getPrice())
-                .categories(productLong.getProductShort().getCategories())
-                .lengthInM(productLong.getLengthInM())
-                .widthInM(productLong.getWidthInM())
-                .heightInM(productLong.getHeightInM())
-                .netWeightInKg(productLong.getNetWeightInKg())
-                .grossWeightInKg(productLong.getGrossWeightInKg())
-                .build();
-    }
-
-    private List<String> unwrapUrls(List<Image> images) {
-        return images.stream()
-                .map(Image::getUrl)
-                .toList();
     }
 }

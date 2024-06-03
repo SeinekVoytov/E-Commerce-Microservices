@@ -1,25 +1,17 @@
 package org.example.productservice.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.List;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CreateProductDto {
+public record CreateProductDto (
+     String name,
+     Float priceAmount,
+     String priceCurrency,
+     List<Integer> categoryIds,
+     Float lengthInM,
+     Float widthInM,
+     Float heightInM,
+     Float netWeightInKg,
+     Float grossWeightInKg
+) {
 
-    private String name;
-    private Float priceAmount;
-    private String priceCurrency;
-    private List<Integer> categoryIds;
-    private Float lengthInM;
-    private Float widthInM;
-    private Float heightInM;
-    private Float netWeightInKg;
-    private Float grossWeightInKg;
 }

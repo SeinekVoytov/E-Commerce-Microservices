@@ -47,13 +47,13 @@ public class ProductController {
     public ResponseEntity<ProductLongDto> updateProduct(@PathVariable int id,
                                                         @RequestBody ProductLongDto updatedProduct) {
         ProductLongDto response = productService.updateProduct(id, updatedProduct);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<?> deleteProduct(@PathVariable int id) {
-        productService.deleteById(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<ProductLongDto> deleteProduct(@PathVariable int id) {
+        ProductLongDto result = productService.deleteById(id);
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }
