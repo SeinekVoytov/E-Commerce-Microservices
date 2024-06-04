@@ -1,7 +1,10 @@
 package org.example.productservice.exception;
 
 public class InvalidQueryParameterException extends RuntimeException {
-    public InvalidQueryParameterException(String message) {
-        super(message);
+
+    private static final String MESSAGE = "Invalid query parameter value";
+
+    public InvalidQueryParameterException() {
+        super(MESSAGE);
     }
 }

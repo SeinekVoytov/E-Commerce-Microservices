@@ -2,7 +2,9 @@ package org.example.productservice.exception;
 
 public class ProductNotFoundException extends RuntimeException {
 
-    public ProductNotFoundException(String message) {
-        super(message);
+    private static final String MESSAGE = "Product could not be found";
+
+    public ProductNotFoundException() {
+        super(MESSAGE);
     }
 }
