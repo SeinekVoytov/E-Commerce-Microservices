@@ -1,5 +1,6 @@
 package org.example.orderservice.service.impl;
 
+import lombok.AllArgsConstructor;
 import org.example.orderservice.dto.order.OrderDetailsDto;
 import org.example.orderservice.dto.order.OrderDto;
 import org.example.orderservice.exception.OrderNotFoundException;
@@ -10,7 +11,6 @@ import org.example.orderservice.model.order.OrderDetails;
 import org.example.orderservice.repository.OrderDetailsRepository;
 import org.example.orderservice.repository.OrderRepository;
 import org.example.orderservice.service.OrderService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@AllArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
@@ -26,19 +27,6 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderMapper orderMapper;
     private final OrderDetailsMapper orderDetailsMapper;
-
-    @Autowired
-    public OrderServiceImpl(
-            OrderRepository orderRepository,
-            OrderDetailsRepository orderDetailsRepository,
-            OrderMapper orderMapper,
-            OrderDetailsMapper orderDetailsMapper
-    ) {
-        this.orderRepository = orderRepository;
-        this.orderDetailsRepository = orderDetailsRepository;
-        this.orderMapper = orderMapper;
-        this.orderDetailsMapper = orderDetailsMapper;
-    }
 
     @Override
     public List<OrderDto> getUserOrdersShort(Authentication authentication) {
