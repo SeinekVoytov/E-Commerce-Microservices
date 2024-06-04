@@ -1,5 +1,6 @@
 package org.example.orderservice.controller;
 
+import lombok.AllArgsConstructor;
 import org.example.orderservice.dto.order.OrderDetailsDto;
 import org.example.orderservice.dto.order.OrderDto;
 import org.example.orderservice.service.OrderService;
@@ -12,14 +13,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/orders")
+@AllArgsConstructor
 public class OrderController {
 
     private final OrderService orderService;
-
-    @Autowired
-    public OrderController(OrderService orderService) {
-        this.orderService = orderService;
-    }
 
     @GetMapping
     public ResponseEntity<List<OrderDto>> getOrderShortsByUserId(Authentication authentication) {

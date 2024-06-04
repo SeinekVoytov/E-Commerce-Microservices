@@ -24,8 +24,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-                .oauth2ResourceServer(oauth2Configurer -> oauth2Configurer.jwt(customizer -> customizer.jwtAuthenticationConverter(jwtConverter())));
+        http.oauth2ResourceServer(
+                oauth2Configurer -> oauth2Configurer.jwt(
+                        customizer -> customizer.jwtAuthenticationConverter(jwtConverter())
+                )
+        );
+
         return http.build();
     }
 
@@ -44,9 +48,9 @@ public class SecurityConfig {
             List<String> roles = (List<String>) claims.get("roles");
 
             return Stream.concat(authorities.stream(),
-                        roles.stream()
-                                .filter(role -> role.startsWith("ROLE"))
-                                .map(SimpleGrantedAuthority::new))
+                            roles.stream()
+                                    .filter(role -> role.startsWith("ROLE"))
+                                    .map(SimpleGrantedAuthority::new))
                     .toList();
         });
 

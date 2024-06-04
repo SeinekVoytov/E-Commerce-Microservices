@@ -11,6 +11,7 @@ import java.util.List;
 public interface ProductShortMapper {
 
     ProductShortDto toDto(ProductShort entity);
+
     ProductShort toEntity(ProductShortDto entity);
 
     default List<String> imagesToUrls(List<Image> images) {

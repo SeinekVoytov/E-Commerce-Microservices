@@ -10,14 +10,21 @@ import java.util.Date;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler({OrderNotFoundException.class})
+    @ExceptionHandler(
+            OrderNotFoundException.class
+    )
     public ResponseEntity<ErrorObject> handleOrderNotFoundException(OrderNotFoundException exc) {
-        ErrorObject errorObject = new ErrorObject();
+        return new ResponseEntity<>(
+                buildErrorObject(HttpStatus.NOT_FOUND.value(), exc.getMessage()),
+                HttpStatus.NOT_FOUND
+        );
+    }
 
-        errorObject.setStatusCode(HttpStatus.NOT_FOUND.value());
-        errorObject.setMessage(exc.getMessage());
-        errorObject.setTimestamp(new Date());
-
-        return new ResponseEntity<>(errorObject, HttpStatus.NOT_FOUND);
+    private ErrorObject buildErrorObject(int statusCode, String message) {
+        return new ErrorObject(
+                statusCode,
+                message,
+                new Date()
+        );
     }
 }

@@ -22,34 +22,34 @@ import java.util.UUID;
 @AllArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
-    private final OrderRepository orderRepository;
-    private final OrderDetailsRepository orderDetailsRepository;
+    private final OrderRepository orderRepo;
+    private final OrderDetailsRepository orderDetailsRepo;
 
     private final OrderMapper orderMapper;
-    private final OrderDetailsMapper orderDetailsMapper;
+    private final OrderDetailsMapper detailsMapper;
 
     @Override
-    public List<OrderDto> getUserOrdersShort(Authentication authentication) {
-        UUID userId = retrieveUserIdFromAuthentication(authentication);
-        List<Order> foundOrders = orderRepository.findOrderShortsByUserId(userId);
+    public List<OrderDto> getUserOrdersShort(Authentication auth) {
+        UUID userId = retrieveUserIdFromAuthentication(auth);
+        List<Order> foundOrders = orderRepo.findOrderShortsByUserId(userId);
         return orderMapper.listToDtos(foundOrders);
     }
 
     @Override
-    public OrderDetailsDto getUsersOrderLongById(Authentication authentication, int orderId) {
-        UUID userId = retrieveUserIdFromAuthentication(authentication);
-        OrderDetails requestedOrder = orderDetailsRepository.findOrderLongByIdAndUserId(orderId, userId)
+    public OrderDetailsDto getUsersOrderLongById(Authentication auth, int orderId) {
+        UUID userId = retrieveUserIdFromAuthentication(auth);
+        OrderDetails requestedOrder = orderDetailsRepo.findOrderLongByIdAndUserId(orderId, userId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found"));
-        return orderDetailsMapper.toDto(requestedOrder);
+        return detailsMapper.toDto(requestedOrder);
     }
 
     @Override
-    public OrderDetailsDto deleteUsersOrderById(Authentication authentication, int orderId) {
-        UUID userId = retrieveUserIdFromAuthentication(authentication);
-        OrderDetails orderToBeDeleted = orderDetailsRepository.findOrderLongByIdAndUserId(orderId, userId)
+    public OrderDetailsDto deleteUsersOrderById(Authentication auth, int orderId) {
+        UUID userId = retrieveUserIdFromAuthentication(auth);
+        OrderDetails orderToBeDeleted = orderDetailsRepo.findOrderLongByIdAndUserId(orderId, userId)
                 .orElseThrow(() -> new OrderNotFoundException("Order could not be deleted"));
-        orderDetailsRepository.delete(orderToBeDeleted);
-        return orderDetailsMapper.toDto(orderToBeDeleted);
+        orderDetailsRepo.delete(orderToBeDeleted);
+        return detailsMapper.toDto(orderToBeDeleted);
     }
 
     private UUID retrieveUserIdFromAuthentication(Authentication authentication) {

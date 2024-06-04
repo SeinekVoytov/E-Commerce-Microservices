@@ -8,9 +8,9 @@ import java.util.List;
 
 public interface OrderService {
 
-    List<OrderDto> getUserOrdersShort(Authentication authentication);
+    List<OrderDto> getUserOrdersShort(Authentication auth);
 
-    OrderDetailsDto getUsersOrderLongById(Authentication authentication, int orderId);
+    OrderDetailsDto getUsersOrderLongById(Authentication auth, int orderId);
 
-    OrderDetailsDto deleteUsersOrderById(Authentication authentication, int orderId);
+    OrderDetailsDto deleteUsersOrderById(Authentication auth, int orderId);
 }

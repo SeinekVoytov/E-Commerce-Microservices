@@ -17,5 +17,6 @@ public interface OrderDetailsMapper {
     @Mapping(source = "order.delivery", target = "delivery")
     @Mapping(source = "order.items", target = "items")
     OrderDetailsDto toDto(OrderDetails entity);
+
     OrderDetails toEntity(OrderDetailsDto dto);
 }
