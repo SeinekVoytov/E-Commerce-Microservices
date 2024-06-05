@@ -1,37 +1,38 @@
 package org.example.productservice.mapper;
 
-import org.example.productservice.dto.ProductShortDto;
+import org.example.productservice.dto.ProductDto;
 import org.example.productservice.model.Image;
-import org.example.productservice.model.ProductShort;
+import org.example.productservice.model.Product;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Mapper(
         componentModel = "spring",
         injectionStrategy = InjectionStrategy.CONSTRUCTOR,
         uses = {PriceMapper.class, CategoryMapper.class}
 )
-public interface ProductShortMapper {
+public interface ProductMapper {
 
-    ProductShortDto toDto(ProductShort entity);
+    ProductDto toDto(Product entity);
 
-    ProductShort toEntity(ProductShortDto dto);
+    Product toEntity(ProductDto dto);
 
-    default List<String> imagesToUrls(List<Image> images) {
+    default Set<String> imagesToUrls(Set<Image> images) {
         return images.stream()
                 .map(Image::getUrl)
-                .toList();
+                .collect(Collectors.toSet());
     }
 
-    default List<Image> urlsToImages(List<String> urls) {
+    default Set<Image> urlsToImages(Set<String> urls) {
         return urls.stream()
                 .map(url -> {
                     Image image = new Image();
                     image.setUrl(url);
                     return image;
                 })
-                .toList();
+                .collect(Collectors.toSet());
     }
 }

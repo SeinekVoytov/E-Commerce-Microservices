@@ -6,6 +6,7 @@ import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 
 import java.util.List;
+import java.util.Set;
 
 @Mapper(
         componentModel = "spring",
@@ -17,5 +18,5 @@ public interface CategoryMapper {
 
     Category toEntity(CategoryDto dto);
 
-    List<Category> toEntitiesList(List<CategoryDto> dtos);
+    Set<Category> toEntitiesSet(Set<CategoryDto> dtos);
 }
