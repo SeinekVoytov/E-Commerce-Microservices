@@ -11,8 +11,14 @@ import java.util.Date;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<ErrorObject> handleProductNotFoundException(ProductNotFoundException exc) {
+    @ExceptionHandler(
+            {
+                    ProductNotFoundException.class,
+                    CategoryNotFoundException.class,
+                    ImageNotFoundException.class
+            }
+    )
+    public ResponseEntity<ErrorObject> handleProductNotFoundException(Exception exc) {
         ErrorObject errorObject = new ErrorObject();
 
         errorObject.setStatusCode(HttpStatus.NOT_FOUND.value());
