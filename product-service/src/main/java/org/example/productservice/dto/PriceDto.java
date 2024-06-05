@@ -2,9 +2,11 @@ package org.example.productservice.dto;
 
 import lombok.Builder;
 
+import java.math.BigDecimal;
+
 @Builder
 public record PriceDto (
-        Float amount,
+        BigDecimal amount,
         String currency
 ) {
 
