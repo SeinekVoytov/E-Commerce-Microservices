@@ -6,12 +6,13 @@ import java.util.Set;
 
 public record CreateProductDto (
      String name,
+     Set<String> images,
      BigDecimal priceAmount,
      Currency priceCurrency,
      Set<Integer> categoryIds,
-     Double lengthInM,
-     Double widthInM,
-     Double heightInM,
+     Double lengthInMeters,
+     Double widthInMeters,
+     Double heightInMeters,
      Double netWeightInKg,
      Double grossWeightInKg
 ) {
