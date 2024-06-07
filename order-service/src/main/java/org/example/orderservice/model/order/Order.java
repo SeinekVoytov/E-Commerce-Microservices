@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.example.orderservice.model.order.delivery.Delivery;
 
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @Builder
@@ -15,18 +16,26 @@ import java.util.List;
 @AllArgsConstructor
 
 @Entity
-@Table(name = "order_short")
-public class OrderShort {
+@Table(name = "\"order\"")
+public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(
+            name = "order_seq",
+            sequenceName = "order_seq",
+            allocationSize = 20
+    )
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_seq")
     private int id;
 
-    @OneToOne
+    @Column(name = "user_id")
+    private UUID userId;
+
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "delivery_id", referencedColumnName = "id")
     private Delivery delivery;
 
-    @OneToMany
+    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "order_id", referencedColumnName = "id")
-    private List<OrderItemShort> items;
+    private List<OrderItem> items;
 }

@@ -18,7 +18,12 @@ import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 public class Delivery {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(
+            name = "delivery_seq",
+            sequenceName = "delivery_seq",
+            allocationSize = 20
+    )
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "delivery_seq")
     private int id;
 
     @Enumerated
@@ -29,7 +34,7 @@ public class Delivery {
     @JdbcType(PostgreSQLEnumJdbcType.class)
     private DeliveryStatus status;
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "fee_id", referencedColumnName = "id")
     private Fee fee;
 }
