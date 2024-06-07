@@ -7,7 +7,7 @@ import java.util.Currency;
 import java.util.Set;
 
 @Builder
-public record CreateProductDto (
+public record RequestProductDto(
      String name,
      Set<String> images,
      BigDecimal priceAmount,

@@ -1,14 +1,20 @@
 package org.example.productservice.service;
 
-import org.example.productservice.dto.CreateProductDto;
-import org.example.productservice.dto.PageProductShortDto;
-import org.example.productservice.dto.ProductLongDto;
+import org.example.productservice.dto.RequestProductDto;
+import org.example.productservice.dto.ProductDetailsDto;
+import org.example.productservice.dto.ProductDto;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface ProductService {
 
-    PageProductShortDto getAllShortProduct(int pageNo, int pageSize, String order);
-    ProductLongDto getById(int id);
-    ProductLongDto createProduct(CreateProductDto newProductData);
-    ProductLongDto deleteById(int id);
-    ProductLongDto updateProduct(int id, ProductLongDto updatedProduct);
+    Page<ProductDto> getAllShortProduct(Pageable pageable);
+
+    ProductDetailsDto getById(int id);
+
+    ProductDetailsDto createProduct(RequestProductDto newProductData);
+
+    ProductDetailsDto deleteById(int id);
+
+    ProductDetailsDto updateProduct(int id, RequestProductDto updatedProduct);
 }
