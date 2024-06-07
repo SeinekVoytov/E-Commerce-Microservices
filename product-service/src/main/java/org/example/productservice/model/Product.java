@@ -18,7 +18,12 @@ import java.util.Set;
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @SequenceGenerator(
+            name = "product_seq",
+            sequenceName = "product_seq",
+            allocationSize = 20
+    )
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "product_seq")
     private Integer id;
 
     private String name;
@@ -32,8 +37,8 @@ public class Product {
     private Price price;
 
     @ManyToMany(cascade = CascadeType.PERSIST)
-    @JoinTable(name = "product_short_category",
-            joinColumns = @JoinColumn(name = "product_short_id"),
+    @JoinTable(name = "product_category",
+            joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
     private Set<Category> categories;
