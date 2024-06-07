@@ -130,3 +130,29 @@ CREATE TABLE IF NOT EXISTS order_details (
 );
 
 CREATE SEQUENCE IF NOT EXISTS order_details_seq START 1 INCREMENT 20 OWNED BY order_details.id;
+
+CREATE TABLE IF NOT EXISTS cart (
+    id UUID PRIMARY KEY,
+    user_id UUID UNIQUE,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS cart_item (
+    id INT PRIMARY KEY,
+    product_id INT REFERENCES product (id),
+    quantity INT NOT NULL,
+    cart_id UUID REFERENCES cart (id)
+);
+
+CREATE SEQUENCE cart_item_seq START 1 INCREMENT 75 OWNED BY cart_item.id;
+
+CREATE OR REPLACE FUNCTION on_item_added_to_cart() RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE cart SET updated_at = CURRENT_TIMESTAMP WHERE NEW.cart_id = id;
+    UPDATE cart SET updated_at = CURRENT_TIMESTAMP WHERE OLD.cart_id = id;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE TRIGGER tr_update_updated_at AFTER INSERT OR DELETE ON cart_item FOR EACH ROW EXECUTE PROCEDURE on_item_added_to_cart();
