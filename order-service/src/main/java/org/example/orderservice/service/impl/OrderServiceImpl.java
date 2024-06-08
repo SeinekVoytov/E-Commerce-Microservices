@@ -46,7 +46,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderDetailsDto getUserOrderDetailsById(Authentication auth, int orderId) {
         UUID userId = retrieveUserIdFromAuthentication(auth);
         OrderDetails requestedOrder = orderDetailsRepository.findOrderLongByIdAndUserId(orderId, userId)
-                .orElseThrow(() -> new OrderNotFoundException("Order not found"));
+                .orElseThrow(OrderNotFoundException::new);
         return detailsMapper.toDto(requestedOrder);
     }
 
@@ -54,7 +54,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderDetailsDto deleteUserOrderById(Authentication auth, int orderId) {
         UUID userId = retrieveUserIdFromAuthentication(auth);
         OrderDetails orderToBeDeleted = orderDetailsRepository.findOrderLongByIdAndUserId(orderId, userId)
-                .orElseThrow(() -> new OrderNotFoundException("Order could not be deleted"));
+                .orElseThrow(OrderNotFoundException::new);
         orderDetailsRepository.delete(orderToBeDeleted);
         return detailsMapper.toDto(orderToBeDeleted);
     }

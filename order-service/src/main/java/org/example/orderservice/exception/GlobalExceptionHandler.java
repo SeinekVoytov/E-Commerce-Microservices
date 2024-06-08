@@ -20,6 +20,16 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(
+            InvalidQueryParameterException.class
+    )
+    public ResponseEntity<ErrorObject> handleInvalidQueryParameterException(InvalidQueryParameterException exc) {
+        return new ResponseEntity<>(
+                buildErrorObject(HttpStatus.BAD_REQUEST.value(), exc.getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
     private ErrorObject buildErrorObject(int statusCode, String message) {
         return new ErrorObject(
                 statusCode,

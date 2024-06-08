@@ -13,7 +13,6 @@ import org.example.userservice.exception.ProductNotFoundException;
 import org.example.userservice.mapper.CartItemMapper;
 import org.example.userservice.model.cart.Cart;
 import org.example.userservice.model.cart.CartItem;
-import org.example.userservice.model.product.ProductLong;
 import org.example.userservice.repository.cart.CartItemRepository;
 import org.example.userservice.repository.cart.CartRepository;
 import org.example.userservice.repository.product.ProductLongRepository;
@@ -91,7 +90,7 @@ public class CartServiceImpl implements CartService {
         } else {
 
             Cart anonymousUserCart = cartRepo.findById(cartIdFromCookie)
-                    .orElseThrow(() -> new InvalidCartIdCookieException("Invalid cart id cookie parameter"));
+                    .orElseThrow(() -> new InvalidCartIdCookieException(cartIdFromCookie));
 
             cartId = anonymousUserCart.getId();
             anonymousUserCart.getItems().add(newCartItem);
@@ -138,32 +137,26 @@ public class CartServiceImpl implements CartService {
             UUID userId = retrieveUserIdFromAuthentication(auth);
             verifyCartIdCookie(cartIdFromCookie, userId, response);
             cart = cartRepo.findByUserId(userId)
-                    .orElseThrow(
-                            () -> new CartNotFoundException(
-                                    "No cart associated with this user"
-                            )
-                    );
+                    .orElseThrow(CartNotFoundException::new);
         }
         else {
 
             if (cartIdFromCookie == null) {
-                throw new InvalidCartIdCookieException("Invalid cart id cookie parameter");
+                throw new InvalidCartIdCookieException(null);
             }
 
             cart = cartRepo.findById(cartIdFromCookie).stream()
                     .filter(c -> c.getUserId() == null)
                     .findAny()
                     .orElseThrow(
-                            () -> new InvalidCartIdCookieException("Invalid cart id cookie parameter")
+                            () -> new InvalidCartIdCookieException(cartIdFromCookie)
                     );
         }
 
         return cart.getItems().stream()
                 .filter(item -> item.getId() == itemId)
                 .findAny()
-                .orElseThrow(
-                        () -> new CartItemNotFoundException("No such item found in user's cart")
-                );
+                .orElseThrow(CartItemNotFoundException::new);
     }
 
     @Override
@@ -199,14 +192,14 @@ public class CartServiceImpl implements CartService {
 
     private ProductLong getProductByIdOrThrowException(int id) {
         return productLongRepo.findById(id)
-                .orElseThrow(() -> new ProductNotFoundException("Product could not be found"));
+                .orElseThrow(ProductNotFoundException::new);
     }
 
     private void assignCartToUser(UUID userId, UUID cartId) {
 
         Cart cartToBeAssigned = cartRepo.findById(cartId)
                 .filter(cart -> cart.getUserId() == null)
-                .orElseThrow(() -> new InvalidCartIdCookieException("Invalid cart id cookie parameter"));
+                .orElseThrow(() -> new InvalidCartIdCookieException(userId));
 
         cartToBeAssigned.setUserId(userId);
         cartRepo.save(cartToBeAssigned);
