@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.example.orderservice.model.order.delivery.Delivery;
 
+import java.time.Instant;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
@@ -38,6 +39,9 @@ public class Order {
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     private Set<OrderItem> items;
+
+    @Column(name = "created_at")
+    private Instant createdAt;
 
     @Override
     public boolean equals(Object o) {
