@@ -1,4 +1,4 @@
-package org.example.orderservice.mapper;
+package org.example.orderservice.mapper.order;
 
 import org.example.orderservice.dto.order.OrderDto;
 import org.example.orderservice.model.order.Order;
@@ -6,7 +6,7 @@ import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-import java.util.List;
+import java.util.Set;
 
 @Mapper(
         componentModel = "spring",
@@ -17,9 +17,6 @@ public interface OrderMapper {
 
     @Mapping(source = "delivery.status", target = "status")
     OrderDto toDto(Order entity);
-    Order toEntity(OrderDto dto);
 
-    List<OrderDto> listToDtos(List<Order> list);
-
-    List<Order> listToEntities(List<OrderDto> list);
+    Set<OrderDto> setToDtos(Set<Order> entities);
 }

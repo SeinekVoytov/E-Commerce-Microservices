@@ -71,7 +71,7 @@ CREATE SEQUENCE IF NOT EXISTS image_seq START 1 INCREMENT 20 OWNED BY image.id;
 
 CREATE TABLE IF NOT EXISTS fee (
     id INT PRIMARY KEY,
-    amount REAL NOT NULL CHECK ( amount > 0 ),
+    amount DECIMAL NOT NULL CHECK ( amount > 0 ),
     currency CHARACTER(3) NOT NULL
 );
 

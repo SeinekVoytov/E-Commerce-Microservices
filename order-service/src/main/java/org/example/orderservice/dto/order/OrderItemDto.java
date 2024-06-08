@@ -1,9 +1,9 @@
 package org.example.orderservice.dto.order;
 
-import org.example.orderservice.dto.product.ProductLongDto;
+import org.example.orderservice.dto.product.ProductDetailsDto;
 
 public record OrderItemDto (
-        ProductLongDto product,
-        int quantity
+        ProductDetailsDto product,
+        Integer quantity
 ) {
 }

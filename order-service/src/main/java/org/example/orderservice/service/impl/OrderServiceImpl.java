@@ -1,11 +1,11 @@
 package org.example.orderservice.service.impl;
 
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.example.orderservice.dto.order.OrderDetailsDto;
 import org.example.orderservice.dto.order.OrderDto;
 import org.example.orderservice.exception.OrderNotFoundException;
-import org.example.orderservice.mapper.OrderDetailsMapper;
-import org.example.orderservice.mapper.OrderMapper;
+import org.example.orderservice.mapper.order.OrderDetailsMapper;
+import org.example.orderservice.mapper.order.OrderMapper;
 import org.example.orderservice.model.order.Order;
 import org.example.orderservice.model.order.OrderDetails;
 import org.example.orderservice.repository.OrderDetailsRepository;
@@ -19,11 +19,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
-    private final OrderRepository orderRepo;
-    private final OrderDetailsRepository orderDetailsRepo;
+    private final OrderRepository orderRepository;
+    private final OrderDetailsRepository orderDetailsRepository;
 
     private final OrderMapper orderMapper;
     private final OrderDetailsMapper detailsMapper;
@@ -31,14 +31,14 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public List<OrderDto> getUserOrdersShort(Authentication auth) {
         UUID userId = retrieveUserIdFromAuthentication(auth);
-        List<Order> foundOrders = orderRepo.findOrderShortsByUserId(userId);
-        return orderMapper.listToDtos(foundOrders);
+        List<Order> foundOrders = orderRepository.findOrderShortsByUserId(userId);
+        return orderMapper.setToDtos(foundOrders);
     }
 
     @Override
     public OrderDetailsDto getUsersOrderLongById(Authentication auth, int orderId) {
         UUID userId = retrieveUserIdFromAuthentication(auth);
-        OrderDetails requestedOrder = orderDetailsRepo.findOrderLongByIdAndUserId(orderId, userId)
+        OrderDetails requestedOrder = orderDetailsRepository.findOrderLongByIdAndUserId(orderId, userId)
                 .orElseThrow(() -> new OrderNotFoundException("Order not found"));
         return detailsMapper.toDto(requestedOrder);
     }
@@ -46,9 +46,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDetailsDto deleteUsersOrderById(Authentication auth, int orderId) {
         UUID userId = retrieveUserIdFromAuthentication(auth);
-        OrderDetails orderToBeDeleted = orderDetailsRepo.findOrderLongByIdAndUserId(orderId, userId)
+        OrderDetails orderToBeDeleted = orderDetailsRepository.findOrderLongByIdAndUserId(orderId, userId)
                 .orElseThrow(() -> new OrderNotFoundException("Order could not be deleted"));
-        orderDetailsRepo.delete(orderToBeDeleted);
+        orderDetailsRepository.delete(orderToBeDeleted);
         return detailsMapper.toDto(orderToBeDeleted);
     }
 

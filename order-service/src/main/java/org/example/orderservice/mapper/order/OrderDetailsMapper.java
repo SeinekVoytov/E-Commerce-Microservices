@@ -1,4 +1,4 @@
-package org.example.orderservice.mapper;
+package org.example.orderservice.mapper.order;
 
 import org.example.orderservice.dto.order.OrderDetailsDto;
 import org.example.orderservice.model.order.OrderDetails;
@@ -17,6 +17,4 @@ public interface OrderDetailsMapper {
     @Mapping(source = "order.delivery", target = "delivery")
     @Mapping(source = "order.items", target = "items")
     OrderDetailsDto toDto(OrderDetails entity);
-
-    OrderDetails toEntity(OrderDetailsDto dto);
 }

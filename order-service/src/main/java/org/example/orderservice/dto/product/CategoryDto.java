@@ -1,16 +1,11 @@
 package org.example.orderservice.dto.product;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class CategoryDto {
+public record CategoryDto (
+        String name,
+        Integer count
+) {
 
-    private String name;
-    private int count;
 }

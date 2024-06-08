@@ -1,17 +1,17 @@
 package org.example.orderservice.model.order;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.example.orderservice.model.order.delivery.Delivery;
 
-import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 
@@ -26,7 +26,7 @@ public class Order {
             allocationSize = 20
     )
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_seq")
-    private int id;
+    private Integer id;
 
     @Column(name = "user_id")
     private UUID userId;
@@ -37,5 +37,18 @@ public class Order {
 
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "order_id", referencedColumnName = "id")
-    private List<OrderItem> items;
+    private Set<OrderItem> items;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Order order = (Order) o;
+        return Objects.equals(id, order.id) && Objects.equals(userId, order.userId) && Objects.equals(delivery, order.delivery) && Objects.equals(items, order.items);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, userId, delivery, items);
+    }
 }
