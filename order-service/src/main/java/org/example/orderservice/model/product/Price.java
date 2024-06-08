@@ -1,11 +1,17 @@
 package org.example.orderservice.model.product;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.orderservice.jpaconverter.CurrencyConverter;
 
-@Data
+import java.math.BigDecimal;
+import java.util.Currency;
+import java.util.Objects;
+
+@Getter
+@Setter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 
@@ -14,14 +20,29 @@ import lombok.*;
 public class Price {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @SequenceGenerator(
+            name = "price_seq",
+            sequenceName = "price_seq",
+            allocationSize = 20
+    )
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "price_seq")
+    private Integer id;
 
-    @OneToOne(mappedBy = "price", cascade = CascadeType.PERSIST)
-    @JsonIgnore
-    @ToString.Exclude
-    private ProductShort product;
+    private BigDecimal amount;
 
-    private Float amount;
-    private String currency;
+    @Convert(converter = CurrencyConverter.class)
+    private Currency currency;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Price price = (Price) o;
+        return Objects.equals(id, price.id) && Objects.equals(amount, price.amount) && Objects.equals(currency, price.currency);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, amount, currency);
+    }
 }
