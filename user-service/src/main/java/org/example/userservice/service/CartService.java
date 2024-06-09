@@ -1,9 +1,9 @@
 package org.example.userservice.service;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.userservice.dto.CartItemRequest;
-import org.example.userservice.dto.CartItemResponse;
-import org.example.userservice.dto.UpdateQuantityRequest;
+import org.example.userservice.dto.cart.CartItemRequest;
+import org.example.userservice.dto.cart.CartItemResponse;
+import org.example.userservice.dto.cart.UpdateQuantityRequest;
 import org.springframework.security.core.Authentication;
 
 import java.util.UUID;

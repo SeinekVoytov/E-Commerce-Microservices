@@ -2,12 +2,16 @@ package org.example.userservice.service.impl;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.userservice.dto.*;
+import org.example.userservice.dto.cart.CartItemRequest;
+import org.example.userservice.dto.cart.CartItemResponse;
+import org.example.userservice.dto.cart.UpdateQuantityRequest;
+import org.example.userservice.dto.product.PriceDto;
+import org.example.userservice.dto.product.ProductDetailsDto;
 import org.example.userservice.exception.CartItemNotFoundException;
 import org.example.userservice.exception.CartNotFoundException;
 import org.example.userservice.exception.InvalidCartIdCookieException;
 import org.example.userservice.exception.ProductNotFoundException;
-import org.example.userservice.mapper.CartItemMapper;
+import org.example.userservice.mapper.cart.CartItemMapper;
 import org.example.userservice.model.cart.Cart;
 import org.example.userservice.model.cart.CartItem;
 import org.example.userservice.model.product.Price;
@@ -15,7 +19,7 @@ import org.example.userservice.model.product.ProductLong;
 import org.example.userservice.model.product.ProductShort;
 import org.example.userservice.repository.cart.CartItemRepository;
 import org.example.userservice.repository.cart.CartRepository;
-import org.example.userservice.repository.product.ProductLongRepository;
+import org.example.userservice.repository.product.ProductDetailsRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -54,7 +58,7 @@ class CartServiceImplTest {
     private CartItemRepository cartItemRepo;
 
     @Mock
-    private ProductLongRepository productLongRepo;
+    private ProductDetailsRepository productLongRepo;
 
     @InjectMocks
     private CartServiceImpl service;
@@ -69,7 +73,7 @@ class CartServiceImplTest {
         int quantity = 10;
         cartItemrequest = new CartItemRequest(1, quantity);
 
-        ProductLongDto productDto = new ProductLongDto(
+        ProductDetailsDto productDto = new ProductDetailsDto(
                 1,
                 "product",
                 Collections.emptyList(),

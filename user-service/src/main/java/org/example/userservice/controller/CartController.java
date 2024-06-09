@@ -1,10 +1,9 @@
 package org.example.userservice.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.userservice.dto.CartItemRequest;
-import org.example.userservice.dto.CartItemResponse;
-import org.example.userservice.dto.UpdateQuantityRequest;
-import org.example.userservice.model.cart.Cart;
+import org.example.userservice.dto.cart.CartItemRequest;
+import org.example.userservice.dto.cart.CartItemResponse;
+import org.example.userservice.dto.cart.UpdateQuantityRequest;
 import org.example.userservice.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

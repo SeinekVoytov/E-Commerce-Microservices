@@ -1,14 +1,15 @@
 package org.example.userservice.model.cart;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.example.userservice.model.product.ProductLong;
+import lombok.*;
+import org.example.userservice.model.product.ProductDetails;
 
-@Data
+import java.util.Objects;
+
+@Getter
+@Setter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 
@@ -23,11 +24,24 @@ public class CartItem {
             allocationSize = 75
     )
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cart_item_seq")
-    private int id;
+    private Integer id;
 
     @OneToOne
     @JoinColumn(name = "product_id", referencedColumnName = "id")
-    private ProductLong product;
+    private ProductDetails product;
 
-    private int quantity;
+    private Integer quantity;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CartItem cartItem = (CartItem) o;
+        return Objects.equals(id, cartItem.id) && Objects.equals(product, cartItem.product) && Objects.equals(quantity, cartItem.quantity);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, product, quantity);
+    }
 }

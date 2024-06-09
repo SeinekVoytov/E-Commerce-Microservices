@@ -3,19 +3,20 @@ package org.example.userservice.service.impl;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
-import org.example.userservice.dto.CartItemRequest;
-import org.example.userservice.dto.CartItemResponse;
-import org.example.userservice.dto.UpdateQuantityRequest;
+import org.example.userservice.dto.cart.CartItemRequest;
+import org.example.userservice.dto.cart.CartItemResponse;
+import org.example.userservice.dto.cart.UpdateQuantityRequest;
 import org.example.userservice.exception.CartItemNotFoundException;
 import org.example.userservice.exception.CartNotFoundException;
 import org.example.userservice.exception.InvalidCartIdCookieException;
 import org.example.userservice.exception.ProductNotFoundException;
-import org.example.userservice.mapper.CartItemMapper;
+import org.example.userservice.mapper.cart.CartItemMapper;
 import org.example.userservice.model.cart.Cart;
 import org.example.userservice.model.cart.CartItem;
+import org.example.userservice.model.product.ProductDetails;
 import org.example.userservice.repository.cart.CartItemRepository;
 import org.example.userservice.repository.cart.CartRepository;
-import org.example.userservice.repository.product.ProductLongRepository;
+import org.example.userservice.repository.product.ProductDetailsRepository;
 import org.example.userservice.service.CartService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
@@ -37,7 +38,7 @@ public class CartServiceImpl implements CartService {
 
     private final CartRepository cartRepo;
     private final CartItemRepository cartItemRepo;
-    private final ProductLongRepository productLongRepo;
+    private final ProductDetailsRepository productLongRepo;
 
     private final CartItemMapper cartItemMapper;
 
@@ -58,7 +59,7 @@ public class CartServiceImpl implements CartService {
             if (supposedCart.isEmpty()) {
                 Cart newCart = Cart.builder()
                         .userId(userId)
-                        .items(Collections.singletonList(newCartItem))
+                        .items(Collections.singleton(newCartItem))
                         .build();
 
                 cartRepo.save(newCart);
@@ -83,7 +84,7 @@ public class CartServiceImpl implements CartService {
 
         if (cartIdFromCookie == null) {
             Cart newCart = Cart.builder()
-                    .items(Collections.singletonList(newCartItem))
+                    .items(Collections.singleton(newCartItem))
                     .build();
 
             cartId = cartRepo.save(newCart).getId();
@@ -166,7 +167,6 @@ public class CartServiceImpl implements CartService {
         LocalDate expiryLocalDate = LocalDate.now().minusDays(1);
         Instant instant = expiryLocalDate.atStartOfDay(ZoneId.systemDefault()).toInstant();
         Date expiryDate = Date.from(instant);
-        System.out.println("EXECUTING SCHEDULED TASK");
         cartRepo.deleteByUpdatedAtBefore(expiryDate);
     }
 
@@ -181,7 +181,7 @@ public class CartServiceImpl implements CartService {
     }
 
     private CartItem buildNewCartItem(int productId, int quantity) {
-        ProductLong productToBeAdded =
+        ProductDetails productToBeAdded =
                 getProductByIdOrThrowException(productId);
 
         return CartItem.builder()
@@ -190,7 +190,7 @@ public class CartServiceImpl implements CartService {
                 .build();
     }
 
-    private ProductLong getProductByIdOrThrowException(int id) {
+    private ProductDetails getProductByIdOrThrowException(int id) {
         return productLongRepo.findById(id)
                 .orElseThrow(ProductNotFoundException::new);
     }
