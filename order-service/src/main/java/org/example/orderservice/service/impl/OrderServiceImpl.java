@@ -14,7 +14,6 @@ import org.example.orderservice.service.OrderService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
@@ -34,25 +33,25 @@ public class OrderServiceImpl implements OrderService {
     private final OrderDetailsMapper detailsMapper;
 
     @Override
-    public Page<OrderDto> getUserOrders(Authentication auth,
+    public Page<OrderDto> getUserOrders(Jwt jwt,
                                         Pageable pageable) {
 
         validateSortParameters(pageable.getSort());
-        UUID userId = retrieveUserIdFromAuthentication(auth);
+        UUID userId = retrieveUserIdFromJwt(jwt);
         return orderRepository.findAllByUserId(userId, pageable).map(orderMapper::toDto);
     }
 
     @Override
-    public OrderDetailsDto getUserOrderDetailsById(Authentication auth, int orderId) {
-        UUID userId = retrieveUserIdFromAuthentication(auth);
+    public OrderDetailsDto getUserOrderDetailsById(Jwt jwt, int orderId) {
+        UUID userId = retrieveUserIdFromJwt(jwt);
         OrderDetails requestedOrder = orderDetailsRepository.findOrderLongByIdAndUserId(orderId, userId)
                 .orElseThrow(OrderNotFoundException::new);
         return detailsMapper.toDto(requestedOrder);
     }
 
     @Override
-    public OrderDetailsDto deleteUserOrderById(Authentication auth, int orderId) {
-        UUID userId = retrieveUserIdFromAuthentication(auth);
+    public OrderDetailsDto deleteUserOrderById(Jwt jwt, int orderId) {
+        UUID userId = retrieveUserIdFromJwt(jwt);
         OrderDetails orderToBeDeleted = orderDetailsRepository.findOrderLongByIdAndUserId(orderId, userId)
                 .orElseThrow(OrderNotFoundException::new);
         orderDetailsRepository.delete(orderToBeDeleted);
@@ -66,10 +65,5 @@ public class OrderServiceImpl implements OrderService {
                 throw new InvalidQueryParameterException("sort", property);
             }
         }
-    }
-
-    private UUID retrieveUserIdFromAuthentication(Authentication authentication) {
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        return UUID.fromString(jwt.getClaim("sub"));
     }
 }
