@@ -1,14 +1,15 @@
 package org.example.orderservice.model.order;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.example.orderservice.model.product.ProductLong;
+import lombok.*;
+import org.example.orderservice.model.product.ProductDetails;
 
-@Data
+import java.util.Objects;
+
+@Getter
+@Setter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 
@@ -22,11 +23,24 @@ public class OrderItem {
             sequenceName = "order_item_seq"
     )
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_item_seq")
-    private int id;
+    private Integer id;
 
     @OneToOne
     @JoinColumn(name = "item_id", referencedColumnName = "id")
-    private ProductLong item;
+    private ProductDetails item;
 
-    private int quantity;
+    private Integer quantity;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OrderItem orderItem = (OrderItem) o;
+        return Objects.equals(id, orderItem.id) && Objects.equals(item, orderItem.item) && Objects.equals(quantity, orderItem.quantity);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, item, quantity);
+    }
 }

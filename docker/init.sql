@@ -1,39 +1,47 @@
 \c e_commerce_microservices;
 
 CREATE TABLE IF NOT EXISTS price (
-    id SERIAL PRIMARY KEY,
-    amount REAL NOT NULL CHECK ( amount > 0 ),
+    id INT PRIMARY KEY,
+    amount NUMERIC NOT NULL CHECK ( amount > 0 ),
     currency CHARACTER(3) NOT NULL
 );
 
+CREATE SEQUENCE IF NOT EXISTS price_seq START 1 INCREMENT 20 OWNED BY price.id;
+
 CREATE TABLE IF NOT EXISTS category (
-    id SERIAL PRIMARY KEY,
+    id INT PRIMARY KEY,
 --     parent_category_id INT DEFAULT NULL,
     name TEXT NOT NULL UNIQUE,
     count INT NOT NULL CHECK ( count >= 0 ) DEFAULT 0
 );
 
-CREATE TABLE IF NOT EXISTS product_short (
-    id SERIAL PRIMARY KEY,
+CREATE SEQUENCE IF NOT EXISTS category_seq START 1 INCREMENT 20 OWNED BY category.id;
+
+CREATE TABLE IF NOT EXISTS product (
+    id INT PRIMARY KEY,
     name TEXT NOT NULL,
     price_id INT REFERENCES price (id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS product_short_category (
-    product_short_id INT REFERENCES product_short (id),
+CREATE SEQUENCE IF NOT EXISTS product_seq START 1 INCREMENT 20 OWNED BY product.id;
+
+CREATE TABLE IF NOT EXISTS product_category (
+    product_id INT REFERENCES product (id),
     category_id INT REFERENCES category (id),
-    PRIMARY KEY (product_short_id, category_id)
+    PRIMARY KEY (product_id, category_id)
 );
 
-CREATE TABLE IF NOT EXISTS product_long (
-    id SERIAL PRIMARY KEY,
-    product_short_id INT REFERENCES product_short (id) ON DELETE CASCADE,
-    length_m REAL NOT NULL CHECK ( length_m > 0 ),
-    width_m REAL NOT NULL CHECK ( width_m > 0 ),
-    height_m REAL NOT NULL CHECK ( height_m > 0 ),
-    net_weight_kg REAL NOT NULL CHECK ( net_weight_kg > 0 ),
-    gross_weight_kg REAL NOT NULL CHECK ( gross_weight_kg > 0 )
+CREATE TABLE IF NOT EXISTS product_details (
+    id INT PRIMARY KEY,
+    product_id INT REFERENCES product (id) ON DELETE CASCADE,
+    length_meters DOUBLE PRECISION NOT NULL CHECK ( length_meters > 0 ),
+    width_meters DOUBLE PRECISION NOT NULL CHECK ( width_meters > 0 ),
+    height_meters DOUBLE PRECISION NOT NULL CHECK ( height_meters > 0 ),
+    net_weight_kg DOUBLE PRECISION NOT NULL CHECK ( net_weight_kg > 0 ),
+    gross_weight_kg DOUBLE PRECISION NOT NULL CHECK ( gross_weight_kg > 0 )
 );
+
+CREATE SEQUENCE IF NOT EXISTS product_details_seq START 1 INCREMENT 20 OWNED BY product_details.id;
 
 CREATE OR REPLACE FUNCTION increment_category_count() RETURNS TRIGGER AS $$
 BEGIN
@@ -49,14 +57,22 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE TRIGGER tr_insert AFTER INSERT ON product_short_category FOR EACH ROW EXECUTE PROCEDURE increment_category_count();
+CREATE OR REPLACE TRIGGER tr_insert AFTER INSERT ON product_category FOR EACH ROW EXECUTE PROCEDURE increment_category_count();
 
-CREATE OR REPLACE TRIGGER tr_delete AFTER DELETE ON product_short_category FOR EACH ROW EXECUTE PROCEDURE decrement_category_count();
+CREATE OR REPLACE TRIGGER tr_delete AFTER DELETE ON product_category FOR EACH ROW EXECUTE PROCEDURE decrement_category_count();
 
 CREATE TABLE IF NOT EXISTS image (
-    id SERIAL PRIMARY KEY,
-    owner_id INT REFERENCES product_short (id),
-    url TEXT NOT NULL
+    id INT PRIMARY KEY,
+    owner_id INT REFERENCES product (id),
+    url VARCHAR(2048) UNIQUE NOT NULL
+);
+
+CREATE SEQUENCE IF NOT EXISTS image_seq START 1 INCREMENT 20 OWNED BY image.id;
+
+CREATE TABLE IF NOT EXISTS fee (
+    id INT PRIMARY KEY,
+    amount DECIMAL NOT NULL CHECK ( amount > 0 ),
+    currency CHARACTER(3) NOT NULL
 );
 
 CREATE TYPE delivery_type AS ENUM ('STANDARD', 'EXPRESS', 'SAME_DAY', 'NEXT_DAY', 'SCHEDULED', 'IN_STORE_PICKING');
@@ -82,7 +98,8 @@ CREATE SEQUENCE IF NOT EXISTS delivery_seq START 1 INCREMENT 20 OWNED BY deliver
 CREATE TABLE IF NOT EXISTS "order" (
     id INT PRIMARY KEY,
     delivery_id INT REFERENCES delivery (id),
-    user_id UUID NOT NULL
+    user_id UUID NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE SEQUENCE IF NOT EXISTS order_seq START 1 INCREMENT 20 OWNED BY "order".id;
@@ -90,7 +107,7 @@ CREATE SEQUENCE IF NOT EXISTS order_seq START 1 INCREMENT 20 OWNED BY "order".id
 CREATE TABLE IF NOT EXISTS order_item (
     id INT PRIMARY KEY,
     order_id INT REFERENCES "order" (id),
-    item_id INT REFERENCES product_long (id),
+    item_id INT REFERENCES product_details (id),
     quantity INT NOT NULL CHECK ( quantity > 0 )
 );
 
@@ -124,7 +141,7 @@ CREATE TABLE IF NOT EXISTS cart (
 
 CREATE TABLE IF NOT EXISTS cart_item (
     id INT PRIMARY KEY,
-    product_id INT REFERENCES product_long (id),
+    product_id INT REFERENCES product (id),
     quantity INT NOT NULL,
     cart_id UUID REFERENCES cart (id)
 );

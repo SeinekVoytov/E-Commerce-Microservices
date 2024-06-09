@@ -3,8 +3,12 @@ package org.example.userservice.model.product;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Data
+import java.util.Objects;
+
+@Getter
+@Setter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 
@@ -13,13 +17,26 @@ import lombok.*;
 public class Image {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
-    @ManyToOne()
-    @JoinColumn(name = "owner_id",  referencedColumnName = "id")
-    @ToString.Exclude
-    private ProductShort owner;
+    @SequenceGenerator(
+            name = "image_seq",
+            sequenceName = "image_seq",
+            allocationSize = 20
+    )
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "image_seq")
+    private Integer id;
 
     private String url;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Image image = (Image) o;
+        return Objects.equals(id, image.id) && Objects.equals(url, image.url);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, url);
+    }
 }

@@ -1,30 +1,28 @@
 package org.example.productservice.service.impl;
 
-import org.example.productservice.dto.CreateProductDto;
-import org.example.productservice.dto.PageProductShortDto;
-import org.example.productservice.dto.ProductLongDto;
-import org.example.productservice.dto.ProductShortDto;
+import org.example.productservice.dto.*;
+import org.example.productservice.exception.CategoryNotFoundException;
+import org.example.productservice.exception.ImageNotFoundException;
 import org.example.productservice.exception.InvalidQueryParameterException;
 import org.example.productservice.exception.ProductNotFoundException;
-import org.example.productservice.model.Image;
-import org.example.productservice.model.Price;
-import org.example.productservice.model.ProductLong;
-import org.example.productservice.model.ProductShort;
+import org.example.productservice.mapper.ProductDetailsMapper;
+import org.example.productservice.mapper.ProductMapper;
+import org.example.productservice.mapper.RequestProductMapper;
+import org.example.productservice.model.*;
 import org.example.productservice.repository.CategoryRepository;
-import org.example.productservice.repository.ProductLongRepository;
-import org.example.productservice.repository.ProductShortRepository;
+import org.example.productservice.repository.ImageRepository;
+import org.example.productservice.repository.ProductDetailsRepository;
+import org.example.productservice.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.math.BigDecimal;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -33,279 +31,433 @@ import static org.mockito.Mockito.*;
 class ProductServiceImplTest {
 
     @Mock
-    private ProductLongRepository longRepository;
+    private ProductDetailsRepository detailsRepository;
 
     @Mock
-    private ProductShortRepository shortRepository;
+    private ProductRepository productRepository;
 
     @Mock
     private CategoryRepository categoryRepository;
 
+    @Mock
+    private ImageRepository imageRepository;
+
+    @Mock
+    private ProductDetailsMapper detailsMapper;
+
+    @Mock
+    private ProductMapper productMapper;
+
+    @Mock
+    private RequestProductMapper requestProductMapper;
+
     @InjectMocks
     private ProductServiceImpl service;
 
-    private ProductLong productLong;
-    private ProductShort productShort;
+    private ProductDetails productDetails;
+    private ProductDetailsDto detailsDto;
+
+    private Product product;
+    private ProductDto productDto;
 
     @BeforeEach
     void setUp() {
 
-        productShort = ProductShort.builder()
-                .id(1)
-                .name("product")
+        final int id = 1;
+        final String name = "name";
+        final BigDecimal priceAmount = new BigDecimal("123.456");
+        final Currency currency = Currency.getInstance("USD");
+        final Double lengthInMeters = 1.0;
+        final Double widthInMeters = 1.0;
+        final Double heightInMeters = 1.0;
+        final Double netWeightInKg = 1.0;
+        final Double grossWeightInKg = 1.0;
+
+        product = Product.builder()
+                .id(id)
+                .name(name)
                 .price(Price.builder()
-                        .id(1)
-                        .amount(10f)
-                        .currency("USD")
+                        .id(id)
+                        .amount(priceAmount)
+                        .currency(currency)
                         .build())
-                .categories(Collections.emptyList())
-                .images(Collections.emptyList())
+                .categories(Collections.emptySet())
+                .images(Collections.emptySet())
                 .build();
 
-        productLong = ProductLong.builder()
-                .id(1)
-                .lengthInM(1.0f)
-                .widthInM(1.0f)
-                .heightInM(1.0f)
-                .netWeightInKg(1.0f)
-                .grossWeightInKg(1.0f)
-                .productShort(productShort)
+        productDetails = ProductDetails.builder()
+                .id(id)
+                .lengthInMeters(lengthInMeters)
+                .widthInMeters(widthInMeters)
+                .heightInMeters(heightInMeters)
+                .netWeightInKg(netWeightInKg)
+                .grossWeightInKg(grossWeightInKg)
+                .product(product)
                 .build();
 
-        productShort.setProductLong(productLong);
+        productDto = new ProductDto(
+                id,
+                name,
+                Collections.emptySet(),
+                new PriceDto(priceAmount, currency),
+                Collections.emptySet()
+        );
+
+        detailsDto = new ProductDetailsDto(
+                id,
+                name,
+                Collections.emptySet(),
+                new PriceDto(priceAmount, currency),
+                Collections.emptySet(),
+                lengthInMeters,
+                widthInMeters,
+                heightInMeters,
+                netWeightInKg,
+                grossWeightInKg
+        );
     }
 
     @Test
     void getAllShortProduct_ShouldThrowInvalidQueryParameterException_WhenUnknownOrderSpecified() {
 
-        assertThrows(InvalidQueryParameterException.class, () -> service.getAllShortProduct(1, 1, "categories:asc"));
+        assertThrows(
+                InvalidQueryParameterException.class,
+                () -> service.getAllShortProduct(PageRequest.of(
+                        1, 10, Sort.by(Sort.Order.asc("category")))
+                )
+        );
 
-        verify(shortRepository, never()).findAll(any(Pageable.class));
+        verify(productRepository, never()).findAll(any(Pageable.class));
     }
 
     @Test
     void getAllShortProduct_ShouldReturnListWithOneElement_WhenOneProductExists() {
 
-        final int testingPageSize = 10;
+        var pageNumber = 0;
+        var pageSize = 10;
+        var totalElements = 1;
 
-        Page<ProductShort> resultPage = mock(Page.class);
-        when(resultPage.getContent())
-                .thenReturn(List.of(productShort));
+        var pageable = PageRequest.of(pageNumber, pageSize);
+        var resultPage = new PageImpl<>(List.of(product), pageable, totalElements);
 
-        when(resultPage.getNumber())
-                .thenReturn(1);
-
-        when(resultPage.getSize())
-                .thenReturn(testingPageSize);
-
-        when(resultPage.getTotalElements())
-                .thenReturn(1L);
-
-        when(resultPage.getTotalPages())
-                .thenReturn(1);
-
-        when(shortRepository.findAll(any(Pageable.class)))
+        when(productRepository.findAll(any(Pageable.class)))
                 .thenReturn(resultPage);
 
-        PageProductShortDto actual = service.getAllShortProduct(1, testingPageSize, "price.amount:asc");
+        when(productMapper.toDto(any(Product.class)))
+                .thenReturn(productDto);
 
-        ProductShortDto shortDto = ProductShortDto.builder()
-                .id(productShort.getId())
-                .name(productShort.getName())
-                .images(unwrapImages(productShort.getImages()))
-                .price(productShort.getPrice())
-                .categories(productShort.getCategories())
-                .build();
+        var actual = service.getAllShortProduct(pageable);
 
-        PageProductShortDto expected = PageProductShortDto.builder()
-                .content(List.of(shortDto))
-                .pageNo(1)
-                .pageSize(10)
-                .totalElements(1)
-                .totalPages(1)
-                .build();
+        var expectedContent = List.of(productDto);
 
-        assertEquals(expected, actual);
+        assertAll(
+                () -> assertEquals(expectedContent, actual.getContent()),
+                () -> assertEquals(pageSize, actual.getSize()),
+                () -> assertEquals(pageNumber, actual.getNumber()),
+                () -> assertEquals(totalElements, actual.getTotalElements())
+        );
     }
 
     @Test
     void getById_ShouldThrowProductNotFoundException_WhenNonExistentIdSpecified() {
 
-        when(longRepository.findById(productLong.getId()))
+        var testingId = productDetails.getId();
+        when(detailsRepository.findById(testingId))
                 .thenReturn(Optional.empty());
 
-        assertThrows(ProductNotFoundException.class, () -> service.getById(productLong.getId()));
+        assertThrows(
+                ProductNotFoundException.class,
+                () -> service.getById(testingId)
+        );
     }
 
     @Test
     void getById_ShouldReturnFoundProductConvertedToDto_WhenExistentIdSpecified() {
 
-        when(longRepository.findById(productLong.getId()))
-                .thenReturn(Optional.of(productLong));
+        var testingId = productDetails.getId();
+        when(detailsRepository.findById(testingId))
+                .thenReturn(Optional.of(productDetails));
 
-        ProductLongDto expectedProductLongDto = mapToLongDto(productLong);
+        when(detailsMapper.toDto(productDetails))
+                .thenReturn(detailsDto);
 
-        ProductLongDto actual = service.getById(productLong.getId());
+        var expectedProductDetailsDto = detailsDto;
+        var actual = service.getById(testingId);
 
-        assertEquals(expectedProductLongDto, actual);
+        assertEquals(expectedProductDetailsDto, actual);
     }
 
     @Test
     void deleteById_ShouldThrowProductNotFoundException_WhenNonExistentIdSpecified() {
 
-        when(longRepository.findById(productLong.getId()))
+        var testingId = productDetails.getId();
+        when(detailsRepository.findById(testingId))
                 .thenReturn(Optional.empty());
 
-        assertThrows(ProductNotFoundException.class, () -> service.deleteById(productLong.getId()));
+        assertThrows(
+                ProductNotFoundException.class,
+                () -> service.deleteById(testingId)
+        );
 
-        verify(longRepository, never()).deleteById(anyInt());
+        verify(detailsRepository, never()).deleteById(anyInt());
     }
 
     @Test
     void deleteById_ShouldCallDeleteRepositoryMethod_WhenExistentIdSpecified() {
 
-        when(longRepository.findById(productLong.getId()))
-                .thenReturn(Optional.of(productLong));
+        var testingId = productDetails.getId();
+        when(detailsRepository.findById(testingId))
+                .thenReturn(Optional.of(productDetails));
 
-        doNothing().when(longRepository).delete(productLong);
+        when(detailsMapper.toDto(productDetails))
+                .thenReturn(detailsDto);
 
-        service.deleteById(productLong.getId());
+        var expected = detailsDto;
+        var actual = service.deleteById(testingId);
 
-        verify(longRepository, times(1)).delete(productLong);
+        assertEquals(expected, actual);
+        verify(detailsRepository, times(1)).delete(productDetails);
     }
 
     @Test
-    void updateProduct_ShouldThrowProductNotFoundException_WhenNonExistentIdSpecified() {
+    void updateProduct_ShouldCreateNewProduct_WhenNonExistentIdSpecified() {
 
-        when(longRepository.findById(productLong.getId()))
+        var testingId = productDetails.getId();
+        when(detailsRepository.findById(testingId))
                 .thenReturn(Optional.empty());
 
-        ProductLongDto stub = new ProductLongDto();
+        setUpMocksForCreateProductWithEmptyImagesAndCategories();
+        var requestData = buildRequestData();
 
-        assertThrows(ProductNotFoundException.class, () -> service.updateProduct(productLong.getId(), stub));
+        productDetails.getProduct().setImages(null);
+        productDetails.getProduct().setCategories(null);
 
-        verify(longRepository, never()).save(any());
+        when(requestProductMapper.toEntity(requestData))
+                .thenReturn(productDetails);
+
+        var actual = service.updateProduct(testingId, requestData);
+
+        assertAll(
+                () -> assertNotNull(productDetails.getProduct().getImages()),
+                () -> assertTrue(productDetails.getProduct().getImages().isEmpty()),
+                () -> assertNotNull(productDetails.getProduct().getCategories()),
+                () -> assertTrue(productDetails.getProduct().getCategories().isEmpty()),
+                () -> assertEquals(detailsDto, actual)
+        );
+
+        verify(detailsRepository, times(1)).save(any(ProductDetails.class));
     }
 
     @Test
     void updateProduct_ShouldReturnUpdatedProductConvertedToDto_WhenExistentIdSpecified() {
 
-        when(longRepository.findById(productLong.getId()))
-                .thenReturn(Optional.of(productLong));
+        var testingId = productDetails.getId();
+        when(detailsRepository.findById(testingId))
+                .thenReturn(Optional.of(productDetails));
 
-        when(longRepository.save(any()))
-                .thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
+        final var newName = "updatedName";
+        final var newCurrency = Currency.getInstance("EUR");
+        final var newLength = 2.0;
+        final var newGrossWeight = 2.0;
 
-        ProductLongDto updated = ProductLongDto.builder()
-                        .name("updated")
-                        .price(Price.builder()
-                                    .amount(11f)
-                                    .build())
-                        .lengthInM(2.0f)
-                        .build();
+        var requestData = new RequestProductDto(
+                newName,
+                Collections.emptySet(),
+                new BigDecimal("123.456"),
+                newCurrency,
+                Collections.emptySet(),
+                newLength,
+                1.0,
+                1.0,
+                1.0,
+                newGrossWeight
+        );
 
-        ProductLongDto actual = service.updateProduct(productLong.getId(), updated);
+        when(categoryRepository.findAllByIdIn(any(Set.class)))
+                .thenReturn(Collections.emptySet());
 
-        ProductLongDto expected = ProductLongDto.builder()
-                .id(productLong.getId())
-                .name(updated.getName())
-                .images(unwrapImages(productShort.getImages()))
-                .price(Price.builder()
-                        .id(productShort.getPrice().getId())
-                        .amount(updated.getPrice().getAmount())
-                        .currency(productShort.getPrice().getCurrency())
-                        .build())
-                .categories(productShort.getCategories())
-                .lengthInM(updated.getLengthInM())
-                .widthInM(productLong.getWidthInM())
-                .heightInM(productLong.getHeightInM())
-                .netWeightInKg(productLong.getNetWeightInKg())
-                .grossWeightInKg(productLong.getGrossWeightInKg())
-                .build();
+        when(imageRepository.findAllByUrlIn(any(Set.class)))
+                .thenReturn(Collections.emptySet());
 
-        assertEquals(expected, actual);
-    }
+        doAnswer(invocationOnMock -> invocationOnMock.<ProductDetails>getArgument(0))
+                .when(detailsRepository).save(any(ProductDetails.class));
 
-    @Test
-    void updateProduct_ShouldReturnSameProduct_WhenEmptyUpdateDataSpecified() {
+        when(detailsMapper.toDto(productDetails))
+                .thenReturn(detailsDto);
 
-        when(longRepository.findById(productLong.getId()))
-                .thenReturn(Optional.of(productLong));
+        service.updateProduct(testingId, requestData);
 
-        when(longRepository.save(any()))
-                .thenAnswer(invocationOnMock -> invocationOnMock.getArgument(0));
-
-        ProductLongDto emptyUpdateData = new ProductLongDto();
-
-        ProductLongDto actual = service.updateProduct(productLong.getId(), emptyUpdateData);
-
-        ProductLongDto expected = ProductLongDto.builder()
-                .id(productLong.getId())
-                .name(productShort.getName())
-                .images(unwrapImages(productShort.getImages()))
-                .price(productShort.getPrice())
-                .categories(productShort.getCategories())
-                .lengthInM(productLong.getLengthInM())
-                .widthInM(productLong.getWidthInM())
-                .heightInM(productLong.getHeightInM())
-                .netWeightInKg(productLong.getNetWeightInKg())
-                .grossWeightInKg(productLong.getGrossWeightInKg())
-                .build();
-
-        assertEquals(expected, actual);
+        assertAll(
+                () -> assertEquals(newName, productDetails.getProduct().getName()),
+                () -> assertEquals(newCurrency, productDetails.getProduct().getPrice().getCurrency()),
+                () -> assertEquals(newLength, productDetails.getLengthInMeters()),
+                () -> assertEquals(newGrossWeight, productDetails.getGrossWeightInKg())
+        );
     }
 
     @Test
     void createProduct_ShouldReturnCreatedProductConvertedToDto_WhenNewProductDataIsSpecified() {
 
-        doAnswer(invocationOnMock -> {
-            ProductLong param = invocationOnMock.getArgument(0);
-            param.setId(2);
-            param.getProductShort().getPrice().setId(2);
-            return param;
-        }).when(longRepository).save(any(ProductLong.class));
+        setUpMocksForCreateProductWithEmptyImagesAndCategories();
 
-        when(categoryRepository.findAllById(any(Iterable.class)))
-                .thenReturn(Collections.emptyList());
+        productDetails.getProduct().setImages(null);
+        productDetails.getProduct().setCategories(null);
 
-        CreateProductDto newProductData = CreateProductDto.builder()
-                .name(productShort.getName())
-                .priceAmount(productShort.getPrice().getAmount())
-                .priceCurrency(productShort.getPrice().getCurrency())
-                .categoryIds(Collections.emptyList())
-                .lengthInM(productLong.getLengthInM())
-                .widthInM(productLong.getWidthInM())
-                .heightInM(productLong.getHeightInM())
-                .netWeightInKg(productLong.getNetWeightInKg())
-                .grossWeightInKg(productLong.getGrossWeightInKg())
-                .build();
+        var requestData = buildRequestData();
 
-        ProductLongDto actual = service.createProduct(newProductData);
-        ProductLongDto expected = mapToLongDto(productLong);
-        expected.setId(2);
-        expected.getPrice().setId(2);
+        when(requestProductMapper.toEntity(requestData))
+                .thenReturn(productDetails);
 
-        assertEquals(expected, actual);
+        var actual = service.createProduct(requestData);
+
+        assertAll(
+                () -> assertNotNull(productDetails.getProduct().getImages()),
+                () -> assertTrue(productDetails.getProduct().getImages().isEmpty()),
+                () -> assertNotNull(productDetails.getProduct().getCategories()),
+                () -> assertTrue(productDetails.getProduct().getCategories().isEmpty()),
+                () -> assertEquals(detailsDto, actual)
+        );
+
+        verify(detailsRepository, times(1)).save(any(ProductDetails.class));
     }
 
-    private List<String> unwrapImages(List<Image> images) {
-        return images.stream()
-                .map(Image::getUrl)
-                .toList();
+    @Test
+    void createProduct_ShouldThrowCategoryNotFoundException_WhenCategoryNotFoundById() {
+
+        var requestData = buildRequestData();
+        requestData.categoryIds().add(1);
+
+        when(requestProductMapper.toEntity(requestData))
+                .thenReturn(productDetails);
+
+        when(categoryRepository.findAllByIdIn(requestData.categoryIds()))
+                .thenReturn(Collections.emptySet());
+
+        assertThrows(
+                CategoryNotFoundException.class,
+                () -> service.createProduct(requestData)
+        );
+
+        verify(detailsRepository, never()).save(any(ProductDetails.class));
     }
 
-    private ProductLongDto mapToLongDto(ProductLong productLong) {
-        return ProductLongDto.builder()
-                .id(productLong.getId())
-                .name(productLong.getProductShort().getName())
-                .images(unwrapImages(productLong.getProductShort().getImages()))
-                .price(productLong.getProductShort().getPrice())
-                .categories(productLong.getProductShort().getCategories())
-                .lengthInM(productLong.getLengthInM())
-                .widthInM(productLong.getWidthInM())
-                .heightInM(productLong.getHeightInM())
-                .netWeightInKg(productLong.getNetWeightInKg())
-                .grossWeightInKg(productLong.getGrossWeightInKg())
-                .build();
+    @Test
+    void createProduct_ShouldCreateNewProductWithOneCategory_WhenExistentCategoryIdSpecified() {
+
+        doAnswer(invocationOnMock -> invocationOnMock.<ProductDetails>getArgument(0))
+                .when(detailsRepository).save(any(ProductDetails.class));
+
+        Category categoryToBeAdded = new Category(10, Collections.emptySet(), "category", 0);
+        when(categoryRepository.findAllByIdIn(any(Set.class)))
+                .thenReturn(Set.of(categoryToBeAdded));
+
+        when(imageRepository.findAllByUrlIn(any(Set.class)))
+                .thenReturn(Collections.emptySet());
+
+        var requestData = buildRequestData();
+
+        productDetails.getProduct().setImages(null);
+        productDetails.getProduct().setCategories(null);
+
+        when(requestProductMapper.toEntity(requestData))
+                .thenReturn(productDetails);
+
+        when(detailsMapper.toDto(any(ProductDetails.class)))
+                .thenReturn(detailsDto);
+
+        var actual = service.createProduct(requestData);
+
+        assertAll(
+                () -> assertNotNull(productDetails.getProduct().getImages()),
+                () -> assertTrue(productDetails.getProduct().getImages().isEmpty()),
+                () -> assertNotNull(productDetails.getProduct().getCategories()),
+                () -> assertTrue(productDetails.getProduct().getCategories().contains(categoryToBeAdded)),
+                () -> assertEquals(detailsDto, actual)
+        );
+    }
+
+    @Test
+    void createProduct_ShouldThrowImageNotFoundException_WhenImageNotFoundByUrl() {
+
+        var requestData = buildRequestData();
+        requestData.images().add("someUrl");
+
+        when(requestProductMapper.toEntity(requestData))
+                .thenReturn(productDetails);
+
+        when(imageRepository.findAllByUrlIn(any(Set.class)))
+                .thenReturn(Collections.emptySet());
+
+        assertThrows(
+                ImageNotFoundException.class,
+                () -> service.createProduct(requestData)
+        );
+
+        verify(detailsRepository, never()).save(any(ProductDetails.class));
+    }
+
+    @Test
+    void createProduct_ShouldCreateNewProductWithOneImage_WhenExistentImageUrlSpecified() {
+
+        doAnswer(invocationOnMock -> invocationOnMock.<ProductDetails>getArgument(0))
+                .when(detailsRepository).save(any(ProductDetails.class));
+
+        when(categoryRepository.findAllByIdIn(any(Set.class)))
+                .thenReturn(Collections.emptySet());
+
+        Image imageToBeAdded = new Image(10, "someUrl");
+        when(imageRepository.findAllByUrlIn(any(Set.class)))
+                .thenReturn(Set.of(imageToBeAdded));
+
+        var requestData = buildRequestData();
+
+        productDetails.getProduct().setImages(null);
+        productDetails.getProduct().setCategories(null);
+
+        when(requestProductMapper.toEntity(requestData))
+                .thenReturn(productDetails);
+
+        when(detailsMapper.toDto(any(ProductDetails.class)))
+                .thenReturn(detailsDto);
+
+        var actual = service.createProduct(requestData);
+
+        assertAll(
+                () -> assertNotNull(productDetails.getProduct().getImages()),
+                () -> assertTrue(productDetails.getProduct().getImages().contains(imageToBeAdded)),
+                () -> assertNotNull(productDetails.getProduct().getCategories()),
+                () -> assertTrue(productDetails.getProduct().getCategories().isEmpty()),
+                () -> assertEquals(detailsDto, actual)
+        );
+    }
+
+    private void setUpMocksForCreateProductWithEmptyImagesAndCategories() {
+
+        doAnswer(invocationOnMock -> invocationOnMock.<ProductDetails>getArgument(0))
+                .when(detailsRepository).save(any(ProductDetails.class));
+
+        when(categoryRepository.findAllByIdIn(any(Set.class)))
+                .thenReturn(Collections.emptySet());
+
+        when(imageRepository.findAllByUrlIn(any(Set.class)))
+                .thenReturn(Collections.emptySet());
+
+        when(detailsMapper.toDto(any(ProductDetails.class)))
+                .thenReturn(detailsDto);
+    }
+
+    private RequestProductDto buildRequestData() {
+        return new RequestProductDto(
+                product.getName(),
+                new HashSet<>(),
+                product.getPrice().getAmount(),
+                product.getPrice().getCurrency(),
+                new HashSet<>(),
+                productDetails.getLengthInMeters(),
+                productDetails.getWidthInMeters(),
+                productDetails.getHeightInMeters(),
+                productDetails.getNetWeightInKg(),
+                productDetails.getGrossWeightInKg()
+        );
     }
 }

@@ -3,7 +3,7 @@ package org.example.userservice.exception;
 import java.util.Date;
 
 public record ErrorObject (
-        int statusCode,
+        Integer statusCode,
         String message,
         Date timestamp
 ) {

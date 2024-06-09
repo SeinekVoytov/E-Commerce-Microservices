@@ -1,15 +1,15 @@
 package org.example.orderservice.model.order;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.util.Date;
+import java.time.Instant;
+import java.util.Objects;
 
-@Data
+@Getter
+@Setter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 
@@ -24,7 +24,7 @@ public class OrderDetails {
             allocationSize = 20
     )
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_details_seq")
-    private int id;
+    private Integer id;
 
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "order_id", referencedColumnName = "id")
@@ -35,5 +35,18 @@ public class OrderDetails {
     private Address address;
 
     @Column(name = "created_at")
-    private Date createdAt;
+    private Instant createdAt;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OrderDetails that = (OrderDetails) o;
+        return Objects.equals(id, that.id) && Objects.equals(order, that.order) && Objects.equals(address, that.address) && Objects.equals(createdAt, that.createdAt);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, order, address, createdAt);
+    }
 }

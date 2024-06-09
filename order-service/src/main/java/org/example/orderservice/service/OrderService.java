@@ -2,15 +2,21 @@ package org.example.orderservice.service;
 
 import org.example.orderservice.dto.order.OrderDetailsDto;
 import org.example.orderservice.dto.order.OrderDto;
-import org.springframework.security.core.Authentication;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.oauth2.jwt.Jwt;
 
-import java.util.List;
+import java.util.UUID;
 
 public interface OrderService {
 
-    List<OrderDto> getUserOrdersShort(Authentication auth);
+    Page<OrderDto> getUserOrders(Jwt jwt, Pageable pageable);
 
-    OrderDetailsDto getUsersOrderLongById(Authentication auth, int orderId);
+    OrderDetailsDto getUserOrderDetailsById(Jwt jwt, int orderId);
 
-    OrderDetailsDto deleteUsersOrderById(Authentication auth, int orderId);
+    OrderDetailsDto deleteUserOrderById(Jwt jwt, int orderId);
+
+    default UUID retrieveUserIdFromJwt(Jwt jwt) {
+        return UUID.fromString(jwt.getSubject());
+    }
 }

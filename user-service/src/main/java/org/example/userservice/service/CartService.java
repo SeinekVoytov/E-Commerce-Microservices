@@ -1,32 +1,36 @@
 package org.example.userservice.service;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.example.userservice.dto.CartItemRequest;
-import org.example.userservice.dto.CartItemResponse;
-import org.example.userservice.dto.UpdateQuantityRequest;
-import org.springframework.security.core.Authentication;
+import org.example.userservice.dto.cart.CartItemRequest;
+import org.example.userservice.dto.cart.CartItemResponse;
+import org.example.userservice.dto.cart.UpdateQuantityRequest;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.UUID;
 
 public interface CartService {
 
-    CartItemResponse addItemToCart(Authentication auth,
+    CartItemResponse addItemToCart(Jwt jwt,
                                    CartItemRequest request,
                                    UUID cartIdFromCookie,
                                    HttpServletResponse response);
 
-    CartItemResponse updateItemQuantity(Authentication auth,
+    CartItemResponse updateItemQuantity(Jwt jwt,
                                         long itemId,
                                         UpdateQuantityRequest request,
                                         UUID cartIdFromCookie,
                                         HttpServletResponse response);
 
-    CartItemResponse deleteItemFromCart(Authentication auth,
+    CartItemResponse deleteItemFromCart(Jwt jwt,
                                         long itemId,
                                         UUID cartIdFromCookie,
                                         HttpServletResponse response);
 
     void deleteExpiredCarts();
 
-    void order(Authentication auth);
+    void order(Jwt jwt);
+
+    default UUID retrieveUserIdFromJwt(Jwt jwt) {
+        return UUID.fromString(jwt.getSubject());
+    }
 }

@@ -1,8 +1,9 @@
 package org.example.userservice.exception;
 
 public class CartNotFoundException extends RuntimeException {
-    public CartNotFoundException(String message) {
-        super(message);
+
+    public CartNotFoundException() {
+        super("No cart associated with this user");
     }
 }
 

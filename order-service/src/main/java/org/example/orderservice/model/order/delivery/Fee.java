@@ -1,13 +1,17 @@
 package org.example.orderservice.model.order.delivery;
 
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
+import org.example.orderservice.jpaconverter.CurrencyConverter;
 
-@Data
+import java.math.BigDecimal;
+import java.util.Currency;
+import java.util.Objects;
+
+@Getter
+@Setter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 
@@ -22,8 +26,23 @@ public class Fee {
             allocationSize = 20
     )
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "fee_seq")
-    private int id;
+    private Integer id;
 
-    private Float amount;
-    private String currency;
+    private BigDecimal amount;
+
+    @Convert(converter = CurrencyConverter.class)
+    private Currency currency;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Fee fee = (Fee) o;
+        return Objects.equals(id, fee.id) && Objects.equals(amount, fee.amount) && Objects.equals(currency, fee.currency);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, amount, currency);
+    }
 }

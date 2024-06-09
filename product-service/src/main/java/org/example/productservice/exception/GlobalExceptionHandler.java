@@ -11,25 +11,33 @@ import java.util.Date;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<ErrorObject> handleProductNotFoundException(ProductNotFoundException exc) {
-        ErrorObject errorObject = new ErrorObject();
-
-        errorObject.setStatusCode(HttpStatus.NOT_FOUND.value());
-        errorObject.setMessage(exc.getMessage());
-        errorObject.setTimestamp(new Date());
-
-        return new ResponseEntity<>(errorObject, HttpStatus.NOT_FOUND);
+    @ExceptionHandler(
+            {
+                    ProductNotFoundException.class,
+                    CategoryNotFoundException.class,
+                    ImageNotFoundException.class
+            }
+    )
+    public ResponseEntity<ErrorObject> handleProductNotFoundException(Exception exc) {
+        return new ResponseEntity<>(
+                buildErrorObject(HttpStatus.NOT_FOUND.value(), exc.getMessage()),
+                HttpStatus.NOT_FOUND
+        );
     }
 
     @ExceptionHandler(InvalidQueryParameterException.class)
     public ResponseEntity<ErrorObject> handleInvalidQueryParameterException(InvalidQueryParameterException exc) {
-        ErrorObject errorObject = new ErrorObject();
+        return new ResponseEntity<>(
+                buildErrorObject(HttpStatus.BAD_REQUEST.value(), exc.getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
 
-        errorObject.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        errorObject.setMessage(exc.getMessage());
-        errorObject.setTimestamp(new Date());
-
-        return new ResponseEntity<>(errorObject, HttpStatus.BAD_REQUEST);
+    private ErrorObject buildErrorObject(int statusCode, String message) {
+        return new ErrorObject(
+                statusCode,
+                message,
+                new Date()
+        );
     }
 }

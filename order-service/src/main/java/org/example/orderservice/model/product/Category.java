@@ -4,10 +4,13 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @Builder
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 
@@ -16,14 +19,32 @@ import java.util.List;
 public class Category {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    @SequenceGenerator(
+            name = "category_seq",
+            sequenceName = "category_seq",
+            allocationSize = 20
+    )
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "category_seq")
+    private Integer id;
 
     @ManyToMany(mappedBy = "categories", cascade = CascadeType.PERSIST)
     @JsonIgnore
     @ToString.Exclude
-    private List<ProductShort> products;
+    private Set<Product> products;
 
     private String name;
     private Integer count;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Category category = (Category) o;
+        return Objects.equals(id, category.id) && Objects.equals(products, category.products) && Objects.equals(name, category.name) && Objects.equals(count, category.count);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, products, name, count);
+    }
 }

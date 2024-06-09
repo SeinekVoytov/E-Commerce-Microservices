@@ -1,16 +1,13 @@
 package org.example.orderservice.dto.product;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
+import java.math.BigDecimal;
+import java.util.Currency;
+
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class PriceDto {
-
-    private Float amount;
-    private String currency;
+public record PriceDto (
+        BigDecimal amount,
+        Currency currency
+) {
 }

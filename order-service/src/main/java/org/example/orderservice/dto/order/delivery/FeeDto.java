@@ -1,7 +1,10 @@
 package org.example.orderservice.dto.order.delivery;
 
+import java.math.BigDecimal;
+import java.util.Currency;
+
 public record FeeDto (
-        Float amount,
-        String currency
+        BigDecimal amount,
+        Currency currency
 ) {
 }
