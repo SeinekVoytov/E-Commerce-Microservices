@@ -5,7 +5,6 @@ import org.example.productservice.model.Category;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 
-import java.util.List;
 import java.util.Set;
 
 @Mapper(
