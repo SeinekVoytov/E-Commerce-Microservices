@@ -6,4 +6,3 @@ public class CartNotFoundException extends RuntimeException {
         super("No cart associated with this user");
     }
 }
-

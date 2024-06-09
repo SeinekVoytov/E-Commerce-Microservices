@@ -43,7 +43,7 @@ class CartServiceImplTest {
     private final UUID cartId = UUID.randomUUID();
     private final Jwt jwt = mockJwt();
     private final UpdateQuantityRequest quantityRequest = new UpdateQuantityRequest(10);
-    private final long itemId = 1;
+    private final int itemId = 1;
 
     @Mock
     private CartItemMapper mapper;

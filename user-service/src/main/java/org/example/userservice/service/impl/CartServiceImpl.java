@@ -27,8 +27,9 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
-import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -43,6 +44,37 @@ public class CartServiceImpl implements CartService {
     private final CartItemMapper cartItemMapper;
 
     @Override
+    public Set<CartItemResponse> getCartItems(Jwt jwt,
+                                              UUID cartIdFromCookie,
+                                              HttpServletResponse response) {
+
+        Cart cart;
+        if (jwt != null) {
+
+            UUID userId = retrieveUserIdFromJwt(jwt);
+            verifyCartIdCookie(cartIdFromCookie, userId, response);
+            cart = cartRepository.findByUserId(userId)
+                    .orElse(null);
+        } else {
+
+            if (cartIdFromCookie == null) {
+                return Collections.emptySet();
+            }
+
+            cart = cartRepository.findById(cartIdFromCookie).stream()
+                    .filter(c -> c.getUserId() == null)
+                    .findAny()
+                    .orElseThrow(
+                            CartNotFoundException::new
+                    );
+        }
+
+        return (cart == null)
+                ? Collections.emptySet()
+                : cart.getItems().stream().map(cartItemMapper::toResponse).collect(Collectors.toSet());
+    }
+
+    @Override
     public CartItemResponse addItemToCart(Jwt jwt,
                                           CartItemRequest request,
                                           UUID cartIdFromCookie,
@@ -54,20 +86,17 @@ public class CartServiceImpl implements CartService {
             CartItem newCartItem = buildNewCartItem(request.productId(), request.quantity());
             verifyCartIdCookie(cartIdFromCookie, userId, response);
 
-            Optional<Cart> supposedCart = cartRepository.findByUserId(userId);
-
-            if (supposedCart.isEmpty()) {
+            cartRepository.findByUserId(userId).ifPresentOrElse(cart -> {
+                cart.getItems().add(newCartItem);
+                cartRepository.save(cart);
+            }, () -> {
                 Cart newCart = Cart.builder()
                         .userId(userId)
                         .items(Collections.singleton(newCartItem))
                         .build();
 
                 cartRepository.save(newCart);
-            } else {
-                Cart cart = supposedCart.get();
-                cart.getItems().add(newCartItem);
-                cartRepository.save(cart);
-            }
+            });
 
             return cartItemMapper.toResponse(newCartItem);
         }
@@ -105,7 +134,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartItemResponse updateItemQuantity(Jwt jwt,
-                                               long itemId,
+                                               int itemId,
                                                UpdateQuantityRequest request,
                                                UUID cartIdFromCookie,
                                                HttpServletResponse response) {
@@ -118,7 +147,7 @@ public class CartServiceImpl implements CartService {
 
     @Override
     public CartItemResponse deleteItemFromCart(Jwt jwt,
-                                               long itemId,
+                                               int itemId,
                                                UUID cartIdFromCookie,
                                                HttpServletResponse response) {
 
@@ -128,7 +157,7 @@ public class CartServiceImpl implements CartService {
     }
 
     private CartItem retrieveRequestedCartItem(Jwt jwt,
-                                               long itemId,
+                                               int itemId,
                                                UUID cartIdFromCookie,
                                                HttpServletResponse response) {
 

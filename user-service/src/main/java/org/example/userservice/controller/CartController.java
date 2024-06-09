@@ -8,11 +8,11 @@ import org.example.userservice.dto.cart.UpdateQuantityRequest;
 import org.example.userservice.service.CartService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -21,6 +21,15 @@ import java.util.UUID;
 public class CartController {
 
     private final CartService cartService;
+
+    @GetMapping
+    public ResponseEntity<Set<CartItemResponse>> getAllCartItems(@AuthenticationPrincipal Jwt jwt,
+                                                                 @CookieValue(name = "cartId", required = false) UUID cartId,
+                                                                 HttpServletResponse response) {
+
+        Set<CartItemResponse> cartItems = cartService.getCartItems(jwt, cartId, response);
+        return ResponseEntity.ok(cartItems);
+    }
 
     @PostMapping("/add")
     public ResponseEntity<CartItemResponse> addItemToCart(@AuthenticationPrincipal Jwt jwt,
@@ -33,7 +42,7 @@ public class CartController {
 
     @PatchMapping("/update/{itemId}")
     public ResponseEntity<CartItemResponse> updateItemQuantity(@AuthenticationPrincipal Jwt jwt,
-                                                               @PathVariable long itemId,
+                                                               @PathVariable int itemId,
                                                                @RequestBody UpdateQuantityRequest request,
                                                                @CookieValue(name = "cartId", required = false) UUID cartId,
                                                                HttpServletResponse response) {
@@ -44,7 +53,7 @@ public class CartController {
 
     @DeleteMapping("/delete/{itemId}")
     public ResponseEntity<CartItemResponse> deleteCartItem(@AuthenticationPrincipal Jwt jwt,
-                                                           @PathVariable long itemId,
+                                                           @PathVariable int itemId,
                                                            @CookieValue(name = "cartId", required = false) UUID cartId,
                                                            HttpServletResponse response) {
 

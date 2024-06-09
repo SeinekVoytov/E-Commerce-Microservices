@@ -6,9 +6,14 @@ import org.example.userservice.dto.cart.CartItemResponse;
 import org.example.userservice.dto.cart.UpdateQuantityRequest;
 import org.springframework.security.oauth2.jwt.Jwt;
 
+import java.util.Set;
 import java.util.UUID;
 
 public interface CartService {
+
+    Set<CartItemResponse> getCartItems(Jwt jwt,
+                                       UUID cartIdFromCookie,
+                                       HttpServletResponse response);
 
     CartItemResponse addItemToCart(Jwt jwt,
                                    CartItemRequest request,
@@ -16,13 +21,13 @@ public interface CartService {
                                    HttpServletResponse response);
 
     CartItemResponse updateItemQuantity(Jwt jwt,
-                                        long itemId,
+                                        int itemId,
                                         UpdateQuantityRequest request,
                                         UUID cartIdFromCookie,
                                         HttpServletResponse response);
 
     CartItemResponse deleteItemFromCart(Jwt jwt,
-                                        long itemId,
+                                        int itemId,
                                         UUID cartIdFromCookie,
                                         HttpServletResponse response);
 

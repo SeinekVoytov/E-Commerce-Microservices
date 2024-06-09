@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
                         authManager -> authManager
+                                .requestMatchers(HttpMethod.GET, "/cart").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/cart/add").permitAll()
                                 .requestMatchers(HttpMethod.PATCH, "/cart/update/{itemId}").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/cart/delete/{itemId}").permitAll()
