@@ -8,9 +8,9 @@ public record ProductDetailsDto(
      Set<String> images,
      PriceDto price,
      Set<CategoryDto> categories,
-     Double lengthInM,
-     Double widthInM,
-     Double heightInM,
+     Double lengthInMeters,
+     Double widthInMeters,
+     Double heightInMeters,
      Double netWeightInKg,
      Double grossWeightInKg
 ) {

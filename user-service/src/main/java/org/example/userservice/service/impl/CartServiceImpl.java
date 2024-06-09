@@ -19,10 +19,10 @@ import org.example.userservice.repository.cart.CartRepository;
 import org.example.userservice.repository.product.ProductDetailsRepository;
 import org.example.userservice.service.CartService;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.Principal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -43,14 +43,14 @@ public class CartServiceImpl implements CartService {
     private final CartItemMapper cartItemMapper;
 
     @Override
-    public CartItemResponse addItemToCart(Principal principal,
+    public CartItemResponse addItemToCart(Jwt jwt,
                                           CartItemRequest request,
                                           UUID cartIdFromCookie,
                                           HttpServletResponse response) {
 
-        if (principal != null) {
+        if (jwt != null) {
 
-            UUID userId = retrieveUserIdFromPrincipal(principal);
+            UUID userId = retrieveUserIdFromJwt(jwt);
             CartItem newCartItem = buildNewCartItem(request.productId(), request.quantity());
             verifyCartIdCookie(cartIdFromCookie, userId, response);
 
@@ -104,38 +104,38 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartItemResponse updateItemQuantity(Principal principal,
+    public CartItemResponse updateItemQuantity(Jwt jwt,
                                                long itemId,
                                                UpdateQuantityRequest request,
                                                UUID cartIdFromCookie,
                                                HttpServletResponse response) {
 
-        CartItem cartItemToBeUpdated = retrieveRequestedCartItem(principal, itemId, cartIdFromCookie, response);
+        CartItem cartItemToBeUpdated = retrieveRequestedCartItem(jwt, itemId, cartIdFromCookie, response);
         cartItemToBeUpdated.setQuantity(request.quantity());
         cartItemRepository.save(cartItemToBeUpdated);
         return cartItemMapper.toResponse(cartItemToBeUpdated);
     }
 
     @Override
-    public CartItemResponse deleteItemFromCart(Principal principal,
+    public CartItemResponse deleteItemFromCart(Jwt jwt,
                                                long itemId,
                                                UUID cartIdFromCookie,
                                                HttpServletResponse response) {
 
-        CartItem cartItemToBeDeleted = retrieveRequestedCartItem(principal, itemId, cartIdFromCookie, response);
+        CartItem cartItemToBeDeleted = retrieveRequestedCartItem(jwt, itemId, cartIdFromCookie, response);
         cartItemRepository.delete(cartItemToBeDeleted);
         return cartItemMapper.toResponse(cartItemToBeDeleted);
     }
 
-    private CartItem retrieveRequestedCartItem(Principal principal,
+    private CartItem retrieveRequestedCartItem(Jwt jwt,
                                                long itemId,
                                                UUID cartIdFromCookie,
                                                HttpServletResponse response) {
 
         Cart cart;
-        if (principal != null) {
+        if (jwt != null) {
 
-            UUID userId = retrieveUserIdFromPrincipal(principal);
+            UUID userId = retrieveUserIdFromJwt(jwt);
             verifyCartIdCookie(cartIdFromCookie, userId, response);
             cart = cartRepository.findByUserId(userId)
                     .orElseThrow(CartNotFoundException::new);
@@ -169,7 +169,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void order(Principal principal) {
+    public void order(Jwt jwt) {
 
     }
 

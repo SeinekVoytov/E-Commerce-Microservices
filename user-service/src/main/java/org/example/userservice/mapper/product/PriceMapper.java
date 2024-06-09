@@ -12,6 +12,4 @@ import org.mapstruct.Mapper;
 public interface PriceMapper {
 
     PriceDto toDto(Price entity);
-
-    Price toEntity(PriceDto dto);
 }
