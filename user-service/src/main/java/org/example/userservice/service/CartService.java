@@ -1,19 +1,19 @@
 package org.example.userservice.service;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.userservice.dto.cart.CartContentResponse;
 import org.example.userservice.dto.cart.CartItemRequest;
 import org.example.userservice.dto.cart.CartItemResponse;
 import org.example.userservice.dto.cart.UpdateQuantityRequest;
 import org.springframework.security.oauth2.jwt.Jwt;
 
-import java.util.Set;
 import java.util.UUID;
 
 public interface CartService {
 
-    Set<CartItemResponse> getCartItems(Jwt jwt,
-                                       UUID cartIdFromCookie,
-                                       HttpServletResponse response);
+    CartContentResponse getCartItems(Jwt jwt,
+                                     UUID cartIdFromCookie,
+                                     HttpServletResponse response);
 
     CartItemResponse addItemToCart(Jwt jwt,
                                    CartItemRequest request,

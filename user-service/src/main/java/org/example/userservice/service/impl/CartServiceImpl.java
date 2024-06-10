@@ -3,6 +3,7 @@ package org.example.userservice.service.impl;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.example.userservice.dto.cart.CartContentResponse;
 import org.example.userservice.dto.cart.CartItemRequest;
 import org.example.userservice.dto.cart.CartItemResponse;
 import org.example.userservice.dto.cart.UpdateQuantityRequest;
@@ -10,6 +11,7 @@ import org.example.userservice.exception.CartItemNotFoundException;
 import org.example.userservice.exception.CartNotFoundException;
 import org.example.userservice.exception.InvalidCartIdCookieException;
 import org.example.userservice.exception.ProductNotFoundException;
+import org.example.userservice.mapper.cart.CartContentMapper;
 import org.example.userservice.mapper.cart.CartItemMapper;
 import org.example.userservice.model.cart.Cart;
 import org.example.userservice.model.cart.CartItem;
@@ -27,9 +29,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
-import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,11 +42,12 @@ public class CartServiceImpl implements CartService {
     private final ProductDetailsRepository productLongRepository;
 
     private final CartItemMapper cartItemMapper;
+    private final CartContentMapper cartContentMapper;
 
     @Override
-    public Set<CartItemResponse> getCartItems(Jwt jwt,
-                                              UUID cartIdFromCookie,
-                                              HttpServletResponse response) {
+    public CartContentResponse getCartItems(Jwt jwt,
+                                            UUID cartIdFromCookie,
+                                            HttpServletResponse response) {
 
         Cart cart;
         if (jwt != null) {
@@ -58,7 +59,7 @@ public class CartServiceImpl implements CartService {
         } else {
 
             if (cartIdFromCookie == null) {
-                return Collections.emptySet();
+                return emptyCartContentResponse();
             }
 
             cart = cartRepository.findById(cartIdFromCookie).stream()
@@ -70,8 +71,8 @@ public class CartServiceImpl implements CartService {
         }
 
         return (cart == null)
-                ? Collections.emptySet()
-                : cart.getItems().stream().map(cartItemMapper::toResponse).collect(Collectors.toSet());
+                ? emptyCartContentResponse()
+                : cartContentMapper.toResponse(cart);
     }
 
     @Override
@@ -244,5 +245,12 @@ public class CartServiceImpl implements CartService {
         Cookie cookie = new Cookie(CART_ID_COOKIE_NAME, "");
         cookie.setMaxAge(0);
         response.addCookie(cookie);
+    }
+
+    private CartContentResponse emptyCartContentResponse() {
+        return new CartContentResponse(
+                Collections.emptySet(),
+                Collections.emptyMap()
+        );
     }
 }

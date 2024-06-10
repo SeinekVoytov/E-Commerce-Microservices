@@ -2,6 +2,7 @@ package org.example.userservice.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.example.userservice.dto.cart.CartContentResponse;
 import org.example.userservice.dto.cart.CartItemRequest;
 import org.example.userservice.dto.cart.CartItemResponse;
 import org.example.userservice.dto.cart.UpdateQuantityRequest;
@@ -12,7 +13,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Set;
 import java.util.UUID;
 
 @RestController
@@ -23,12 +23,12 @@ public class CartController {
     private final CartService cartService;
 
     @GetMapping
-    public ResponseEntity<Set<CartItemResponse>> getAllCartItems(@AuthenticationPrincipal Jwt jwt,
+    public ResponseEntity<CartContentResponse> getAllCartItems(@AuthenticationPrincipal Jwt jwt,
                                                                  @CookieValue(name = "cartId", required = false) UUID cartId,
                                                                  HttpServletResponse response) {
 
-        Set<CartItemResponse> cartItems = cartService.getCartItems(jwt, cartId, response);
-        return ResponseEntity.ok(cartItems);
+        CartContentResponse cartContent = cartService.getCartItems(jwt, cartId, response);
+        return ResponseEntity.ok(cartContent);
     }
 
     @PostMapping("/add")
