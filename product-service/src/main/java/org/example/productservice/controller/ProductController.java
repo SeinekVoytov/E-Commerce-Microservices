@@ -31,13 +31,13 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductDetailsDto> productDetails(@PathVariable int id) {
+    public ResponseEntity<ProductDetailsDto> productDetails(@PathVariable Integer id) {
         return ResponseEntity.ok(productService.getById(id));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ProductDetailsDto> updateProduct(@PathVariable int id,
+    public ResponseEntity<ProductDetailsDto> updateProduct(@PathVariable Integer id,
                                                            @RequestBody RequestProductDto updatedProduct) {
         ProductDetailsDto response = productService.updateProduct(id, updatedProduct);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -45,7 +45,7 @@ public class ProductController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ProductDetailsDto> deleteProduct(@PathVariable int id) {
+    public ResponseEntity<ProductDetailsDto> deleteProduct(@PathVariable Integer id) {
         ProductDetailsDto result = productService.deleteById(id);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
