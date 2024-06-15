@@ -23,7 +23,6 @@ import org.example.userservice.repository.cart.CartItemRepository;
 import org.example.userservice.repository.cart.CartRepository;
 import org.example.userservice.repository.product.ProductDetailsRepository;
 import org.example.userservice.service.CartService;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
@@ -218,12 +217,19 @@ public class CartServiceImpl implements CartService {
         }
 
         CartContentResponse cartContent = cartContentMapper.toResponse(cart);
+        clearCart(cart);
+
         OrderPublishedMessage orderPublishedMessage =
                 orderPublishedMessageMapper.mapToMessage(request, cartContent, userId);
 
         orderPublishedProducer.publishOrder(orderPublishedMessage);
 
         return orderResponseMapper.mapToOrderResponse(request, cartContent);
+    }
+
+    private void clearCart(Cart cart) {
+        cart.getItems().clear();
+        cartRepository.save(cart);
     }
 
     private CartItem buildNewCartItem(int productId, int quantity) {

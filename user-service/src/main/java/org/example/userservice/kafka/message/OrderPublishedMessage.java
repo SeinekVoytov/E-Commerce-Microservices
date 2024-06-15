@@ -10,6 +10,6 @@ public record OrderPublishedMessage(
         UUID userId,
         DeliveryType deliveryType,
         AddressDto address,
-        CartContentResponse cartContent
+        CartContentResponse orderContent
 ) {
 }

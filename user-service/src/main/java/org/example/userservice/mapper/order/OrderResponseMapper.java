@@ -14,5 +14,5 @@ import org.mapstruct.Mapping;
 public interface OrderResponseMapper {
 
     @Mapping(source = "orderRequest.deliveryType", target = "deliveryType")
-    OrderResponse mapToOrderResponse(OrderRequest orderRequest, CartContentResponse cartContent);
+    OrderResponse mapToOrderResponse(OrderRequest orderRequest, CartContentResponse orderContent);
 }
