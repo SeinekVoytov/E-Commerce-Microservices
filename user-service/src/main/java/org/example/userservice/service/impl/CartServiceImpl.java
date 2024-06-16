@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.userservice.dto.cart.CartContentResponse;
 import org.example.userservice.dto.cart.CartItemRequest;
-import org.example.userservice.dto.cart.CartItemResponse;
 import org.example.userservice.dto.cart.UpdateQuantityRequest;
 import org.example.userservice.dto.order.OrderRequest;
 import org.example.userservice.dto.order.OrderResponse;
@@ -14,12 +13,10 @@ import org.example.userservice.kafka.message.OrderPublishedMessage;
 import org.example.userservice.kafka.messagemapper.OrderPublishedMessageMapper;
 import org.example.userservice.kafka.producer.OrderPublishedProducer;
 import org.example.userservice.mapper.cart.CartContentMapper;
-import org.example.userservice.mapper.cart.CartItemMapper;
 import org.example.userservice.mapper.order.OrderResponseMapper;
 import org.example.userservice.model.cart.Cart;
 import org.example.userservice.model.cart.CartItem;
 import org.example.userservice.model.product.ProductDetails;
-import org.example.userservice.repository.cart.CartItemRepository;
 import org.example.userservice.repository.cart.CartRepository;
 import org.example.userservice.repository.product.ProductDetailsRepository;
 import org.example.userservice.service.CartService;
@@ -32,6 +29,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.UUID;
 
 @Service
@@ -41,10 +39,8 @@ public class CartServiceImpl implements CartService {
     private static final String CART_ID_COOKIE_NAME = "cartId";
 
     private final CartRepository cartRepository;
-    private final CartItemRepository cartItemRepository;
-    private final ProductDetailsRepository productLongRepository;
+    private final ProductDetailsRepository productDetailsRepository;
 
-    private final CartItemMapper cartItemMapper;
     private final CartContentMapper cartContentMapper;
     private final OrderResponseMapper orderResponseMapper;
 
@@ -83,7 +79,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public CartItemResponse addItemToCart(Jwt jwt,
+    public CartContentResponse addItemToCart(Jwt jwt,
                                           CartItemRequest request,
                                           UUID cartIdFromCookie,
                                           HttpServletResponse response) {
@@ -91,83 +87,91 @@ public class CartServiceImpl implements CartService {
         if (jwt != null) {
 
             UUID userId = retrieveUserIdFromJwt(jwt);
-            CartItem newCartItem = buildNewCartItem(request.productId(), request.quantity());
             verifyCartIdCookie(cartIdFromCookie, userId, response);
 
-            cartRepository.findByUserId(userId).ifPresentOrElse(cart -> {
-                cart.getItems().add(newCartItem);
-                cartRepository.save(cart);
-            }, () -> {
-                Cart newCart = Cart.builder()
-                        .userId(userId)
-                        .items(Collections.singleton(newCartItem))
-                        .build();
+            Cart cart = cartRepository.findByUserId(userId)
+                    .orElseGet(() -> Cart.builder()
+                            .userId(userId)
+                            .items(new HashSet<>())
+                            .build()
+                    );
 
-                cartRepository.save(newCart);
-            });
+            CartItem newCartItem = buildNewCartItem(request.productId(), request.quantity());
 
-            return cartItemMapper.toResponse(newCartItem);
+            cart.getItems().add(newCartItem);
+            cartRepository.save(cart);
+
+            return cartContentMapper.toResponse(cart);
         }
 
         return addItemToAnonymousCart(request, cartIdFromCookie, response);
     }
 
-    private CartItemResponse addItemToAnonymousCart(CartItemRequest request,
+    private CartContentResponse addItemToAnonymousCart(CartItemRequest request,
                                                     UUID cartIdFromCookie,
                                                     HttpServletResponse response) {
 
         CartItem newCartItem = buildNewCartItem(request.productId(), request.quantity());
-        UUID cartId;
+        Cart cart;
 
         if (cartIdFromCookie == null) {
             Cart newCart = Cart.builder()
                     .items(Collections.singleton(newCartItem))
                     .build();
 
-            cartId = cartRepository.save(newCart).getId();
+            cart = cartRepository.save(newCart);
         } else {
 
             Cart anonymousUserCart = cartRepository.findById(cartIdFromCookie)
                     .orElseThrow(() -> new InvalidCartIdCookieException(cartIdFromCookie));
 
-            cartId = anonymousUserCart.getId();
             anonymousUserCart.getItems().add(newCartItem);
-            cartRepository.save(anonymousUserCart);
+            cart = cartRepository.save(anonymousUserCart);
         }
 
-        addCartIdCookie(response, cartId);
+        addCartIdCookie(response, cart.getId());
 
-        return cartItemMapper.toResponse(newCartItem);
+        return cartContentMapper.toResponse(cart);
     }
 
     @Override
-    public CartItemResponse updateItemQuantity(Jwt jwt,
+    public CartContentResponse updateItemQuantity(Jwt jwt,
                                                int itemId,
                                                UpdateQuantityRequest request,
                                                UUID cartIdFromCookie,
                                                HttpServletResponse response) {
 
-        CartItem cartItemToBeUpdated = retrieveRequestedCartItem(jwt, itemId, cartIdFromCookie, response);
+        Cart cart = retrieveCart(jwt, cartIdFromCookie, response);
+        CartItem cartItemToBeUpdated = cart.getItems().stream()
+                .filter(item -> item.getId() == itemId)
+                .findAny()
+                .orElseThrow(CartItemNotFoundException::new);
+
         cartItemToBeUpdated.setQuantity(request.quantity());
-        cartItemRepository.save(cartItemToBeUpdated);
-        return cartItemMapper.toResponse(cartItemToBeUpdated);
+        cartRepository.save(cart);
+
+        return cartContentMapper.toResponse(cart);
     }
+
 
     @Override
-    public CartItemResponse deleteItemFromCart(Jwt jwt,
+    public CartContentResponse deleteItemFromCart(Jwt jwt,
                                                int itemId,
                                                UUID cartIdFromCookie,
                                                HttpServletResponse response) {
 
-        CartItem cartItemToBeDeleted = retrieveRequestedCartItem(jwt, itemId, cartIdFromCookie, response);
-        cartItemRepository.delete(cartItemToBeDeleted);
-        return cartItemMapper.toResponse(cartItemToBeDeleted);
+        Cart cart = retrieveCart(jwt, cartIdFromCookie, response);
+        if (!cart.getItems().removeIf(item -> item.getId() == itemId)) {
+            throw new CartItemNotFoundException();
+        }
+
+        cartRepository.save(cart);
+        return cartContentMapper.toResponse(cart);
     }
 
-    private CartItem retrieveRequestedCartItem(Jwt jwt,
-                                               int itemId,
-                                               UUID cartIdFromCookie,
-                                               HttpServletResponse response) {
+    private Cart retrieveCart(Jwt jwt,
+                              UUID cartIdFromCookie,
+                              HttpServletResponse response) {
 
         Cart cart;
         if (jwt != null) {
@@ -190,10 +194,7 @@ public class CartServiceImpl implements CartService {
                     );
         }
 
-        return cart.getItems().stream()
-                .filter(item -> item.getId() == itemId)
-                .findAny()
-                .orElseThrow(CartItemNotFoundException::new);
+        return cart;
     }
 
     @Override
@@ -243,7 +244,7 @@ public class CartServiceImpl implements CartService {
     }
 
     private ProductDetails getProductByIdOrThrowException(int id) {
-        return productLongRepository.findById(id)
+        return productDetailsRepository.findById(id)
                 .orElseThrow(ProductNotFoundException::new);
     }
 
