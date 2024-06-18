@@ -26,7 +26,10 @@ public class Cart {
 
     private UUID userId;
 
-    @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @OneToMany(
+            cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+            orphanRemoval = true
+    )
     @JoinColumn(name = "cart_id", referencedColumnName = "id")
     private Set<CartItem> items;
 

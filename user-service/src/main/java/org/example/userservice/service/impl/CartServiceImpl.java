@@ -7,12 +7,15 @@ import org.example.userservice.dto.cart.CartContentResponse;
 import org.example.userservice.dto.cart.CartItemRequest;
 import org.example.userservice.dto.cart.CartItemResponse;
 import org.example.userservice.dto.cart.UpdateQuantityRequest;
-import org.example.userservice.exception.CartItemNotFoundException;
-import org.example.userservice.exception.CartNotFoundException;
-import org.example.userservice.exception.InvalidCartIdCookieException;
-import org.example.userservice.exception.ProductNotFoundException;
+import org.example.userservice.dto.order.OrderRequest;
+import org.example.userservice.dto.order.OrderResponse;
+import org.example.userservice.exception.*;
+import org.example.userservice.kafka.message.OrderPublishedMessage;
+import org.example.userservice.kafka.messagemapper.OrderPublishedMessageMapper;
+import org.example.userservice.kafka.producer.OrderPublishedProducer;
 import org.example.userservice.mapper.cart.CartContentMapper;
 import org.example.userservice.mapper.cart.CartItemMapper;
+import org.example.userservice.mapper.order.OrderResponseMapper;
 import org.example.userservice.model.cart.Cart;
 import org.example.userservice.model.cart.CartItem;
 import org.example.userservice.model.product.ProductDetails;
@@ -43,6 +46,10 @@ public class CartServiceImpl implements CartService {
 
     private final CartItemMapper cartItemMapper;
     private final CartContentMapper cartContentMapper;
+    private final OrderResponseMapper orderResponseMapper;
+
+    private final OrderPublishedProducer orderPublishedProducer;
+    private final OrderPublishedMessageMapper orderPublishedMessageMapper;
 
     @Override
     public CartContentResponse getCartItems(Jwt jwt,
@@ -199,8 +206,30 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public void order(Jwt jwt) {
+    public OrderResponse order(Jwt jwt, OrderRequest request) {
 
+        UUID userId = retrieveUserIdFromJwt(jwt);
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseThrow(CartNotFoundException::new);
+
+        if (cart.getItems().isEmpty()) {
+            throw new CartIsEmptyException();
+        }
+
+        CartContentResponse cartContent = cartContentMapper.toResponse(cart);
+        clearCart(cart);
+
+        OrderPublishedMessage orderPublishedMessage =
+                orderPublishedMessageMapper.mapToMessage(request, cartContent, userId);
+
+        orderPublishedProducer.publishOrder(orderPublishedMessage);
+
+        return orderResponseMapper.mapToOrderResponse(request, cartContent);
+    }
+
+    private void clearCart(Cart cart) {
+        cart.getItems().clear();
+        cartRepository.save(cart);
     }
 
     private CartItem buildNewCartItem(int productId, int quantity) {

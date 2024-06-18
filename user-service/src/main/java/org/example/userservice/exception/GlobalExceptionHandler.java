@@ -20,8 +20,10 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(InvalidCartIdCookieException.class)
-    public ResponseEntity<ErrorObject> handleInvalidCartIdException(InvalidCartIdCookieException exc) {
+    @ExceptionHandler(
+            {InvalidCartIdCookieException.class, CartIsEmptyException.class}
+    )
+    public ResponseEntity<ErrorObject> handleInvalidCartIdException(Exception exc) {
         return new ResponseEntity<>(
                 buildErrorObject(HttpStatus.BAD_REQUEST.value(), exc.getMessage()),
                 HttpStatus.BAD_REQUEST

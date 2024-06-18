@@ -6,6 +6,8 @@ import org.example.userservice.dto.cart.CartContentResponse;
 import org.example.userservice.dto.cart.CartItemRequest;
 import org.example.userservice.dto.cart.CartItemResponse;
 import org.example.userservice.dto.cart.UpdateQuantityRequest;
+import org.example.userservice.dto.order.OrderRequest;
+import org.example.userservice.dto.order.OrderResponse;
 import org.example.userservice.service.CartService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -59,5 +61,12 @@ public class CartController {
 
         CartItemResponse result = cartService.deleteItemFromCart(jwt, itemId, cartId, response);
         return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/order")
+    public ResponseEntity<OrderResponse> order(@AuthenticationPrincipal Jwt jwt,
+                                               @RequestBody OrderRequest request) {
+
+        return new ResponseEntity<>(cartService.order(jwt, request), HttpStatus.CREATED);
     }
 }
