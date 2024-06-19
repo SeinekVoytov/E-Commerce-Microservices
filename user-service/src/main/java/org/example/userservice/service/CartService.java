@@ -3,7 +3,6 @@ package org.example.userservice.service;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.userservice.dto.cart.CartContentResponse;
 import org.example.userservice.dto.cart.CartItemRequest;
-import org.example.userservice.dto.cart.CartItemResponse;
 import org.example.userservice.dto.cart.UpdateQuantityRequest;
 import org.example.userservice.dto.order.OrderRequest;
 import org.example.userservice.dto.order.OrderResponse;

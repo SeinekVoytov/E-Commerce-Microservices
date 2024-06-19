@@ -2,11 +2,13 @@ package org.example.userservice.model.cart;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.example.userservice.exception.CartItemNotFoundException;
 import org.hibernate.annotations.DynamicInsert;
 
-import javax.print.attribute.standard.MediaSize;
 import java.time.Instant;
-import java.util.*;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -44,6 +46,29 @@ public class Cart {
             columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP"
     )
     private Instant createdAt;
+
+    public void addItem(CartItem item) {
+        items.add(item);
+    }
+
+    public boolean isEmpty() {
+        return items.isEmpty();
+    }
+
+    public void clear() {
+        items.clear();
+    }
+
+    public CartItem getItemById(int itemId) {
+        return items.stream()
+                .filter(item -> item.getId() == itemId)
+                .findAny()
+                .orElseThrow(CartItemNotFoundException::new);
+    }
+
+    public void removeItemById(int itemId) {
+        items.removeIf(item -> item.getId() == itemId);
+    }
 
     @Override
     public boolean equals(Object o) {

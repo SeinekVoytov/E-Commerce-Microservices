@@ -8,7 +8,10 @@ import org.example.userservice.dto.cart.CartItemRequest;
 import org.example.userservice.dto.cart.UpdateQuantityRequest;
 import org.example.userservice.dto.order.OrderRequest;
 import org.example.userservice.dto.order.OrderResponse;
-import org.example.userservice.exception.*;
+import org.example.userservice.exception.CartIsEmptyException;
+import org.example.userservice.exception.CartNotFoundException;
+import org.example.userservice.exception.InvalidCartIdCookieException;
+import org.example.userservice.exception.ProductNotFoundException;
 import org.example.userservice.kafka.message.OrderPublishedMessage;
 import org.example.userservice.kafka.messagemapper.OrderPublishedMessageMapper;
 import org.example.userservice.kafka.producer.OrderPublishedProducer;
@@ -98,7 +101,7 @@ public class CartServiceImpl implements CartService {
 
             CartItem newCartItem = buildNewCartItem(request.productId(), request.quantity());
 
-            cart.getItems().add(newCartItem);
+            cart.addItem(newCartItem);
             cartRepository.save(cart);
 
             return cartContentMapper.toResponse(cart);
@@ -125,7 +128,7 @@ public class CartServiceImpl implements CartService {
             Cart anonymousUserCart = cartRepository.findById(cartIdFromCookie)
                     .orElseThrow(() -> new InvalidCartIdCookieException(cartIdFromCookie));
 
-            anonymousUserCart.getItems().add(newCartItem);
+            anonymousUserCart.addItem(newCartItem);
             cart = cartRepository.save(anonymousUserCart);
         }
 
@@ -142,10 +145,7 @@ public class CartServiceImpl implements CartService {
                                                HttpServletResponse response) {
 
         Cart cart = retrieveCart(jwt, cartIdFromCookie, response);
-        CartItem cartItemToBeUpdated = cart.getItems().stream()
-                .filter(item -> item.getId() == itemId)
-                .findAny()
-                .orElseThrow(CartItemNotFoundException::new);
+        CartItem cartItemToBeUpdated = cart.getItemById(itemId);
 
         cartItemToBeUpdated.setQuantity(request.quantity());
         cartRepository.save(cart);
@@ -161,10 +161,7 @@ public class CartServiceImpl implements CartService {
                                                HttpServletResponse response) {
 
         Cart cart = retrieveCart(jwt, cartIdFromCookie, response);
-        if (!cart.getItems().removeIf(item -> item.getId() == itemId)) {
-            throw new CartItemNotFoundException();
-        }
-
+        cart.removeItemById(itemId);
         cartRepository.save(cart);
         return cartContentMapper.toResponse(cart);
     }
@@ -213,7 +210,7 @@ public class CartServiceImpl implements CartService {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(CartNotFoundException::new);
 
-        if (cart.getItems().isEmpty()) {
+        if (cart.isEmpty()) {
             throw new CartIsEmptyException();
         }
 
@@ -229,7 +226,7 @@ public class CartServiceImpl implements CartService {
     }
 
     private void clearCart(Cart cart) {
-        cart.getItems().clear();
+        cart.clear();
         cartRepository.save(cart);
     }
 
