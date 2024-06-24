@@ -9,7 +9,7 @@ import org.mapstruct.Mapping;
 @Mapper(
         componentModel = "spring",
         injectionStrategy = InjectionStrategy.CONSTRUCTOR,
-        uses = ProductMapper.class
+        uses = {PriceMapper.class, CategoryMapper.class, ProductMapper.class}
 )
 public interface ProductDetailsMapper {
 
