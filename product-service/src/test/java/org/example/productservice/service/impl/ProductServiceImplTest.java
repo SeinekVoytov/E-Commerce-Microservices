@@ -76,6 +76,7 @@ class ProductServiceImplTest {
         product = Product.builder()
                 .id(id)
                 .name(name)
+                .netWeightInKg(netWeightInKg)
                 .price(Price.builder()
                         .id(id)
                         .amount(priceAmount)
@@ -90,7 +91,6 @@ class ProductServiceImplTest {
                 .lengthInMeters(lengthInMeters)
                 .widthInMeters(widthInMeters)
                 .heightInMeters(heightInMeters)
-                .netWeightInKg(netWeightInKg)
                 .grossWeightInKg(grossWeightInKg)
                 .product(product)
                 .build();
@@ -98,6 +98,7 @@ class ProductServiceImplTest {
         productDto = new ProductDto(
                 id,
                 name,
+                netWeightInKg,
                 Collections.emptySet(),
                 new PriceDto(priceAmount, currency),
                 Collections.emptySet()
@@ -456,7 +457,7 @@ class ProductServiceImplTest {
                 productDetails.getLengthInMeters(),
                 productDetails.getWidthInMeters(),
                 productDetails.getHeightInMeters(),
-                productDetails.getNetWeightInKg(),
+                product.getNetWeightInKg(),
                 productDetails.getGrossWeightInKg()
         );
     }

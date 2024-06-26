@@ -96,11 +96,11 @@ public class ProductServiceImpl implements ProductService {
         toBeUpdated.setLengthInMeters(updated.lengthInMeters());
         toBeUpdated.setWidthInMeters(updated.widthInMeters());
         toBeUpdated.setHeightInMeters(updated.heightInMeters());
-        toBeUpdated.setNetWeightInKg(updated.netWeightInKg());
         toBeUpdated.setGrossWeightInKg(updated.grossWeightInKg());
 
         Product innerProduct = toBeUpdated.getProduct();
         innerProduct.setName(updated.name());
+        innerProduct.setNetWeightInKg(updated.netWeightInKg());
 
         Price price = innerProduct.getPrice();
         price.setAmount(updated.priceAmount());

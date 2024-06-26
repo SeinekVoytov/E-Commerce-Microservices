@@ -38,9 +38,6 @@ public class ProductDetails {
     @Column(name = "height_meters")
     private Double heightInMeters;
 
-    @Column(name = "net_weight_kg")
-    private Double netWeightInKg;
-
     @Column(name = "gross_weight_kg")
     private Double grossWeightInKg;
 
@@ -49,11 +46,11 @@ public class ProductDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ProductDetails that = (ProductDetails) o;
-        return Objects.equals(id, that.id) && Objects.equals(product, that.product) && Objects.equals(lengthInMeters, that.lengthInMeters) && Objects.equals(widthInMeters, that.widthInMeters) && Objects.equals(heightInMeters, that.heightInMeters) && Objects.equals(netWeightInKg, that.netWeightInKg) && Objects.equals(grossWeightInKg, that.grossWeightInKg);
+        return Objects.equals(id, that.id) && Objects.equals(product, that.product) && Objects.equals(lengthInMeters, that.lengthInMeters) && Objects.equals(widthInMeters, that.widthInMeters) && Objects.equals(heightInMeters, that.heightInMeters) && Objects.equals(grossWeightInKg, that.grossWeightInKg);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, product, lengthInMeters, widthInMeters, heightInMeters, netWeightInKg, grossWeightInKg);
+        return Objects.hash(id, product, lengthInMeters, widthInMeters, heightInMeters, grossWeightInKg);
     }
 }

@@ -8,6 +8,7 @@ import java.util.Set;
 public record ProductDto(
      Integer id,
      String name,
+     Double netWeightInKg,
      Set<String> images,
      PriceDto price,
      Set<CategoryDto> categories

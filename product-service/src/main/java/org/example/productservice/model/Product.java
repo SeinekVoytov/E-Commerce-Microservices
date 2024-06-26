@@ -28,6 +28,9 @@ public class Product {
 
     private String name;
 
+    @Column(name = "net_weight_kg")
+    private Double netWeightInKg;
+
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "owner_id", referencedColumnName = "id")
     private Set<Image> images;
