@@ -65,6 +65,7 @@ class ProductServiceImplTest {
 
         final int id = 1;
         final String name = "name";
+        final String description = "description";
         final BigDecimal priceAmount = new BigDecimal("123.456");
         final Currency currency = Currency.getInstance("USD");
         final Double lengthInMeters = 1.0;
@@ -99,6 +100,7 @@ class ProductServiceImplTest {
                 id,
                 name,
                 netWeightInKg,
+                description,
                 Collections.emptySet(),
                 new PriceDto(priceAmount, currency),
                 Collections.emptySet()
@@ -107,6 +109,7 @@ class ProductServiceImplTest {
         detailsDto = new ProductDetailsDto(
                 id,
                 name,
+                description,
                 Collections.emptySet(),
                 new PriceDto(priceAmount, currency),
                 Collections.emptySet(),
@@ -263,6 +266,7 @@ class ProductServiceImplTest {
 
         var requestData = new RequestProductDto(
                 newName,
+                "description",
                 Collections.emptySet(),
                 new BigDecimal("123.456"),
                 newCurrency,
@@ -450,6 +454,7 @@ class ProductServiceImplTest {
     private RequestProductDto buildRequestData() {
         return new RequestProductDto(
                 product.getName(),
+                product.getDescription(),
                 new HashSet<>(),
                 product.getPrice().getAmount(),
                 product.getPrice().getCurrency(),

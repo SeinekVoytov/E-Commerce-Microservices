@@ -20,6 +20,7 @@ CREATE SEQUENCE IF NOT EXISTS category_seq START 1 INCREMENT 20 OWNED BY categor
 CREATE TABLE IF NOT EXISTS product (
     id INT PRIMARY KEY,
     name TEXT NOT NULL,
+    description TEXT NOT NULL,
     net_weight_kg DOUBLE PRECISION NOT NULL CHECK ( net_weight_kg > 0 ),
     price_id INT REFERENCES price (id) ON DELETE CASCADE
 );

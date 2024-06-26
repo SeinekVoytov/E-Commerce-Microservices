@@ -9,6 +9,7 @@ import java.util.Set;
 @Builder
 public record RequestProductDto(
      String name,
+     String description,
      Set<String> images,
      BigDecimal priceAmount,
      Currency priceCurrency,

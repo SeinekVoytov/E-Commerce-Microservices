@@ -101,6 +101,7 @@ public class ProductServiceImpl implements ProductService {
         Product innerProduct = toBeUpdated.getProduct();
         innerProduct.setName(updated.name());
         innerProduct.setNetWeightInKg(updated.netWeightInKg());
+        innerProduct.setDescription(updated.description());
 
         Price price = innerProduct.getPrice();
         price.setAmount(updated.priceAmount());
