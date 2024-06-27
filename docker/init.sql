@@ -10,9 +10,8 @@ CREATE SEQUENCE IF NOT EXISTS price_seq START 1 INCREMENT 20 OWNED BY price.id;
 
 CREATE TABLE IF NOT EXISTS category (
     id INT PRIMARY KEY,
---     parent_category_id INT DEFAULT NULL,
-    name TEXT NOT NULL UNIQUE,
-    count INT NOT NULL CHECK ( count >= 0 ) DEFAULT 0
+    parent_category_id INT DEFAULT NULL REFERENCES category (id),
+    name TEXT NOT NULL UNIQUE
 );
 
 CREATE SEQUENCE IF NOT EXISTS category_seq START 1 INCREMENT 20 OWNED BY category.id;
@@ -42,24 +41,6 @@ CREATE TABLE IF NOT EXISTS product_details (
 );
 
 CREATE SEQUENCE IF NOT EXISTS product_details_seq START 1 INCREMENT 20 OWNED BY product_details.id;
-
-CREATE OR REPLACE FUNCTION increment_category_count() RETURNS TRIGGER AS $$
-BEGIN
-    UPDATE category SET count = count + 1 WHERE id = NEW.category_id;
-    RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE FUNCTION decrement_category_count() RETURNS TRIGGER AS $$
-BEGIN
-    UPDATE category SET count = count - 1 WHERE id = OLD.category_id;
-    RETURN NULL;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE OR REPLACE TRIGGER tr_insert AFTER INSERT ON product_category FOR EACH ROW EXECUTE PROCEDURE increment_category_count();
-
-CREATE OR REPLACE TRIGGER tr_delete AFTER DELETE ON product_category FOR EACH ROW EXECUTE PROCEDURE decrement_category_count();
 
 CREATE TABLE IF NOT EXISTS image (
     id INT PRIMARY KEY,
