@@ -1,6 +1,7 @@
 package org.example.productservice.mapper;
 
 import org.example.productservice.dto.CategoryDto;
+import org.example.productservice.dto.CategoryWithChildrenDto;
 import org.example.productservice.model.Category;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
@@ -18,4 +19,8 @@ public interface CategoryMapper {
     Category toEntity(CategoryDto dto);
 
     Set<Category> toEntitiesSet(Set<CategoryDto> dtos);
+
+    CategoryWithChildrenDto toDtoWithChildren(Category entity);
+
+    Set<CategoryWithChildrenDto> toDtoWithChildrenSet(Set<Category> entities);
 }
