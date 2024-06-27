@@ -15,6 +15,8 @@ public interface RequestProductMapper {
     @Mapping(source = "images", target = "product.images", ignore = true)
     @Mapping(source = "categoryIds", target = "product.categories", ignore = true)
     @Mapping(source = "name", target = "product.name")
+    @Mapping(source = "description", target = "product.description")
+    @Mapping(source = "netWeightInKg", target = "product.netWeightInKg")
     @Mapping(source = "priceAmount", target = "product.price.amount")
     @Mapping(source = "priceCurrency", target = "product.price.currency")
     ProductDetails toEntity(RequestProductDto dto);
