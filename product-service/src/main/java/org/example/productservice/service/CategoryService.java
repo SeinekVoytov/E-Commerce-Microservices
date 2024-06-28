@@ -11,4 +11,6 @@ public interface CategoryService {
     Set<CategoryWithChildrenDto> getRootCategories();
 
     CategoryWithParentDto createCategory(RequestCategoryDto data);
+
+    CategoryWithChildrenDto deleteCategory(String identifier);
 }

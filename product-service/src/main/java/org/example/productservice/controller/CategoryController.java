@@ -30,4 +30,10 @@ public class CategoryController {
         CategoryWithParentDto response = categoryService.createCategory(data);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
+
+    @DeleteMapping("/{identifier}")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<CategoryWithChildrenDto> deleteCategory(@PathVariable String identifier) {
+        return ResponseEntity.ok(categoryService.deleteCategory(identifier));
+    }
 }

@@ -56,4 +56,25 @@ public class CategoryServiceImpl implements CategoryService {
 
         return categoryMapper.toDtoWithParent(createdCategory);
     }
+
+    @Override
+    public CategoryWithChildrenDto deleteCategory(String identifier) {
+
+        Category deletedCategory;
+        try {
+            Integer id = Integer.parseInt(identifier);
+            deletedCategory = categoryRepository.findById(id)
+                    .orElseThrow(() -> new CategoryNotFoundException(id));
+
+            categoryRepository.deleteById(id);
+        }
+        catch (NumberFormatException exc) {
+            deletedCategory = categoryRepository.findByName(identifier)
+                    .orElseThrow(() -> new CategoryNotFoundException(identifier));
+
+            categoryRepository.deleteByName(identifier);
+        }
+
+        return categoryMapper.toDtoWithChildren(deletedCategory);
+    }
 }
