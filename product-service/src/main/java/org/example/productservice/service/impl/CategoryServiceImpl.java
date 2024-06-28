@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.productservice.dto.CategoryWithChildrenDto;
 import org.example.productservice.dto.CategoryWithParentDto;
 import org.example.productservice.dto.RequestCategoryDto;
+import org.example.productservice.dto.UpdateCategoryDto;
 import org.example.productservice.exception.CategoryAlreadyExistsException;
 import org.example.productservice.exception.CategoryNotFoundException;
 import org.example.productservice.mapper.CategoryMapper;
@@ -58,23 +59,28 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public CategoryWithChildrenDto deleteCategory(String identifier) {
+    public CategoryWithParentDto updateCategory(String identifier, UpdateCategoryDto data) {
+        Category categoryToBeUpdated = getCategoryByIdentifier(identifier);
+        categoryToBeUpdated.setName(data.name());
+        categoryToBeUpdated = categoryRepository.save(categoryToBeUpdated);
+        return categoryMapper.toDtoWithParent(categoryToBeUpdated);
+    }
 
-        Category deletedCategory;
+    @Override
+    public CategoryWithChildrenDto deleteCategory(String identifier) {
+        Category categoryToBeDeleted = getCategoryByIdentifier(identifier);
+        categoryRepository.delete(categoryToBeDeleted);
+        return categoryMapper.toDtoWithChildren(categoryToBeDeleted);
+    }
+
+    private Category getCategoryByIdentifier(String identifier) {
         try {
             Integer id = Integer.parseInt(identifier);
-            deletedCategory = categoryRepository.findById(id)
+            return categoryRepository.findById(id)
                     .orElseThrow(() -> new CategoryNotFoundException(id));
-
-            categoryRepository.deleteById(id);
-        }
-        catch (NumberFormatException exc) {
-            deletedCategory = categoryRepository.findByName(identifier)
+        } catch (NumberFormatException exc) {
+            return categoryRepository.findByName(identifier)
                     .orElseThrow(() -> new CategoryNotFoundException(identifier));
-
-            categoryRepository.deleteByName(identifier);
         }
-
-        return categoryMapper.toDtoWithChildren(deletedCategory);
     }
 }

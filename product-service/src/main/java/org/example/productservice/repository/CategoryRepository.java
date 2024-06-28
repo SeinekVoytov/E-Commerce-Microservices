@@ -15,6 +15,4 @@ public interface CategoryRepository extends CrudRepository<Category, Integer> {
     boolean existsByName(String name);
 
     Optional<Category> findByName(String name);
-
-    void deleteByName(String name);
 }
