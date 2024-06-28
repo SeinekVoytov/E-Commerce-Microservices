@@ -118,20 +118,18 @@ public class CartServiceImpl implements CartService {
         Cart cart;
 
         if (cartIdFromCookie == null) {
-            Cart newCart = Cart.builder()
+            cart = Cart.builder()
                     .items(Collections.singleton(newCartItem))
                     .build();
-
-            cart = cartRepository.save(newCart);
         } else {
 
-            Cart anonymousUserCart = cartRepository.findById(cartIdFromCookie)
+            cart = cartRepository.findById(cartIdFromCookie)
                     .orElseThrow(() -> new InvalidCartIdCookieException(cartIdFromCookie));
 
-            anonymousUserCart.addItem(newCartItem);
-            cart = cartRepository.save(anonymousUserCart);
+            cart.addItem(newCartItem);
         }
 
+        cart = cartRepository.save(cart);
         addCartIdCookie(response, cart.getId());
 
         return cartContentMapper.toResponse(cart);

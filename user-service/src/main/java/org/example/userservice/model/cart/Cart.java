@@ -29,7 +29,7 @@ public class Cart {
     private UUID userId;
 
     @OneToMany(
-            cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+            cascade = CascadeType.ALL,
             orphanRemoval = true
     )
     @JoinColumn(name = "cart_id", referencedColumnName = "id")

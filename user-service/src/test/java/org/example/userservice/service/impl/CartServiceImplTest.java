@@ -71,6 +71,7 @@ class CartServiceImplTest {
 
         final int id = 1;
         final String name = "name";
+        final String description = "description";
         final BigDecimal priceAmount = new BigDecimal("123.456");
         final Currency currency = Currency.getInstance("USD");
         final Double lengthInMeters = 1.0;
@@ -103,6 +104,8 @@ class CartServiceImplTest {
         Product product = new Product(
                 id,
                 name,
+                netWeightInKg,
+                description,
                 Collections.emptySet(),
                 new Price(id, priceAmount, currency),
                 Collections.emptySet()
@@ -114,7 +117,6 @@ class CartServiceImplTest {
                 lengthInMeters,
                 widthInMeters,
                 heightInMeters,
-                netWeightInKg,
                 grossWeightInKg
         );
 
