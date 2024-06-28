@@ -10,4 +10,6 @@ public interface CategoryRepository extends CrudRepository<Category, Integer> {
     Set<Category> findAllByIdIn(Set<Integer> ids);
 
     Set<Category> findAllByParentCategoryIsNull();
+
+    boolean existsByName(String name);
 }

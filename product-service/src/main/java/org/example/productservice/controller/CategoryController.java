@@ -2,11 +2,13 @@ package org.example.productservice.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.productservice.dto.CategoryWithChildrenDto;
+import org.example.productservice.dto.CategoryWithParentDto;
+import org.example.productservice.dto.RequestCategoryDto;
 import org.example.productservice.service.CategoryService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
@@ -20,5 +22,12 @@ public class CategoryController {
     @GetMapping
     public ResponseEntity<Set<CategoryWithChildrenDto>> getRootCategories() {
         return ResponseEntity.ok(categoryService.getRootCategories());
+    }
+
+    @PostMapping
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<CategoryWithParentDto> createCategory(@RequestBody RequestCategoryDto data) {
+        CategoryWithParentDto response = categoryService.createCategory(data);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 }
