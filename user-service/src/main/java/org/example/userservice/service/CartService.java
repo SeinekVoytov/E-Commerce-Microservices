@@ -3,7 +3,6 @@ package org.example.userservice.service;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.userservice.dto.cart.CartContentResponse;
 import org.example.userservice.dto.cart.CartItemRequest;
-import org.example.userservice.dto.cart.CartItemResponse;
 import org.example.userservice.dto.cart.UpdateQuantityRequest;
 import org.example.userservice.dto.order.OrderRequest;
 import org.example.userservice.dto.order.OrderResponse;
@@ -17,18 +16,18 @@ public interface CartService {
                                      UUID cartIdFromCookie,
                                      HttpServletResponse response);
 
-    CartItemResponse addItemToCart(Jwt jwt,
+    CartContentResponse addItemToCart(Jwt jwt,
                                    CartItemRequest request,
                                    UUID cartIdFromCookie,
                                    HttpServletResponse response);
 
-    CartItemResponse updateItemQuantity(Jwt jwt,
+    CartContentResponse updateItemQuantity(Jwt jwt,
                                         int itemId,
                                         UpdateQuantityRequest request,
                                         UUID cartIdFromCookie,
                                         HttpServletResponse response);
 
-    CartItemResponse deleteItemFromCart(Jwt jwt,
+    CartContentResponse deleteItemFromCart(Jwt jwt,
                                         int itemId,
                                         UUID cartIdFromCookie,
                                         HttpServletResponse response);

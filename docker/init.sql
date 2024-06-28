@@ -90,7 +90,7 @@ CREATE SEQUENCE IF NOT EXISTS fee_seq START 1 INCREMENT 20 OWNED BY fee.id;
 CREATE TABLE IF NOT EXISTS delivery (
     id INT PRIMARY KEY,
     fee_id INT REFERENCES fee (id),
-    status delivery_status NOT NULL,
+    status delivery_status NOT NULL DEFAULT 'ORDER_RECEIVED',
     type delivery_type NOT NULL
 );
 

@@ -13,7 +13,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(
             {ProductNotFoundException.class, CartItemNotFoundException.class, CartNotFoundException.class}
     )
-    public ResponseEntity<ErrorObject> handleNotFoundExceptions(ProductNotFoundException exc) {
+    public ResponseEntity<ErrorObject> handleNotFoundExceptions(Exception exc) {
         return new ResponseEntity<>(
                 buildErrorObject(HttpStatus.NOT_FOUND.value(), exc.getMessage()),
                 HttpStatus.NOT_FOUND

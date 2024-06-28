@@ -2,6 +2,7 @@ package org.example.userservice.service.impl;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.userservice.dto.cart.CartContentResponse;
 import org.example.userservice.dto.cart.CartItemRequest;
 import org.example.userservice.dto.cart.CartItemResponse;
 import org.example.userservice.dto.cart.UpdateQuantityRequest;
@@ -11,12 +12,12 @@ import org.example.userservice.exception.CartItemNotFoundException;
 import org.example.userservice.exception.CartNotFoundException;
 import org.example.userservice.exception.InvalidCartIdCookieException;
 import org.example.userservice.exception.ProductNotFoundException;
-import org.example.userservice.mapper.cart.CartItemMapper;
+import org.example.userservice.mapper.cart.CartContentMapper;
 import org.example.userservice.model.cart.Cart;
 import org.example.userservice.model.cart.CartItem;
 import org.example.userservice.model.product.Price;
-import org.example.userservice.model.product.ProductDetails;
 import org.example.userservice.model.product.Product;
+import org.example.userservice.model.product.ProductDetails;
 import org.example.userservice.repository.cart.CartItemRepository;
 import org.example.userservice.repository.cart.CartRepository;
 import org.example.userservice.repository.product.ProductDetailsRepository;
@@ -46,7 +47,7 @@ class CartServiceImplTest {
     private final int itemId = 1;
 
     @Mock
-    private CartItemMapper mapper;
+    private CartContentMapper mapper;
 
     @Mock
     private CartRepository cartRepo;
@@ -55,13 +56,13 @@ class CartServiceImplTest {
     private CartItemRepository cartItemRepo;
 
     @Mock
-    private ProductDetailsRepository productLongRepo;
+    private ProductDetailsRepository productDetailsRepo;
 
     @InjectMocks
     private CartServiceImpl service;
 
     private CartItemRequest cartItemRequest;
-    private CartItemResponse response;
+    private CartContentResponse response;
     private ProductDetails productDetails;
     private HttpServletResponse httpResponseMock;
 
@@ -93,7 +94,11 @@ class CartServiceImplTest {
 
         final int quantity = 10;
         cartItemRequest = new CartItemRequest(id, quantity);
-        response = new CartItemResponse(productDto, quantity);
+        CartItemResponse cartItemResponse = new CartItemResponse(id, productDto, quantity);
+        response = new CartContentResponse(
+                new HashSet<>(Set.of(cartItemResponse)),
+                Map.of(currency, priceAmount.multiply(BigDecimal.valueOf(quantity)))
+        );
 
         Product product = new Product(
                 id,
@@ -119,7 +124,7 @@ class CartServiceImplTest {
     @Test
     void addItemToCart_ShouldThrowProductNotFoundExc_WhenProductNotFoundAndNotAuthenticated() {
 
-        when(productLongRepo.findById(cartItemRequest.productId())).thenReturn(Optional.empty());
+        when(productDetailsRepo.findById(cartItemRequest.productId())).thenReturn(Optional.empty());
 
         assertThrows(
                 ProductNotFoundException.class,
@@ -130,27 +135,27 @@ class CartServiceImplTest {
     @Test
     void addItemToCart_ShouldThrowProductNotFoundExc_WhenProductNotFoundAndAuthenticated() {
 
-        when(productLongRepo.findById(cartItemRequest.productId())).thenReturn(Optional.empty());
+        when(productDetailsRepo.findById(cartItemRequest.productId())).thenReturn(Optional.empty());
 
         assertThrows(
                 ProductNotFoundException.class,
-                () -> service.addItemToCart(jwt, cartItemRequest, cartId, httpResponseMock)
+                () -> service.addItemToCart(jwt, cartItemRequest, null, httpResponseMock)
         );
     }
 
     @Test
-    void addItemToCart_ShouldAndReturnCreatedItem_WhenNotAuthenticatedAndCartIdNotSpecified() {
+    void addItemToCart_ShouldReturnCreatedCartWithOneItem_WhenNotAuthenticatedAndCartIdNotSpecified() {
 
-        when(productLongRepo.findById(cartItemRequest.productId())).thenReturn(Optional.of(productDetails));
+        when(productDetailsRepo.findById(cartItemRequest.productId())).thenReturn(Optional.of(productDetails));
 
-        Cart stubCartId = Cart.builder()
+        Cart stubbedCart = Cart.builder()
                 .id(cartId)
                 .build();
 
-        when(cartRepo.save(any(Cart.class))).thenReturn(stubCartId);
-        when(mapper.toResponse(any(CartItem.class))).thenReturn(response);
+        when(cartRepo.save(any(Cart.class))).thenReturn(stubbedCart);
+        when(mapper.toResponse(stubbedCart)).thenReturn(response);
 
-        CartItemResponse result = service.addItemToCart(null, cartItemRequest, null, httpResponseMock);
+        CartContentResponse result = service.addItemToCart(null, cartItemRequest, null, httpResponseMock);
 
         verify(httpResponseMock, times(1)).addCookie(any(Cookie.class));
         assertEquals(response, result);
@@ -159,7 +164,7 @@ class CartServiceImplTest {
     @Test
     void addItemToCart_ShouldThrowInvalidCartIdCookieExc_WhenCartNotFoundByCookieAndNotAuthenticated() {
 
-        when(productLongRepo.findById(cartItemRequest.productId())).thenReturn(Optional.of(productDetails));
+        when(productDetailsRepo.findById(cartItemRequest.productId())).thenReturn(Optional.of(productDetails));
         when(cartRepo.findById(cartId)).thenReturn(Optional.empty());
 
         assertThrows(
@@ -169,9 +174,9 @@ class CartServiceImplTest {
     }
 
     @Test
-    void addItemToCart_ShouldAddCookieAndReturnCreatedItem_WhenNotAuthenticatedAndCartIdSpecified() {
+    void addItemToCart_ShouldAddCookieAndReturnCartContentWithCreatedItem_WhenNotAuthenticatedAndCartIdSpecified() {
 
-        when(productLongRepo.findById(cartItemRequest.productId())).thenReturn(Optional.of(productDetails));
+        when(productDetailsRepo.findById(cartItemRequest.productId())).thenReturn(Optional.of(productDetails));
 
         Cart stubbedCart = Cart.builder()
                 .id(cartId)
@@ -179,9 +184,10 @@ class CartServiceImplTest {
                 .build();
 
         when(cartRepo.findById(cartId)).thenReturn(Optional.of(stubbedCart));
-        when(mapper.toResponse(any(CartItem.class))).thenReturn(response);
+        when(mapper.toResponse(stubbedCart)).thenReturn(response);
+        when(cartRepo.save(stubbedCart)).thenReturn(stubbedCart);
 
-        CartItemResponse result = service.addItemToCart(null, cartItemRequest, cartId, httpResponseMock);
+        CartContentResponse result = service.addItemToCart(null, cartItemRequest, cartId, httpResponseMock);
 
         assertAll(
                 () -> assertEquals(1, stubbedCart.getItems().size()),
@@ -193,23 +199,23 @@ class CartServiceImplTest {
     }
 
     @Test
-    void addItemToCart_ShouldCreateNewCartAndReturnCreatedCartItem_WhenAuthenticatedAndNoCartAssignedAndNoCookieSpecified() {
+    void addItemToCart_ShouldCreateAndReturnNewCartWithCartItem_WhenAuthenticatedAndNoCartAssignedAndNoCookieSpecified() {
 
-        when(productLongRepo.findById(cartItemRequest.productId())).thenReturn(Optional.of(productDetails));
+        when(productDetailsRepo.findById(cartItemRequest.productId())).thenReturn(Optional.of(productDetails));
 
         when(cartRepo.findByUserId(userId)).thenReturn(Optional.empty());
-        when(mapper.toResponse(any(CartItem.class))).thenReturn(response);
+        when(mapper.toResponse(any(Cart.class))).thenReturn(response);
 
-        CartItemResponse result = service.addItemToCart(jwt, cartItemRequest, null, httpResponseMock);
+        CartContentResponse result = service.addItemToCart(jwt, cartItemRequest, null, httpResponseMock);
 
         verify(cartRepo, times(1)).save(any(Cart.class));
         assertEquals(response, result);
     }
 
     @Test
-    void addItemToCart_ShouldAddItemToCartAndReturnAddedItem_WhenAuthenticatedAndCartIsAssignedAndNoCookieSpecified() {
+    void addItemToCart_ShouldAddItemToCartAndReturnCartContent_WhenAuthenticatedAndCartIsAssignedAndNoCookieSpecified() {
 
-        when(productLongRepo.findById(cartItemRequest.productId())).thenReturn(Optional.of(productDetails));
+        when(productDetailsRepo.findById(cartItemRequest.productId())).thenReturn(Optional.of(productDetails));
 
         Cart stubbedCart = Cart.builder()
                 .id(cartId)
@@ -218,9 +224,9 @@ class CartServiceImplTest {
                 .build();
 
         when(cartRepo.findByUserId(userId)).thenReturn(Optional.of(stubbedCart));
-        when(mapper.toResponse(any(CartItem.class))).thenReturn(response);
+        when(mapper.toResponse(stubbedCart)).thenReturn(response);
 
-        CartItemResponse result = service.addItemToCart(jwt, cartItemRequest, null, httpResponseMock);
+        CartContentResponse result = service.addItemToCart(jwt, cartItemRequest, null, httpResponseMock);
 
         verify(cartRepo, times(1)).save(stubbedCart);
 
@@ -232,8 +238,6 @@ class CartServiceImplTest {
 
     @Test
     void addItemToCart_ShouldThrowInvalidCartIdCookieExc_WhenCartIsAlreadyAssignedAndCookieIdSpecified() {
-
-        when(productLongRepo.findById(cartItemRequest.productId())).thenReturn(Optional.of(productDetails));
 
         Cart stubbedCart = Cart.builder()
                 .id(cartId)
@@ -253,7 +257,7 @@ class CartServiceImplTest {
     @Test
     void addItemToCart_ShouldAssignCartAndDeleteCookieAndAddItemToCart_WhenAuthenticatedAndCookieSpecified() {
 
-        when(productLongRepo.findById(cartItemRequest.productId())).thenReturn(Optional.of(productDetails));
+        when(productDetailsRepo.findById(cartItemRequest.productId())).thenReturn(Optional.of(productDetails));
 
         Cart stubbedCart = Cart.builder()
                 .id(cartId)
@@ -271,9 +275,9 @@ class CartServiceImplTest {
             throw new IllegalStateException("This line should never be reached");
         });
 
-        when(mapper.toResponse(any(CartItem.class))).thenReturn(response);
+        when(mapper.toResponse(stubbedCart)).thenReturn(response);
 
-        CartItemResponse result = service.addItemToCart(jwt, cartItemRequest, cartId, httpResponseMock);
+        CartContentResponse result = service.addItemToCart(jwt, cartItemRequest, cartId, httpResponseMock);
 
         ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
         verify(httpResponseMock, times(1)).addCookie(cookieCaptor.capture());
@@ -386,16 +390,14 @@ class CartServiceImplTest {
                 .build();
 
         when(cartRepo.findById(cartId)).thenReturn(Optional.of(stubbedCart));
-        when(mapper.toResponse(itemToBeUpdated)).thenReturn(response);
-
-        CartItemResponse result = service.updateItemQuantity(null, itemId, quantityRequest, cartId, httpResponseMock);
+        service.updateItemQuantity(null, itemId, quantityRequest, cartId, httpResponseMock);
 
         assertAll(
-                () -> assertEquals(cartItemRequest.quantity(), result.quantity()),
-                () -> assertEquals(cartItemRequest.quantity(), itemToBeUpdated.getQuantity()),
-                () -> assertEquals(response, result)
+                () -> assertTrue(stubbedCart.getItems().contains(itemToBeUpdated)),
+                () -> assertEquals(cartItemRequest.quantity(), itemToBeUpdated.getQuantity())
         );
 
+        verify(mapper, times(1)).toResponse(stubbedCart);
     }
 
     @Test
@@ -411,9 +413,7 @@ class CartServiceImplTest {
         when(cartRepo.findById(cartId)).thenReturn(Optional.of(stubbedCart));
         when(cartRepo.findByUserId(userId)).thenReturn(Optional.of(stubbedCart));
 
-        when(mapper.toResponse(itemToBeUpdated)).thenReturn(response);
-
-        CartItemResponse result = service.updateItemQuantity(jwt, itemId, quantityRequest,cartId, httpResponseMock);
+        service.updateItemQuantity(jwt, itemId, quantityRequest,cartId, httpResponseMock);
 
         ArgumentCaptor<Cookie> cookieCaptor = ArgumentCaptor.forClass(Cookie.class);
         verify(httpResponseMock, times(1)).addCookie(cookieCaptor.capture());
@@ -423,12 +423,12 @@ class CartServiceImplTest {
         assertAll(
                 () -> assertNotNull(passedCookie),
                 () -> assertEquals(0, passedCookie.getMaxAge()),
-                () -> assertEquals(cartItemRequest.quantity(), result.quantity()),
-                () -> assertEquals(cartItemRequest.quantity(), itemToBeUpdated.getQuantity()),
-                () -> assertEquals(response, result)
+                () -> assertTrue(stubbedCart.getItems().contains(itemToBeUpdated)),
+                () -> assertEquals(cartItemRequest.quantity(), itemToBeUpdated.getQuantity())
         );
-    }
 
+        verify(mapper, times(1)).toResponse(stubbedCart);
+    }
 
     private Jwt mockJwt() {
         Jwt jwt = mock(Jwt.class);
