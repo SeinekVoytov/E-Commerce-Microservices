@@ -95,7 +95,7 @@ class CartServiceImplTest {
 
         final int quantity = 10;
         cartItemRequest = new CartItemRequest(id, quantity);
-        CartItemResponse cartItemResponse = new CartItemResponse(id, productDto, quantity);
+        CartItemResponse cartItemResponse = new CartItemResponse(id, productDto, quantity, priceAmount.multiply(BigDecimal.valueOf(quantity)));
         response = new CartContentResponse(
                 new HashSet<>(Set.of(cartItemResponse)),
                 Map.of(currency, priceAmount.multiply(BigDecimal.valueOf(quantity)))
