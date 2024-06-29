@@ -7,6 +7,7 @@ import java.util.Set;
 
 public record CartContentResponse(
         Set<CartItemResponse> items,
-        Map<Currency, BigDecimal> totalPrices
+        Map<Currency, BigDecimal> totalPrices,
+        Integer totalItems
 ) {
 }
