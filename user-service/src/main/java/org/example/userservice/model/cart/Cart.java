@@ -48,7 +48,15 @@ public class Cart {
     private Instant createdAt;
 
     public void addItem(CartItem item) {
-        items.add(item);
+        Integer toBeAddedProductId = item.getProduct().getId();
+        items.stream()
+                .filter(cartItem -> cartItem.getProduct().getId().equals(toBeAddedProductId))
+                .findAny()
+                .ifPresentOrElse(
+                        alreadySavedItem -> alreadySavedItem.setQuantity(
+                                alreadySavedItem.getQuantity() + item.getQuantity()
+                        ),
+                        () -> items.add(item));
     }
 
     public boolean isEmpty() {
