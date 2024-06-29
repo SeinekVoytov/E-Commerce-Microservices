@@ -83,6 +83,7 @@ class CartServiceImplTest {
         ProductDetailsDto productDto = new ProductDetailsDto(
                 id,
                 name,
+                description,
                 Collections.emptySet(),
                 new PriceDto(priceAmount, currency),
                 Collections.emptySet(),

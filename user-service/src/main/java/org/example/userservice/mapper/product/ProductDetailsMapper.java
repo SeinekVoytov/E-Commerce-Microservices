@@ -18,15 +18,19 @@ import java.util.stream.Collectors;
 public interface ProductDetailsMapper {
 
     @Mapping(source = "product.name", target = "name")
+    @Mapping(source = "product.description", target = "description")
     @Mapping(source = "product.images", target = "images")
     @Mapping(source = "product.price", target = "price")
     @Mapping(source = "product.categories", target = "categories")
+    @Mapping(source = "product.netWeightInKg", target = "netWeightInKg")
     ProductDetailsDto toDto(ProductDetails entity);
 
     @Mapping(source = "name", target = "product.name")
+    @Mapping(source = "description", target = "product.description")
     @Mapping(source = "images", target = "product.images")
     @Mapping(source = "price", target = "product.price")
     @Mapping(source = "categories", target = "product.categories")
+    @Mapping(source = "netWeightInKg", target = "product.netWeightInKg")
     ProductDetails toEntity(ProductDetailsDto entity);
 
     default Set<String> imagesToUrls(Set<Image> images) {
