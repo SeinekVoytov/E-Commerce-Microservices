@@ -31,8 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.UUID;
 
 @Service
@@ -95,7 +95,7 @@ public class CartServiceImpl implements CartService {
             Cart cart = cartRepository.findByUserId(userId)
                     .orElseGet(() -> Cart.builder()
                             .userId(userId)
-                            .items(new HashSet<>())
+                            .items(new ArrayList<>())
                             .build()
                     );
 
@@ -119,7 +119,7 @@ public class CartServiceImpl implements CartService {
 
         if (cartIdFromCookie == null) {
             cart = Cart.builder()
-                    .items(Collections.singleton(newCartItem))
+                    .items(Collections.singletonList(newCartItem))
                     .build();
         } else {
 
@@ -274,7 +274,7 @@ public class CartServiceImpl implements CartService {
 
     private CartContentResponse emptyCartContentResponse() {
         return new CartContentResponse(
-                Collections.emptySet(),
+                Collections.emptyList(),
                 Collections.emptyMap()
         );
     }
