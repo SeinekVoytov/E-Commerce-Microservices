@@ -275,7 +275,8 @@ public class CartServiceImpl implements CartService {
     private CartContentResponse emptyCartContentResponse() {
         return new CartContentResponse(
                 Collections.emptySet(),
-                Collections.emptyMap()
+                Collections.emptyMap(),
+                0
         );
     }
 }
