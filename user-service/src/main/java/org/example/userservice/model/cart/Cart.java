@@ -6,8 +6,8 @@ import org.example.userservice.exception.CartItemNotFoundException;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -33,7 +33,8 @@ public class Cart {
             orphanRemoval = true
     )
     @JoinColumn(name = "cart_id", referencedColumnName = "id")
-    private Set<CartItem> items;
+    @OrderBy("id ASC")
+    private List<CartItem> items;
 
     @Column(
             name = "updated_at",

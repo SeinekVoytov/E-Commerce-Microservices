@@ -6,7 +6,7 @@ import org.example.userservice.model.cart.CartItem;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 
-import java.util.Set;
+import java.util.List;
 
 @Mapper(
         componentModel = "spring",
@@ -17,5 +17,5 @@ public interface CartItemMapper {
 
     CartItemResponse toResponse(CartItem entity);
 
-    Set<CartItemResponse> toResponsesSet(Set<CartItem> entitiesSet);
+    List<CartItemResponse> toResponsesList(List<CartItem> entitiesSet);
 }
