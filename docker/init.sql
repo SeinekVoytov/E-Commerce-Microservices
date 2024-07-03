@@ -10,7 +10,7 @@ CREATE SEQUENCE IF NOT EXISTS price_seq START 1 INCREMENT 20 OWNED BY price.id;
 
 CREATE TABLE IF NOT EXISTS category (
     id INT PRIMARY KEY,
---     parent_category_id INT DEFAULT NULL,
+    parent_category_id INT DEFAULT NULL,
     name TEXT NOT NULL UNIQUE,
     count INT NOT NULL CHECK ( count >= 0 ) DEFAULT 0
 );

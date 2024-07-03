@@ -1,0 +1,3 @@
+DB_DRIVER="org.postgresql.Driver"
+KEYCLOAK_HOSTNAME=keycloak
+CONFIG_SERVICE_HOSTNAME=config-service
