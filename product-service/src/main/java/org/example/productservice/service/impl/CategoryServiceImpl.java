@@ -45,13 +45,12 @@ public class CategoryServiceImpl implements CategoryService {
                     .orElseThrow(() -> new CategoryNotFoundException(data.parentId()));
         }
 
-        Category createdCategory = new Category(
-                null,
-                parent,
-                Collections.emptySet(),
-                Collections.emptySet(),
-                data.name()
-        );
+        Category createdCategory = Category.builder()
+                .parentCategory(parent)
+                .childCategories(Collections.emptySet())
+                .products(Collections.emptySet())
+                .name(data.name())
+                .build();
 
         createdCategory = categoryRepository.save(createdCategory);
 
