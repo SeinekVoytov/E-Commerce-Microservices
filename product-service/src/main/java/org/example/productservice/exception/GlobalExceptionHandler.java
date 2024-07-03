@@ -1,10 +1,10 @@
 package org.example.productservice.exception;
 
+import org.example.productservice.elasticsearch.exception.ProductIndexingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
 
 import java.util.Date;
 
@@ -30,6 +30,14 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(
                 buildErrorObject(HttpStatus.BAD_REQUEST.value(), exc.getMessage()),
                 HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(ProductIndexingException.class)
+    public ResponseEntity<ErrorObject> handleProductIndexingException(ProductIndexingException exc) {
+        return new ResponseEntity<>(
+                buildErrorObject(HttpStatus.INTERNAL_SERVER_ERROR.value(), exc.getMessage()),
+                HttpStatus.INTERNAL_SERVER_ERROR
         );
     }
 

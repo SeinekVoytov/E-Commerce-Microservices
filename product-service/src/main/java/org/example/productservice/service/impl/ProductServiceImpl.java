@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.productservice.dto.RequestProductDto;
 import org.example.productservice.dto.ProductDetailsDto;
 import org.example.productservice.dto.ProductDto;
+import org.example.productservice.elasticsearch.ElasticSearchService;
 import org.example.productservice.exception.CategoryNotFoundException;
 import org.example.productservice.exception.ImageNotFoundException;
 import org.example.productservice.exception.InvalidQueryParameterException;
@@ -27,6 +28,8 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
 
     private static final Set<String> AVAILABLE_SORT_PARAMETERS = Set.of("name", "price.amount");
+
+    private final ElasticSearchService elasticSearchService;
 
     private final ProductRepository shortRepository;
     private final ProductDetailsRepository longRepository;
@@ -88,6 +91,8 @@ public class ProductServiceImpl implements ProductService {
         );
 
         createdProduct = longRepository.save(createdProduct);
+        elasticSearchService.save(createdProduct.getProduct());
+
         return detailsMapper.toDto(createdProduct);
     }
 
