@@ -1,6 +1,7 @@
 package org.example.productservice.exception;
 
 import org.example.productservice.elasticsearch.exception.ProductIndexingException;
+import org.example.productservice.elasticsearch.exception.ProductUpdatingException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -33,7 +34,12 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(ProductIndexingException.class)
+    @ExceptionHandler(
+            {
+                    ProductIndexingException.class,
+                    ProductUpdatingException.class
+            }
+    )
     public ResponseEntity<ErrorObject> handleProductIndexingException(ProductIndexingException exc) {
         return new ResponseEntity<>(
                 buildErrorObject(HttpStatus.INTERNAL_SERVER_ERROR.value(), exc.getMessage()),
