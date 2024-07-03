@@ -9,7 +9,6 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 
@@ -28,7 +27,6 @@ public class Category {
 
     @ManyToOne
     @JoinColumn(name = "parent_category_id")
-    @ToString.Exclude
     private Category parentCategory;
 
     @OneToMany(
@@ -39,7 +37,6 @@ public class Category {
     private Set<Category> childCategories;
 
     @ManyToMany(mappedBy = "categories", cascade = CascadeType.PERSIST)
-    @ToString.Exclude
     private Set<Product> products;
 
     private String name;
