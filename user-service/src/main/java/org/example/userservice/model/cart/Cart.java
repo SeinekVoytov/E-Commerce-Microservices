@@ -47,10 +47,6 @@ public class Cart {
     )
     private Instant createdAt;
 
-    public void addItem(CartItem item) {
-        items.add(item);
-    }
-
     public boolean isEmpty() {
         return items.isEmpty();
     }
