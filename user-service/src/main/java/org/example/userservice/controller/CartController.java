@@ -23,7 +23,7 @@ public class CartController {
 
     private final CartService cartService;
 
-    @GetMapping
+    @GetMapping("/items")
     public ResponseEntity<CartContentResponse> getAllCartItems(@AuthenticationPrincipal Jwt jwt,
                                                                @CookieValue(name = "cartId", required = false) UUID cartId,
                                                                HttpServletResponse response) {
@@ -32,7 +32,7 @@ public class CartController {
         return ResponseEntity.ok(cartContent);
     }
 
-    @PostMapping("/add")
+    @PostMapping("/items")
     public ResponseEntity<CartContentResponse> addItemToCart(@AuthenticationPrincipal Jwt jwt,
                                                              @RequestBody CartItemRequest request,
                                                              @CookieValue(name = "cartId", required = false) UUID cartId,
@@ -41,7 +41,7 @@ public class CartController {
         return new ResponseEntity<>(result, HttpStatus.CREATED);
     }
 
-    @PatchMapping("/update/{itemId}")
+    @PatchMapping("/items/{itemId}")
     public ResponseEntity<CartContentResponse> updateItemQuantity(@AuthenticationPrincipal Jwt jwt,
                                                                   @PathVariable Integer itemId,
                                                                   @RequestBody UpdateQuantityRequest request,
@@ -52,7 +52,7 @@ public class CartController {
         return ResponseEntity.ok(result);
     }
 
-    @DeleteMapping("/delete/{itemId}")
+    @DeleteMapping("/items/{itemId}")
     public ResponseEntity<CartContentResponse> deleteCartItem(@AuthenticationPrincipal Jwt jwt,
                                                               @PathVariable Integer itemId,
                                                               @CookieValue(name = "cartId", required = false) UUID cartId,
@@ -62,7 +62,7 @@ public class CartController {
         return ResponseEntity.ok(result);
     }
 
-    @PostMapping("/order")
+    @PostMapping("/orders")
     public ResponseEntity<OrderResponse> order(@AuthenticationPrincipal Jwt jwt,
                                                @RequestBody OrderRequest request) {
 
