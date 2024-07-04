@@ -27,10 +27,10 @@ public class ElasticSearchService {
     public void save(Product product) {
         try {
             ProductDocument document = productDocumentMapper.toDocument(product);
-            client.index(i ->
-                    i.index(PRODUCT_INDEX)
-                            .id(String.valueOf(document.id()))
-                            .document(document)
+            client.index(i -> i
+                    .index(PRODUCT_INDEX)
+                    .id(String.valueOf(document.id()))
+                    .document(document)
             );
         } catch (IOException e) {
             throw new ProductIndexingException();
