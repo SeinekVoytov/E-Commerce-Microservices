@@ -1,7 +1,7 @@
 package org.example.productservice.elasticsearch.document;
 
 public record ProductDocument(
-        String id,
+        Integer id,
         String name,
         String description
 ) {
