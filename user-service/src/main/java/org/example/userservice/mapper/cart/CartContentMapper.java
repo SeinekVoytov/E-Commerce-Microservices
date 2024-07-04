@@ -43,11 +43,8 @@ public interface CartContentMapper {
     }
 
     default Integer computeTotalItems(Cart cart) {
-        Integer totalItems = 0;
-        for (CartItem item : cart.getItems()) {
-            totalItems += item.getQuantity();
-        }
-
-        return totalItems;
+        return cart.getItems().stream()
+                .map(CartItem::getQuantity)
+                .reduce(0, Integer::sum);
     }
 }
