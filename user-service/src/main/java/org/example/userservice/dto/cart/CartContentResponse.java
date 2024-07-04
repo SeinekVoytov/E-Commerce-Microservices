@@ -7,6 +7,7 @@ import java.util.Map;
 
 public record CartContentResponse(
         List<CartItemResponse> items,
-        Map<Currency, BigDecimal> totalPrices
+        Map<Currency, BigDecimal> totalPrices,
+        Integer totalItems
 ) {
 }

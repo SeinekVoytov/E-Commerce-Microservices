@@ -352,7 +352,7 @@ class ProductServiceImplTest {
         doAnswer(invocationOnMock -> invocationOnMock.<ProductDetails>getArgument(0))
                 .when(detailsRepository).save(any(ProductDetails.class));
 
-        Category categoryToBeAdded = new Category(10, Collections.emptySet(), "category", 0);
+        Category categoryToBeAdded = new Category(10, null, Collections.emptySet(), Collections.emptySet(), "category");
         when(categoryRepository.findAllByIdIn(any(Set.class)))
                 .thenReturn(Set.of(categoryToBeAdded));
 

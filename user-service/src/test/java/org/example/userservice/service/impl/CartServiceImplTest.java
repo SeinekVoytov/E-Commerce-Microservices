@@ -96,10 +96,11 @@ class CartServiceImplTest {
 
         final int quantity = 10;
         cartItemRequest = new CartItemRequest(id, quantity);
-        CartItemResponse cartItemResponse = new CartItemResponse(id, productDto, quantity);
+        CartItemResponse cartItemResponse = new CartItemResponse(id, productDto, quantity, priceAmount.multiply(BigDecimal.valueOf(quantity)));
         response = new CartContentResponse(
                 new ArrayList<>(List.of(cartItemResponse)),
-                Map.of(currency, priceAmount.multiply(BigDecimal.valueOf(quantity)))
+                Map.of(currency, priceAmount.multiply(BigDecimal.valueOf(quantity))),
+                quantity
         );
 
         Product product = new Product(

@@ -13,7 +13,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Builder
-@ToString
+
 @NoArgsConstructor
 @AllArgsConstructor
 
@@ -47,10 +47,6 @@ public class Cart {
             columnDefinition = "TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP"
     )
     private Instant createdAt;
-
-    public void addItem(CartItem item) {
-        items.add(item);
-    }
 
     public boolean isEmpty() {
         return items.isEmpty();

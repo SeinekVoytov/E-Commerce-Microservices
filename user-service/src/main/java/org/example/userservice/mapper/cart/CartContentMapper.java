@@ -24,6 +24,10 @@ public interface CartContentMapper {
             target = "totalPrices",
             expression = "java(computeTotalPrices(cart))"
     )
+    @Mapping(
+            target = "totalItems",
+            expression = "java(computeTotalItems(cart))"
+    )
     CartContentResponse toResponse(Cart cart);
 
     default Map<Currency, BigDecimal> computeTotalPrices(Cart cart) {
@@ -36,5 +40,11 @@ public interface CartContentMapper {
         }
 
         return totalPrices;
+    }
+
+    default Integer computeTotalItems(Cart cart) {
+        return cart.getItems().stream()
+                .map(CartItem::getQuantity)
+                .reduce(0, Integer::sum);
     }
 }

@@ -25,8 +25,13 @@ public class GlobalExceptionHandler {
         );
     }
 
-    @ExceptionHandler(InvalidQueryParameterException.class)
-    public ResponseEntity<ErrorObject> handleInvalidQueryParameterException(InvalidQueryParameterException exc) {
+    @ExceptionHandler(
+            {
+                    InvalidQueryParameterException.class,
+                    CategoryAlreadyExistsException.class
+            }
+    )
+    public ResponseEntity<ErrorObject> handleInvalidQueryParameterException(Exception exc) {
         return new ResponseEntity<>(
                 buildErrorObject(HttpStatus.BAD_REQUEST.value(), exc.getMessage()),
                 HttpStatus.BAD_REQUEST
