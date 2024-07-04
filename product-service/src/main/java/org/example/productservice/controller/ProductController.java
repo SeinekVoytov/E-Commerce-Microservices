@@ -20,7 +20,7 @@ public class ProductController {
 
     @GetMapping()
     public ResponseEntity<Page<ProductDto>> getPage(Pageable pageable) {
-        return new ResponseEntity<>(productService.getAllShortProduct(pageable), HttpStatus.OK);
+        return new ResponseEntity<>(productService.getAllProducts(pageable), HttpStatus.OK);
     }
 
     @PostMapping()

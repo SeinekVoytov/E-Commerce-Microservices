@@ -41,7 +41,7 @@ public class ProductServiceImpl implements ProductService {
     private final RequestProductMapper requestProductMapper;
 
     @Override
-    public Page<ProductDto> getAllShortProduct(Pageable pageable) {
+    public Page<ProductDto> getAllProducts(Pageable pageable) {
         validateSortParameters(pageable.getSort());
         return productRepository.findAll(pageable).map(productMapper::toDto);
     }
