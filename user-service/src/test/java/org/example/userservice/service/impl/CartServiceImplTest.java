@@ -98,7 +98,7 @@ class CartServiceImplTest {
         cartItemRequest = new CartItemRequest(id, quantity);
         CartItemResponse cartItemResponse = new CartItemResponse(id, productDto, quantity, priceAmount.multiply(BigDecimal.valueOf(quantity)));
         response = new CartContentResponse(
-                new HashSet<>(Set.of(cartItemResponse)),
+                new ArrayList<>(List.of(cartItemResponse)),
                 Map.of(currency, priceAmount.multiply(BigDecimal.valueOf(quantity))),
                 quantity
         );
@@ -184,7 +184,7 @@ class CartServiceImplTest {
 
         Cart stubbedCart = Cart.builder()
                 .id(cartId)
-                .items(new HashSet<>())
+                .items(new ArrayList<>())
                 .build();
 
         when(cartRepo.findById(cartId)).thenReturn(Optional.of(stubbedCart));
@@ -224,7 +224,7 @@ class CartServiceImplTest {
         Cart stubbedCart = Cart.builder()
                 .id(cartId)
                 .userId(userId)
-                .items(new HashSet<>())
+                .items(new ArrayList<>())
                 .build();
 
         when(cartRepo.findByUserId(userId)).thenReturn(Optional.of(stubbedCart));
@@ -265,7 +265,7 @@ class CartServiceImplTest {
 
         Cart stubbedCart = Cart.builder()
                 .id(cartId)
-                .items(new HashSet<>())
+                .items(new ArrayList<>())
                 .build();
 
         when(cartRepo.findById(cartId)).thenReturn(Optional.of(stubbedCart));
@@ -336,7 +336,7 @@ class CartServiceImplTest {
         Cart stubbedCart = Cart.builder()
                 .id(cartId)
                 .userId(userId)
-                .items(new HashSet<>())
+                .items(new ArrayList<>())
                 .build();
 
         when(cartRepo.findById(cartId)).thenReturn(Optional.of(stubbedCart));
@@ -370,7 +370,7 @@ class CartServiceImplTest {
         Cart stubbedCart = Cart.builder()
                 .id(cartId)
                 .userId(null)
-                .items(new HashSet<>())
+                .items(new ArrayList<>())
                 .build();
 
         when(cartRepo.findById(cartId)).thenReturn(Optional.of(stubbedCart));
@@ -390,7 +390,7 @@ class CartServiceImplTest {
         Cart stubbedCart = Cart.builder()
                 .id(cartId)
                 .userId(null)
-                .items(Collections.singleton(itemToBeUpdated))
+                .items(Collections.singletonList(itemToBeUpdated))
                 .build();
 
         when(cartRepo.findById(cartId)).thenReturn(Optional.of(stubbedCart));
@@ -411,7 +411,7 @@ class CartServiceImplTest {
         Cart stubbedCart = Cart.builder()
                 .id(cartId)
                 .userId(null)
-                .items(Collections.singleton(itemToBeUpdated))
+                .items(Collections.singletonList(itemToBeUpdated))
                 .build();
 
         when(cartRepo.findById(cartId)).thenReturn(Optional.of(stubbedCart));
