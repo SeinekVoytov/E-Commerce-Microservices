@@ -1,6 +1,7 @@
 package org.example.userservice.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.userservice.dto.cart.CartContentResponse;
 import org.example.userservice.dto.cart.CartItemRequest;
@@ -34,7 +35,7 @@ public class CartController {
 
     @PostMapping("/items")
     public ResponseEntity<CartContentResponse> addItemToCart(@AuthenticationPrincipal Jwt jwt,
-                                                             @RequestBody CartItemRequest request,
+                                                             @RequestBody @Valid CartItemRequest request,
                                                              @CookieValue(name = "cartId", required = false) UUID cartId,
                                                              HttpServletResponse response) {
         CartContentResponse result = cartService.addItemToCart(jwt, request, cartId, response);
@@ -44,7 +45,7 @@ public class CartController {
     @PatchMapping("/items/{itemId}")
     public ResponseEntity<CartContentResponse> updateItemQuantity(@AuthenticationPrincipal Jwt jwt,
                                                                   @PathVariable Integer itemId,
-                                                                  @RequestBody UpdateQuantityRequest request,
+                                                                  @RequestBody @Valid UpdateQuantityRequest request,
                                                                   @CookieValue(name = "cartId", required = false) UUID cartId,
                                                                   HttpServletResponse response) {
 
@@ -64,7 +65,7 @@ public class CartController {
 
     @PostMapping("/orders")
     public ResponseEntity<OrderResponse> order(@AuthenticationPrincipal Jwt jwt,
-                                               @RequestBody OrderRequest request) {
+                                               @RequestBody @Valid OrderRequest request) {
 
         return new ResponseEntity<>(cartService.order(jwt, request), HttpStatus.CREATED);
     }
