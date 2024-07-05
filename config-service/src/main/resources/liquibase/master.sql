@@ -104,25 +104,11 @@ CREATE TABLE IF NOT EXISTS delivery (
 );
 
 CREATE SEQUENCE IF NOT EXISTS delivery_seq START 1 INCREMENT 20 OWNED BY delivery.id;
-
-CREATE SEQUENCE IF NOT EXISTS delivery_seq START 1 INCREMENT 20 OWNED BY delivery.id;
 --rollback DROP SEQUENCE IF EXISTS delivery_seq;
 --rollback DROP TABLE IF EXISTS delivery;
 
 
 --changeset SeinekVoytov:10 dbms:postgresql
-CREATE TABLE IF NOT EXISTS "order" (
-    id INT PRIMARY KEY,
-    delivery_id INT REFERENCES delivery (id),
-    user_id UUID NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE SEQUENCE IF NOT EXISTS order_seq START 1 INCREMENT 20 OWNED BY "order".id;
---rollback DROP SEQUENCE IF EXISTS order_seq;
---rollback DROP TABLE IF EXISTS "order";
-
---changeset SeinekVoytov:11 dbms:postgresql
 CREATE TABLE IF NOT EXISTS "order" (
     id INT PRIMARY KEY,
     delivery_id INT REFERENCES delivery (id),
