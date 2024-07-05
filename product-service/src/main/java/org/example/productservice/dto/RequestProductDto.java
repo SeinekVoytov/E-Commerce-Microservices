@@ -2,6 +2,7 @@ package org.example.productservice.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.Builder;
+import org.hibernate.validator.constraints.URL;
 
 import java.math.BigDecimal;
 import java.util.Currency;
@@ -16,7 +17,7 @@ public record RequestProductDto(
      String description,
 
      @NotNull(message = "Images set cannot be null")
-     Set<@NotBlank(message = "Image URL cannot be blank") String> images,
+     Set<@URL(message = "Image URL must be a valid") String> images,
 
      @NotNull(message = "Price amount cannot be null")
      @DecimalMin(value = "0", inclusive = false, message = "Price amount must be greater than zero")
