@@ -1,5 +1,6 @@
 package org.example.productservice.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.productservice.dto.CategoryWithChildrenDto;
 import org.example.productservice.dto.CategoryWithParentDto;
@@ -27,7 +28,7 @@ public class CategoryController {
 
     @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<CategoryWithParentDto> createCategory(@RequestBody RequestCategoryDto data) {
+    public ResponseEntity<CategoryWithParentDto> createCategory(@RequestBody @Valid RequestCategoryDto data) {
         CategoryWithParentDto response = categoryService.createCategory(data);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -35,7 +36,7 @@ public class CategoryController {
     @PatchMapping("/{identifier}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<CategoryWithParentDto> updateCategory(@PathVariable String identifier,
-                                                                @RequestBody UpdateCategoryDto data) {
+                                                                @RequestBody @Valid UpdateCategoryDto data) {
         return ResponseEntity.ok(categoryService.updateCategory(identifier, data));
     }
 
