@@ -48,7 +48,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category createdCategory = Category.builder()
                 .parentCategory(parent)
                 .childCategories(Collections.emptySet())
-                .products(Collections.emptySet())
+                .products(Collections.emptyList())
                 .name(data.name())
                 .build();
 

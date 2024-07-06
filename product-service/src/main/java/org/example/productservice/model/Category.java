@@ -3,6 +3,7 @@ package org.example.productservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -37,7 +38,7 @@ public class Category {
     private Set<Category> childCategories;
 
     @ManyToMany(mappedBy = "categories", cascade = CascadeType.PERSIST)
-    private Set<Product> products;
+    private List<Product> products;
 
     private String name;
 

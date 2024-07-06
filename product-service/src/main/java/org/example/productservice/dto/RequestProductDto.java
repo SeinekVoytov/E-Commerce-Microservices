@@ -4,6 +4,7 @@ import lombok.Builder;
 
 import java.math.BigDecimal;
 import java.util.Currency;
+import java.util.List;
 import java.util.Set;
 
 @Builder
@@ -13,7 +14,7 @@ public record RequestProductDto(
      Set<String> images,
      BigDecimal priceAmount,
      Currency priceCurrency,
-     Set<Integer> categoryIds,
+     List<Integer> categoryIds,
      Double lengthInMeters,
      Double widthInMeters,
      Double heightInMeters,

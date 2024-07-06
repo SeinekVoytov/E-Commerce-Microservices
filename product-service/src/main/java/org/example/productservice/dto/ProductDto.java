@@ -2,6 +2,7 @@ package org.example.productservice.dto;
 
 import lombok.Builder;
 
+import java.util.List;
 import java.util.Set;
 
 @Builder
@@ -12,7 +13,7 @@ public record ProductDto(
      String description,
      Set<String> images,
      PriceDto price,
-     Set<CategoryDto> categories
+     List<CategoryDto> categories
 ) {
     
 }
