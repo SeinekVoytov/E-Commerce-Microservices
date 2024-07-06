@@ -16,6 +16,7 @@ public interface RequestProductMapper {
     @Mapping(source = "categoryIds", target = "product.categories", ignore = true)
     @Mapping(source = "name", target = "product.name")
     @Mapping(source = "description", target = "product.description")
+    @Mapping(source = "brand", target = "product.brand")
     @Mapping(source = "netWeightInKg", target = "product.netWeightInKg")
     @Mapping(source = "priceAmount", target = "product.price.amount")
     @Mapping(source = "priceCurrency", target = "product.price.currency")

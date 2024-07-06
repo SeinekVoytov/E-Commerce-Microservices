@@ -10,6 +10,7 @@ public record ProductDto(
      String name,
      Double netWeightInKg,
      String description,
+     String brand,
      Set<String> images,
      PriceDto price,
      Set<CategoryDto> categories

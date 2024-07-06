@@ -32,6 +32,8 @@ public class Product {
 
     private String description;
 
+    private String brand;
+
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "owner_id", referencedColumnName = "id")
     private Set<Image> images;

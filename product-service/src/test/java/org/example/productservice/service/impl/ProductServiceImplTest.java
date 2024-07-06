@@ -66,6 +66,8 @@ class ProductServiceImplTest {
         final int id = 1;
         final String name = "name";
         final String description = "description";
+        final String brand = "brand";
+        final String countryManufacturer = "countryManufacturer";
         final BigDecimal priceAmount = new BigDecimal("123.456");
         final Currency currency = Currency.getInstance("USD");
         final Double lengthInMeters = 1.0;
@@ -101,6 +103,7 @@ class ProductServiceImplTest {
                 name,
                 netWeightInKg,
                 description,
+                brand,
                 Collections.emptySet(),
                 new PriceDto(priceAmount, currency),
                 Collections.emptySet()
@@ -110,9 +113,11 @@ class ProductServiceImplTest {
                 id,
                 name,
                 description,
+                brand,
                 Collections.emptySet(),
                 new PriceDto(priceAmount, currency),
                 Collections.emptySet(),
+                countryManufacturer,
                 lengthInMeters,
                 widthInMeters,
                 heightInMeters,
@@ -267,10 +272,12 @@ class ProductServiceImplTest {
         var requestData = new RequestProductDto(
                 newName,
                 "description",
+                "brand",
                 Collections.emptySet(),
                 new BigDecimal("123.456"),
                 newCurrency,
                 Collections.emptySet(),
+                "countryManufacturer",
                 newLength,
                 1.0,
                 1.0,
@@ -455,10 +462,12 @@ class ProductServiceImplTest {
         return new RequestProductDto(
                 product.getName(),
                 product.getDescription(),
+                product.getBrand(),
                 new HashSet<>(),
                 product.getPrice().getAmount(),
                 product.getPrice().getCurrency(),
                 new HashSet<>(),
+                productDetails.getCountryManufacturer(),
                 productDetails.getLengthInMeters(),
                 productDetails.getWidthInMeters(),
                 productDetails.getHeightInMeters(),

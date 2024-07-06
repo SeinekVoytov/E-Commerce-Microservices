@@ -204,3 +204,9 @@ $$ LANGUAGE plpgsql;
 CREATE OR REPLACE TRIGGER tr_update_updated_at AFTER INSERT OR DELETE ON cart_item FOR EACH ROW EXECUTE PROCEDURE on_item_added_to_cart();
 --rollback DROP TRIGGER IF EXISTS tr_update_updated_at ON cart_item;
 --rollback DROP FUNCTION IF EXISTS on_item_added_to_cart();
+
+--changeset SeinekVoytov:18 dbms:postgresql
+ALTER TABLE product ADD COLUMN brand VARCHAR(256) NOT NULL DEFAULT 'Unknown';
+ALTER TABLE product_details ADD COLUMN country_manufacturer VARCHAR(64) NOT NULL DEFAULT 'Unknown';
+--rollback ALTER TABLE product DROP COLUMN IF EXISTS brand;
+--rollback ALTER TABLE product_details DROP COLUMN IF EXISTS country_manufacturer;

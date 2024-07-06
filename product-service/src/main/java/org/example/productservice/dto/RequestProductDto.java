@@ -10,10 +10,12 @@ import java.util.Set;
 public record RequestProductDto(
      String name,
      String description,
+     String brand,
      Set<String> images,
      BigDecimal priceAmount,
      Currency priceCurrency,
      Set<Integer> categoryIds,
+     String countryManufacturer,
      Double lengthInMeters,
      Double widthInMeters,
      Double heightInMeters,
