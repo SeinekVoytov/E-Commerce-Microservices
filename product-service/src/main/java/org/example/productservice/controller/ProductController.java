@@ -19,8 +19,11 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping()
-    public ResponseEntity<Page<ProductDto>> getPage(Pageable pageable) {
-        return new ResponseEntity<>(productService.getAllShortProduct(pageable), HttpStatus.OK);
+    public ResponseEntity<Page<ProductDto>> getPage(Pageable pageable,
+                                                    @RequestParam(required = false) String category) {
+
+        Page<ProductDto> page = productService.getAllShortProduct(pageable, category);
+        return new ResponseEntity<>(page, HttpStatus.OK);
     }
 
     @PostMapping()
@@ -50,4 +53,3 @@ public class ProductController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }
-

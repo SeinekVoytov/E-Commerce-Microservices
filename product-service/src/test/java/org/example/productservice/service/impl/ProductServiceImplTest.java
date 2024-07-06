@@ -127,7 +127,7 @@ class ProductServiceImplTest {
         assertThrows(
                 InvalidQueryParameterException.class,
                 () -> service.getAllShortProduct(PageRequest.of(
-                        1, 10, Sort.by(Sort.Order.asc("category")))
+                        1, 10, Sort.by(Sort.Order.asc("category"))), null
                 )
         );
 
@@ -150,7 +150,7 @@ class ProductServiceImplTest {
         when(productMapper.toDto(any(Product.class)))
                 .thenReturn(productDto);
 
-        var actual = service.getAllShortProduct(pageable);
+        var actual = service.getAllShortProduct(pageable, null);
 
         var expectedContent = List.of(productDto);
 

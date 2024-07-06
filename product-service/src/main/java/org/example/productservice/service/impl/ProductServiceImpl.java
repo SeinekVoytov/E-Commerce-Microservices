@@ -14,20 +14,25 @@ import org.example.productservice.repository.CategoryRepository;
 import org.example.productservice.repository.ImageRepository;
 import org.example.productservice.repository.ProductDetailsRepository;
 import org.example.productservice.repository.ProductRepository;
+import org.example.productservice.service.CategoryService;
 import org.example.productservice.service.ProductService;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-    private static final Set<String> AVAILABLE_SORT_PARAMETERS = Set.of("name", "price.amount");
+    public static final Map<String, Comparator<Product>> AVAILABLE_SORT_PARAMETERS =
+            Map.of(
+                    "name", Comparator.comparing(Product::getName),
+                    "price.amount", Comparator.comparing(p -> p.getPrice().getAmount())
+            );
+
+    private final CategoryService categoryService;
 
     private final ProductRepository shortRepository;
     private final ProductDetailsRepository longRepository;
@@ -39,9 +44,14 @@ public class ProductServiceImpl implements ProductService {
     private final RequestProductMapper requestProductMapper;
 
     @Override
-    public Page<ProductDto> getAllShortProduct(Pageable pageable) {
+    public Page<ProductDto> getAllShortProduct(Pageable pageable, String category) {
+
         validateSortParameters(pageable.getSort());
-        return shortRepository.findAll(pageable).map(productMapper::toDto);
+        if (category == null) {
+            return shortRepository.findAll(pageable).map(productMapper::toDto);
+        }
+
+        return categoryService.getProductsByCategory(category, pageable);
     }
 
     @Override
@@ -147,7 +157,7 @@ public class ProductServiceImpl implements ProductService {
     private void validateSortParameters(Sort sort) {
         for (Sort.Order order : sort) {
             String property = order.getProperty();
-            if (!AVAILABLE_SORT_PARAMETERS.contains(property)) {
+            if (!AVAILABLE_SORT_PARAMETERS.containsKey(property)) {
                 throw new InvalidQueryParameterException("sort", property);
             }
         }

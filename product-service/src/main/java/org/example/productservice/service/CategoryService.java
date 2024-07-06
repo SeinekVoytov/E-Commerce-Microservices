@@ -1,9 +1,8 @@
 package org.example.productservice.service;
 
-import org.example.productservice.dto.CategoryWithChildrenDto;
-import org.example.productservice.dto.CategoryWithParentDto;
-import org.example.productservice.dto.RequestCategoryDto;
-import org.example.productservice.dto.UpdateCategoryDto;
+import org.example.productservice.dto.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Set;
 
@@ -16,4 +15,6 @@ public interface CategoryService {
     CategoryWithChildrenDto deleteCategory(String identifier);
 
     CategoryWithParentDto updateCategory(String identifier, UpdateCategoryDto data);
+
+    Page<ProductDto> getProductsByCategory(String categoryIdentifier, Pageable pageable);
 }
