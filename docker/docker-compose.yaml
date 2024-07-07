@@ -1,28 +1,4 @@
 services:
-  database:
-    container_name: postgres
-    image: postgres:16
-    restart: always
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_MULTIPLE_DATABASES: e_commerce_microservices,keycloak
-    volumes:
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./create-multiple-databases.sh:/docker-entrypoint-initdb.d/create-multiple-databases.sh
-      - pgdata:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      backend:
-        aliases:
-          - "database"
-
   keycloak:
     container_name: keycloak
     image: quay.io/keycloak/keycloak:25.0.1
@@ -33,9 +9,6 @@ services:
       KC_DB-USERNAME: ${POSTGRES_USER}
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
       KC_DB_URL: ${KC_DB_URL}
-    depends_on:
-      database:
-        condition: service_healthy
     ports:
       - "${KEYCLOAK_PORT}:${KEYCLOAK_PORT}"
     command: ["start-dev"]
@@ -45,6 +18,7 @@ services:
           - "keycloak"
 
   zookeeper:
+    container_name: zookeeper
     image: zookeeper:3.7.2
     restart: always
     ports:
@@ -89,30 +63,6 @@ services:
         aliases:
           - "discoveryservice"
 
-  gateway-service:
-    container_name: gateway-service
-    image: e-commerce/gateway-service:latest
-    build:
-      ../gateway-service
-    restart: always
-    environment:
-      EUREKA_HOSTNAME: ${EUREKA_HOSTNAME}
-      CONFIG_SERVICE_HOSTNAME: config-service
-    depends_on:
-      discovery-service:
-        condition: service_healthy
-    links:
-      - config-service
-      - discovery-service
-      - product-service
-      - keycloak
-    ports:
-      - "8765:8765"
-    networks:
-      backend:
-        aliases:
-          - "gatewayservice"
-
   product-service:
     container_name: product-service
     image: e-commerce/product-service:latest
@@ -128,17 +78,10 @@ services:
     env_file:
       - "./services-env"
     depends_on:
-      database:
-        condition: service_healthy
       discovery-service:
         condition: service_healthy
     ports:
       - "8081:8081"
-#    links:
-#      - config-service
-#      - discovery-service
-#      - database
-#      - keycloak
     networks:
       backend:
         aliases:
@@ -159,17 +102,10 @@ services:
     env_file:
       - "./services-env"
     depends_on:
-      database:
-        condition: service_healthy
       discovery-service:
         condition: service_healthy
     ports:
       - "8082:8082"
-    links:
-      - config-service
-      - discovery-service
-      - database
-      - keycloak
     networks:
       backend:
         aliases:
@@ -189,19 +125,31 @@ services:
     env_file:
       - "./services-env"
     depends_on:
-      database:
-        condition: service_healthy
       discovery-service:
         condition: service_healthy
-    links:
-      - config-service
-      - discovery-service
-      - database
-      - keycloak
+    networks:
+      backend:
+        aliases:
+          - "userservice"
 
-volumes:
-  pgdata:
-    name: "pgdata"
+  gateway-service:
+    container_name: gateway-service
+    image: e-commerce/gateway-service:latest
+    build:
+      ../gateway-service
+    restart: always
+    environment:
+      EUREKA_HOSTNAME: ${EUREKA_HOSTNAME}
+      CONFIG_SERVICE_HOSTNAME: config-service
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    ports:
+      - "8765:8765"
+    networks:
+      backend:
+        aliases:
+          - "gatewayservice"
 
 networks:
   backend:
