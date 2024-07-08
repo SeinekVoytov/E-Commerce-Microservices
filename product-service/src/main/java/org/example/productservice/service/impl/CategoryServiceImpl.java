@@ -10,13 +10,15 @@ import org.example.productservice.model.Category;
 import org.example.productservice.model.Product;
 import org.example.productservice.repository.CategoryRepository;
 import org.example.productservice.service.CategoryService;
+import org.example.productservice.service.ProductService;
+import org.example.productservice.util.PaginationUtils;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,46 +78,20 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Page<ProductDto> getProductsByCategory(String identifier, Pageable pageable) {
+    public Page<ProductDto> getProductsByCategory(String identifier,
+                                                  Pageable pageable,
+                                                  Predicate<Product> filter) {
 
         Category category = getCategoryByIdentifier(identifier);
         List<Product> categoryProducts = new ArrayList<>();
         retrieveAllProductsByCategory(categoryProducts, category);
-        long offset = pageable.getOffset();
-        long limit = pageable.getPageSize();
 
-        return new PageImpl<>(
-                categoryProducts.stream()
-                        .skip(offset)
-                        .limit(limit)
-                        .sorted(getComparatorBySort(pageable.getSort()))
-                        .map(productMapper::toDto)
-                        .toList(),
-                pageable,
-                categoryProducts.size()
+        Comparator<Product> cmp = ProductService.getComparatorBySort(pageable.getSort());
+        Function<Product, ProductDto> mapper = productMapper::toDto;
+
+        return PaginationUtils.collectionToPageWithSortAndFilter(
+                categoryProducts, pageable, mapper, filter, cmp
         );
-    }
-
-    private Comparator<Product> getComparatorBySort(Sort sort) {
-
-        Comparator<Product> comparator = (p1, p2) -> 0;           // empty comparator
-        Iterator<Sort.Order> orderIterator = sort.stream().iterator();
-
-        if (orderIterator.hasNext()) {
-            comparator = getComparatorByOrder(orderIterator.next());
-
-            while (orderIterator.hasNext()) {
-                comparator.thenComparing(getComparatorByOrder(orderIterator.next()));
-            }
-        }
-
-        return comparator;
-    }
-
-    private Comparator<Product> getComparatorByOrder(Sort.Order order) {
-        String property = order.getProperty();
-        Comparator<Product> comparator = ProductServiceImpl.AVAILABLE_SORT_PARAMETERS.get(property);
-        return (order.isDescending()) ? comparator.reversed() : comparator;
     }
 
     private void retrieveAllProductsByCategory(List<Product> accumulator, Category category) {
