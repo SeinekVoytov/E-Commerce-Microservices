@@ -58,7 +58,7 @@ public class ProductServiceImpl implements ProductService {
         Predicate<Product> filter = createProductsFilter(minPrice, maxPrice);
 
         if (category == null) {
-            List<Product> products = shortRepository.findAll(pageable.getSort());
+            List<Product> products = productRepository.findAll(pageable.getSort());
             Function<Product, ProductDto> mapper = productMapper::toDto;
 
             return PaginationUtils.collectionToPageWithFilter(products, pageable, mapper, filter);
@@ -122,6 +122,7 @@ public class ProductServiceImpl implements ProductService {
 
     private void updateProduct(ProductDetails toBeUpdated, RequestProductDto updated) {
 
+        toBeUpdated.setCountryManufacturer(updated.countryManufacturer());
         toBeUpdated.setLengthInMeters(updated.lengthInMeters());
         toBeUpdated.setWidthInMeters(updated.widthInMeters());
         toBeUpdated.setHeightInMeters(updated.heightInMeters());
@@ -131,6 +132,7 @@ public class ProductServiceImpl implements ProductService {
         innerProduct.setName(updated.name());
         innerProduct.setNetWeightInKg(updated.netWeightInKg());
         innerProduct.setDescription(updated.description());
+        innerProduct.setBrand(updated.brand());
 
         Price price = innerProduct.getPrice();
         price.setAmount(updated.priceAmount());
@@ -148,11 +150,11 @@ public class ProductServiceImpl implements ProductService {
         toBeUpdated.setProduct(innerProduct);
     }
 
-    private List<Category> fetchCategoriesByIds(List<Integer> ids) {
+    private List<Category> fetchCategoriesByIds(Set<Integer> ids) {
 
         List<Category> foundCategories = categoryRepository.findAllByIdIn(ids);
         List<Integer> foundIds = foundCategories.stream().map(Category::getId).toList();
-        ids.removeAll(foundIds);
+        foundIds.forEach(ids::remove);
         for (Integer missedId : ids) {
             throw new CategoryNotFoundException(missedId);
         }

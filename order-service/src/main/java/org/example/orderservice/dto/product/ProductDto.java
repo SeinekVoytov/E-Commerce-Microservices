@@ -2,6 +2,7 @@ package org.example.orderservice.dto.product;
 
 import lombok.Builder;
 
+import java.util.List;
 import java.util.Set;
 
 @Builder
@@ -10,8 +11,9 @@ public record ProductDto (
         String name,
         Double netWeightInKg,
         String description,
+        String brand,
         Set<String> images,
         PriceDto price,
-        Set<CategoryDto> categories
+        List<CategoryDto> categories
 ) {
 }

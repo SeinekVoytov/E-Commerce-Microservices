@@ -1,4 +1,4 @@
-package org.example.productservice.dto;
+package org.example.orderservice.dto.product;
 
 import java.util.Set;
 

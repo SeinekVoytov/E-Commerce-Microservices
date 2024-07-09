@@ -1,9 +1,9 @@
 package org.example.orderservice.model.product;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -26,23 +26,32 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "category_seq")
     private Integer id;
 
+    @ManyToOne
+    @JoinColumn(name = "parent_category_id")
+    private Category parentCategory;
+
+    @OneToMany(
+            mappedBy = "parentCategory",
+            cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
+            orphanRemoval = true
+    )
+    private Set<Category> childCategories;
+
     @ManyToMany(mappedBy = "categories", cascade = CascadeType.PERSIST)
-    @JsonIgnore
-    private Set<Product> products;
+    private List<Product> products;
 
     private String name;
-    private Integer count;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Category category = (Category) o;
-        return Objects.equals(id, category.id) && Objects.equals(products, category.products) && Objects.equals(name, category.name) && Objects.equals(count, category.count);
+        return Objects.equals(id, category.id) && Objects.equals(parentCategory, category.parentCategory) && Objects.equals(products, category.products) && Objects.equals(name, category.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, products, name, count);
+        return Objects.hash(id, childCategories, products, name);
     }
 }

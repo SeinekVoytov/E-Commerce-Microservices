@@ -3,6 +3,7 @@ package org.example.orderservice.model.product;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -32,6 +33,8 @@ public class Product {
 
     private String description;
 
+    private String brand;
+
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "owner_id", referencedColumnName = "id")
     private Set<Image> images;
@@ -45,7 +48,7 @@ public class Product {
             joinColumns = @JoinColumn(name = "product_id"),
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
-    private Set<Category> categories;
+    private List<Category> categories;
 
     @PreRemove
     private void removeMappingWithCategories() {

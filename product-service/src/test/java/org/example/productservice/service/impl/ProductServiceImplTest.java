@@ -22,7 +22,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -122,8 +121,8 @@ class ProductServiceImplTest {
                 brand,
                 Collections.emptySet(),
                 new PriceDto(priceAmount, currency),
+                Collections.emptyList(),
                 countryManufacturer,
-                Collections.emptySet(),
                 lengthInMeters,
                 widthInMeters,
                 heightInMeters,
@@ -281,9 +280,8 @@ class ProductServiceImplTest {
                 Collections.emptySet(),
                 new BigDecimal("123.456"),
                 newCurrency,
-                Collections.emptySet(),
                 "countryManufacturer",
-                Collections.emptyList(),
+                Collections.emptySet(),
                 newLength,
                 1.0,
                 1.0,
