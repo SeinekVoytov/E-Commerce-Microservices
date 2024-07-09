@@ -53,7 +53,7 @@ public interface ProductService {
         return (order.isDescending()) ? comparator.reversed() : comparator;
     }
 
-    Page<ProductDto> getAllShortProduct(Pageable pageable,
+    Page<ProductDto> getAllProducts(Pageable pageable,
                                         String category,
                                         BigDecimal minPrice,
                                         BigDecimal maxPrice);

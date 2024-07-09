@@ -128,11 +128,11 @@ class ProductServiceImplTest {
     }
 
     @Test
-    void getAllShortProduct_ShouldThrowInvalidQueryParameterException_WhenUnknownOrderSpecified() {
+    void getAllProducts_ShouldThrowInvalidQueryParameterException_WhenUnknownOrderSpecified() {
 
         assertThrows(
                 InvalidQueryParameterException.class,
-                () -> service.getAllShortProduct(PageRequest.of(
+                () -> service.getAllProducts(PageRequest.of(
                         1, 10, Sort.by(Sort.Order.asc("category"))), null, null, null
                 )
         );
@@ -141,7 +141,7 @@ class ProductServiceImplTest {
     }
 
     @Test
-    void getAllShortProduct_ShouldReturnListWithOneElement_WhenOneProductExists() {
+    void getAllProducts__ShouldReturnListWithOneElement_WhenOneProductExists() {
 
         var pageNumber = 0;
         var pageSize = 10;
@@ -155,7 +155,7 @@ class ProductServiceImplTest {
         when(productMapper.toDto(any(Product.class)))
                 .thenReturn(productDto);
 
-        var actual = service.getAllShortProduct(pageable, null, null, null);
+        var actual = service.getAllProducts(pageable, null, null, null);
 
         var expectedContent = List.of(productDto);
 
