@@ -1,35 +1,46 @@
 package org.example.productservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.productservice.dto.RequestProductDto;
 import org.example.productservice.dto.ProductDetailsDto;
 import org.example.productservice.dto.ProductDto;
+import org.example.productservice.dto.RequestProductDto;
+import org.example.productservice.elasticsearch.ElasticSearchService;
 import org.example.productservice.exception.CategoryNotFoundException;
 import org.example.productservice.exception.ImageNotFoundException;
-import org.example.productservice.exception.InvalidQueryParameterException;
 import org.example.productservice.exception.ProductNotFoundException;
-import org.example.productservice.mapper.*;
+import org.example.productservice.mapper.ProductDetailsMapper;
+import org.example.productservice.mapper.ProductMapper;
+import org.example.productservice.mapper.RequestProductMapper;
 import org.example.productservice.model.*;
 import org.example.productservice.repository.CategoryRepository;
 import org.example.productservice.repository.ImageRepository;
 import org.example.productservice.repository.ProductDetailsRepository;
 import org.example.productservice.repository.ProductRepository;
+import org.example.productservice.service.CategoryService;
 import org.example.productservice.service.ProductService;
-import org.springframework.data.domain.*;
+import org.example.productservice.util.PaginationUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-    private static final Set<String> AVAILABLE_SORT_PARAMETERS = Set.of("name", "price.amount");
+    private final CategoryService categoryService;
 
-    private final ProductRepository shortRepository;
-    private final ProductDetailsRepository longRepository;
+    private final ElasticSearchService elasticSearchService;
+
+    private final ProductRepository productRepository;
+    private final ProductDetailsRepository detailsRepository;
     private final CategoryRepository categoryRepository;
     private final ImageRepository imageRepository;
 
@@ -38,14 +49,27 @@ public class ProductServiceImpl implements ProductService {
     private final RequestProductMapper requestProductMapper;
 
     @Override
-    public Page<ProductDto> getAllShortProduct(Pageable pageable) {
-        validateSortParameters(pageable.getSort());
-        return shortRepository.findAll(pageable).map(productMapper::toDto);
+    public Page<ProductDto> getAllProducts(Pageable pageable,
+                                               String category,
+                                               BigDecimal minPrice,
+                                               BigDecimal maxPrice) {
+
+        ProductService.validateSortParameters(pageable.getSort());
+        Predicate<Product> filter = createProductsFilter(minPrice, maxPrice);
+
+        if (category == null) {
+            List<Product> products = shortRepository.findAll(pageable.getSort());
+            Function<Product, ProductDto> mapper = productMapper::toDto;
+
+            return PaginationUtils.collectionToPageWithFilter(products, pageable, mapper, filter);
+        }
+
+        return categoryService.getProductsByCategory(category, pageable, filter);
     }
 
     @Override
     public ProductDetailsDto getById(int id) {
-        ProductDetails productDetails = longRepository.findById(id)
+        ProductDetails productDetails = detailsRepository.findById(id)
                 .orElseThrow(ProductNotFoundException::new);
 
         return detailsMapper.toDto(productDetails);
@@ -53,16 +77,17 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDetailsDto deleteById(int id) {
-        ProductDetails productToBeDeleted = longRepository.findById(id)
+        ProductDetails productToBeDeleted = detailsRepository.findById(id)
                 .orElseThrow(ProductNotFoundException::new);
 
-        longRepository.delete(productToBeDeleted);
+        detailsRepository.delete(productToBeDeleted);
         return detailsMapper.toDto(productToBeDeleted);
     }
 
     @Override
     public ProductDetailsDto updateProduct(int id, RequestProductDto updatedProduct) {
-        Optional<ProductDetails> optionalProductDetails = longRepository.findById(id);
+
+        Optional<ProductDetails> optionalProductDetails = detailsRepository.findById(id);
 
         if (optionalProductDetails.isEmpty()) {
             return createProduct(updatedProduct);
@@ -70,7 +95,9 @@ public class ProductServiceImpl implements ProductService {
 
         ProductDetails productToBeUpdated = optionalProductDetails.get();
         updateProduct(productToBeUpdated, updatedProduct);
-        productToBeUpdated = longRepository.save(productToBeUpdated);
+        productToBeUpdated = detailsRepository.save(productToBeUpdated);
+        elasticSearchService.update(productToBeUpdated.getProduct());
+
         return detailsMapper.toDto(productToBeUpdated);
     }
 
@@ -87,7 +114,9 @@ public class ProductServiceImpl implements ProductService {
                 fetchImagesByUrls(newProductData.images())
         );
 
-        createdProduct = longRepository.save(createdProduct);
+        createdProduct = detailsRepository.save(createdProduct);
+        elasticSearchService.save(createdProduct.getProduct());
+
         return detailsMapper.toDto(createdProduct);
     }
 
@@ -119,10 +148,10 @@ public class ProductServiceImpl implements ProductService {
         toBeUpdated.setProduct(innerProduct);
     }
 
-    private Set<Category> fetchCategoriesByIds(Set<Integer> ids) {
+    private List<Category> fetchCategoriesByIds(List<Integer> ids) {
 
-        Set<Category> foundCategories = categoryRepository.findAllByIdIn(ids);
-        Set<Integer> foundIds = foundCategories.stream().map(Category::getId).collect(Collectors.toSet());
+        List<Category> foundCategories = categoryRepository.findAllByIdIn(ids);
+        List<Integer> foundIds = foundCategories.stream().map(Category::getId).toList();
         ids.removeAll(foundIds);
         for (Integer missedId : ids) {
             throw new CategoryNotFoundException(missedId);
@@ -143,12 +172,11 @@ public class ProductServiceImpl implements ProductService {
         return foundImages;
     }
 
-    private void validateSortParameters(Sort sort) {
-        for (Sort.Order order : sort) {
-            String property = order.getProperty();
-            if (!AVAILABLE_SORT_PARAMETERS.contains(property)) {
-                throw new InvalidQueryParameterException("sort", property);
-            }
-        }
+    private Predicate<Product> createProductsFilter(BigDecimal minPrice, BigDecimal maxPrice) {
+        return product -> {
+            BigDecimal priceAmount = product.getPrice().getAmount();
+            return (minPrice == null || priceAmount.compareTo(minPrice) >= 0) &&
+                    (maxPrice == null || priceAmount.compareTo(maxPrice) <= 0);
+        };
     }
 }

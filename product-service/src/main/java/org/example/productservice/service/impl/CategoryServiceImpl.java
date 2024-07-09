@@ -1,20 +1,24 @@
 package org.example.productservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.productservice.dto.CategoryWithChildrenDto;
-import org.example.productservice.dto.CategoryWithParentDto;
-import org.example.productservice.dto.RequestCategoryDto;
-import org.example.productservice.dto.UpdateCategoryDto;
+import org.example.productservice.dto.*;
 import org.example.productservice.exception.CategoryAlreadyExistsException;
 import org.example.productservice.exception.CategoryNotFoundException;
 import org.example.productservice.mapper.CategoryMapper;
+import org.example.productservice.mapper.ProductMapper;
 import org.example.productservice.model.Category;
+import org.example.productservice.model.Product;
 import org.example.productservice.repository.CategoryRepository;
 import org.example.productservice.service.CategoryService;
+import org.example.productservice.service.ProductService;
+import org.example.productservice.util.PaginationUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
@@ -24,6 +28,7 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     private final CategoryMapper categoryMapper;
+    private final ProductMapper productMapper;
 
     @Override
     public Set<CategoryWithChildrenDto> getRootCategories() {
@@ -48,7 +53,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category createdCategory = Category.builder()
                 .parentCategory(parent)
                 .childCategories(Collections.emptySet())
-                .products(Collections.emptySet())
+                .products(Collections.emptyList())
                 .name(data.name())
                 .build();
 
@@ -70,6 +75,35 @@ public class CategoryServiceImpl implements CategoryService {
         Category categoryToBeDeleted = getCategoryByIdentifier(identifier);
         categoryRepository.delete(categoryToBeDeleted);
         return categoryMapper.toDtoWithChildren(categoryToBeDeleted);
+    }
+
+    @Override
+    public Page<ProductDto> getProductsByCategory(String identifier,
+                                                  Pageable pageable,
+                                                  Predicate<Product> filter) {
+
+        Category category = getCategoryByIdentifier(identifier);
+        List<Product> categoryProducts = retrieveAllProductsByCategory(category);
+
+        Comparator<Product> cmp = ProductService.getComparatorBySort(pageable.getSort());
+        Function<Product, ProductDto> mapper = productMapper::toDto;
+
+        return PaginationUtils.collectionToPageWithSortAndFilter(
+                categoryProducts, pageable, mapper, filter, cmp
+        );
+    }
+
+    private List<Product> retrieveAllProductsByCategory(Category category) {
+        List<Product> products = new ArrayList<>();
+
+        Set<Category> childCategories = category.getChildCategories();
+        if (!childCategories.isEmpty()) {
+            for (Category child : childCategories) {
+                products.addAll(retrieveAllProductsByCategory(child));
+            }
+        }
+
+        return products;
     }
 
     private Category getCategoryByIdentifier(String identifier) {

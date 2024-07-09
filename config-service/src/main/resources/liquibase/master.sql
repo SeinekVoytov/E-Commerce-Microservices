@@ -26,6 +26,8 @@ CREATE SEQUENCE IF NOT EXISTS category_seq START 1 INCREMENT 20 OWNED BY categor
 CREATE TABLE IF NOT EXISTS product (
     id INT PRIMARY KEY,
     name TEXT NOT NULL,
+    net_weight_kg DOUBLE PRECISION NOT NULL CHECK ( net_weight_kg > 0 ),
+    description TEXT NOT NULL,
     price_id INT REFERENCES price (id) ON DELETE CASCADE
 );
 
@@ -48,7 +50,6 @@ CREATE TABLE IF NOT EXISTS product_details (
     length_meters DOUBLE PRECISION NOT NULL CHECK ( length_meters > 0 ),
     width_meters DOUBLE PRECISION NOT NULL CHECK ( width_meters > 0 ),
     height_meters DOUBLE PRECISION NOT NULL CHECK ( height_meters > 0 ),
-    net_weight_kg DOUBLE PRECISION NOT NULL CHECK ( net_weight_kg > 0 ),
     gross_weight_kg DOUBLE PRECISION NOT NULL CHECK ( gross_weight_kg > 0 )
 );
 
@@ -104,25 +105,11 @@ CREATE TABLE IF NOT EXISTS delivery (
 );
 
 CREATE SEQUENCE IF NOT EXISTS delivery_seq START 1 INCREMENT 20 OWNED BY delivery.id;
-
-CREATE SEQUENCE IF NOT EXISTS delivery_seq START 1 INCREMENT 20 OWNED BY delivery.id;
 --rollback DROP SEQUENCE IF EXISTS delivery_seq;
 --rollback DROP TABLE IF EXISTS delivery;
 
 
 --changeset SeinekVoytov:10 dbms:postgresql
-CREATE TABLE IF NOT EXISTS "order" (
-    id INT PRIMARY KEY,
-    delivery_id INT REFERENCES delivery (id),
-    user_id UUID NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE SEQUENCE IF NOT EXISTS order_seq START 1 INCREMENT 20 OWNED BY "order".id;
---rollback DROP SEQUENCE IF EXISTS order_seq;
---rollback DROP TABLE IF EXISTS "order";
-
---changeset SeinekVoytov:11 dbms:postgresql
 CREATE TABLE IF NOT EXISTS "order" (
     id INT PRIMARY KEY,
     delivery_id INT REFERENCES delivery (id),

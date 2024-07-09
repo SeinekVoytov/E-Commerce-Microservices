@@ -1,6 +1,9 @@
 package org.example.productservice.service.impl;
 
-import org.example.productservice.dto.*;
+import org.example.productservice.dto.PriceDto;
+import org.example.productservice.dto.ProductDetailsDto;
+import org.example.productservice.dto.ProductDto;
+import org.example.productservice.dto.RequestProductDto;
 import org.example.productservice.exception.CategoryNotFoundException;
 import org.example.productservice.exception.ImageNotFoundException;
 import org.example.productservice.exception.InvalidQueryParameterException;
@@ -19,7 +22,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -85,7 +91,7 @@ class ProductServiceImplTest {
                         .amount(priceAmount)
                         .currency(currency)
                         .build())
-                .categories(Collections.emptySet())
+                .categories(Collections.emptyList())
                 .images(Collections.emptySet())
                 .build();
 
@@ -106,7 +112,7 @@ class ProductServiceImplTest {
                 brand,
                 Collections.emptySet(),
                 new PriceDto(priceAmount, currency),
-                Collections.emptySet()
+                Collections.emptyList()
         );
 
         detailsDto = new ProductDetailsDto(
@@ -116,8 +122,8 @@ class ProductServiceImplTest {
                 brand,
                 Collections.emptySet(),
                 new PriceDto(priceAmount, currency),
-                Collections.emptySet(),
                 countryManufacturer,
+                Collections.emptySet(),
                 lengthInMeters,
                 widthInMeters,
                 heightInMeters,
@@ -127,12 +133,12 @@ class ProductServiceImplTest {
     }
 
     @Test
-    void getAllShortProduct_ShouldThrowInvalidQueryParameterException_WhenUnknownOrderSpecified() {
+    void getAllProducts_ShouldThrowInvalidQueryParameterException_WhenUnknownOrderSpecified() {
 
         assertThrows(
                 InvalidQueryParameterException.class,
-                () -> service.getAllShortProduct(PageRequest.of(
-                        1, 10, Sort.by(Sort.Order.asc("category")))
+                () -> service.getAllProducts(PageRequest.of(
+                        1, 10, Sort.by(Sort.Order.asc("category"))), null, null, null
                 )
         );
 
@@ -140,22 +146,21 @@ class ProductServiceImplTest {
     }
 
     @Test
-    void getAllShortProduct_ShouldReturnListWithOneElement_WhenOneProductExists() {
+    void getAllProducts__ShouldReturnListWithOneElement_WhenOneProductExists() {
 
         var pageNumber = 0;
         var pageSize = 10;
         var totalElements = 1;
 
         var pageable = PageRequest.of(pageNumber, pageSize);
-        var resultPage = new PageImpl<>(List.of(product), pageable, totalElements);
 
-        when(productRepository.findAll(any(Pageable.class)))
-                .thenReturn(resultPage);
+        when(productRepository.findAll(any(Sort.class)))
+                .thenReturn(List.of(product));
 
         when(productMapper.toDto(any(Product.class)))
                 .thenReturn(productDto);
 
-        var actual = service.getAllShortProduct(pageable);
+        var actual = service.getAllProducts(pageable, null, null, null);
 
         var expectedContent = List.of(productDto);
 
@@ -278,6 +283,7 @@ class ProductServiceImplTest {
                 newCurrency,
                 Collections.emptySet(),
                 "countryManufacturer",
+                Collections.emptyList(),
                 newLength,
                 1.0,
                 1.0,
@@ -285,8 +291,8 @@ class ProductServiceImplTest {
                 newGrossWeight
         );
 
-        when(categoryRepository.findAllByIdIn(any(Set.class)))
-                .thenReturn(Collections.emptySet());
+        when(categoryRepository.findAllByIdIn(any(Collection.class)))
+                .thenReturn(Collections.emptyList());
 
         when(imageRepository.findAllByUrlIn(any(Set.class)))
                 .thenReturn(Collections.emptySet());
@@ -343,7 +349,7 @@ class ProductServiceImplTest {
                 .thenReturn(productDetails);
 
         when(categoryRepository.findAllByIdIn(requestData.categoryIds()))
-                .thenReturn(Collections.emptySet());
+                .thenReturn(Collections.emptyList());
 
         assertThrows(
                 CategoryNotFoundException.class,
@@ -359,9 +365,9 @@ class ProductServiceImplTest {
         doAnswer(invocationOnMock -> invocationOnMock.<ProductDetails>getArgument(0))
                 .when(detailsRepository).save(any(ProductDetails.class));
 
-        Category categoryToBeAdded = new Category(10, null, Collections.emptySet(), Collections.emptySet(), "category");
-        when(categoryRepository.findAllByIdIn(any(Set.class)))
-                .thenReturn(Set.of(categoryToBeAdded));
+        Category categoryToBeAdded = new Category(10, null, Collections.emptySet(), Collections.emptyList(), "category");
+        when(categoryRepository.findAllByIdIn(any(Collection.class)))
+                .thenReturn(List.of(categoryToBeAdded));
 
         when(imageRepository.findAllByUrlIn(any(Set.class)))
                 .thenReturn(Collections.emptySet());
@@ -414,8 +420,8 @@ class ProductServiceImplTest {
         doAnswer(invocationOnMock -> invocationOnMock.<ProductDetails>getArgument(0))
                 .when(detailsRepository).save(any(ProductDetails.class));
 
-        when(categoryRepository.findAllByIdIn(any(Set.class)))
-                .thenReturn(Collections.emptySet());
+        when(categoryRepository.findAllByIdIn(any(Collection.class)))
+                .thenReturn(Collections.emptyList());
 
         Image imageToBeAdded = new Image(10, "someUrl");
         when(imageRepository.findAllByUrlIn(any(Set.class)))
@@ -448,8 +454,8 @@ class ProductServiceImplTest {
         doAnswer(invocationOnMock -> invocationOnMock.<ProductDetails>getArgument(0))
                 .when(detailsRepository).save(any(ProductDetails.class));
 
-        when(categoryRepository.findAllByIdIn(any(Set.class)))
-                .thenReturn(Collections.emptySet());
+        when(categoryRepository.findAllByIdIn(any(Collection.class)))
+                .thenReturn(Collections.emptyList());
 
         when(imageRepository.findAllByUrlIn(any(Set.class)))
                 .thenReturn(Collections.emptySet());
@@ -466,8 +472,8 @@ class ProductServiceImplTest {
                 new HashSet<>(),
                 product.getPrice().getAmount(),
                 product.getPrice().getCurrency(),
-                new HashSet<>(),
                 productDetails.getCountryManufacturer(),
+                new HashSet<>(),
                 productDetails.getLengthInMeters(),
                 productDetails.getWidthInMeters(),
                 productDetails.getHeightInMeters(),
