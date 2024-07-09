@@ -1,8 +1,8 @@
 package org.example.productservice.service;
 
-import org.example.productservice.dto.RequestProductDto;
 import org.example.productservice.dto.ProductDetailsDto;
 import org.example.productservice.dto.ProductDto;
+import org.example.productservice.dto.RequestProductDto;
 import org.example.productservice.exception.InvalidQueryParameterException;
 import org.example.productservice.model.Product;
 import org.springframework.data.domain.Page;
@@ -12,6 +12,7 @@ import org.springframework.data.domain.Sort;
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public interface ProductService {
@@ -57,6 +58,10 @@ public interface ProductService {
                                         String category,
                                         BigDecimal minPrice,
                                         BigDecimal maxPrice);
+
+    List<ProductDto> search(String keyword);
+
+    List<ProductDto> reindex();
 
     ProductDetailsDto getById(int id);
 
