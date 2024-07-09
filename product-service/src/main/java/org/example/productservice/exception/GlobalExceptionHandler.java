@@ -1,5 +1,8 @@
 package org.example.productservice.exception;
 
+import org.example.productservice.elasticsearch.exception.ProductIndexingException;
+import org.example.productservice.elasticsearch.exception.ProductUpdatingException;
+import org.example.productservice.elasticsearch.exception.SearchTextIsTooShortException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -31,7 +34,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(
             {
                     InvalidQueryParameterException.class,
-                    CategoryAlreadyExistsException.class
+                    CategoryAlreadyExistsException.class,
+                    SearchTextIsTooShortException.class
             }
     )
     public ResponseEntity<ErrorObject> handleInvalidQueryParameterException(Exception exc) {
@@ -53,6 +57,19 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(
                 buildErrorObject(HttpStatus.BAD_REQUEST.value(), errors.toString()),
                 HttpStatus.BAD_REQUEST
+          );
+    }
+
+    @ExceptionHandler(
+            {
+                    ProductIndexingException.class,
+                    ProductUpdatingException.class
+            }
+    )
+    public ResponseEntity<ErrorObject> handleProductIndexingException(ProductIndexingException exc) {
+        return new ResponseEntity<>(
+                buildErrorObject(HttpStatus.INTERNAL_SERVER_ERROR.value(), exc.getMessage()),
+                HttpStatus.INTERNAL_SERVER_ERROR
         );
     }
 
