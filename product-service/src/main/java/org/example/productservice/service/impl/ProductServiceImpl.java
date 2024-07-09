@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.productservice.dto.RequestProductDto;
 import org.example.productservice.dto.ProductDetailsDto;
 import org.example.productservice.dto.ProductDto;
+import org.example.productservice.elasticsearch.ElasticSearchService;
 import org.example.productservice.exception.CategoryNotFoundException;
 import org.example.productservice.exception.ImageNotFoundException;
 import org.example.productservice.exception.InvalidQueryParameterException;
@@ -28,8 +29,10 @@ public class ProductServiceImpl implements ProductService {
 
     private static final Set<String> AVAILABLE_SORT_PARAMETERS = Set.of("name", "price.amount");
 
-    private final ProductRepository shortRepository;
-    private final ProductDetailsRepository longRepository;
+    private final ElasticSearchService elasticSearchService;
+
+    private final ProductRepository productRepository;
+    private final ProductDetailsRepository detailsRepository;
     private final CategoryRepository categoryRepository;
     private final ImageRepository imageRepository;
 
@@ -38,14 +41,14 @@ public class ProductServiceImpl implements ProductService {
     private final RequestProductMapper requestProductMapper;
 
     @Override
-    public Page<ProductDto> getAllShortProduct(Pageable pageable) {
+    public Page<ProductDto> getAllProducts(Pageable pageable) {
         validateSortParameters(pageable.getSort());
-        return shortRepository.findAll(pageable).map(productMapper::toDto);
+        return productRepository.findAll(pageable).map(productMapper::toDto);
     }
 
     @Override
     public ProductDetailsDto getById(int id) {
-        ProductDetails productDetails = longRepository.findById(id)
+        ProductDetails productDetails = detailsRepository.findById(id)
                 .orElseThrow(ProductNotFoundException::new);
 
         return detailsMapper.toDto(productDetails);
@@ -53,16 +56,17 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDetailsDto deleteById(int id) {
-        ProductDetails productToBeDeleted = longRepository.findById(id)
+        ProductDetails productToBeDeleted = detailsRepository.findById(id)
                 .orElseThrow(ProductNotFoundException::new);
 
-        longRepository.delete(productToBeDeleted);
+        detailsRepository.delete(productToBeDeleted);
         return detailsMapper.toDto(productToBeDeleted);
     }
 
     @Override
     public ProductDetailsDto updateProduct(int id, RequestProductDto updatedProduct) {
-        Optional<ProductDetails> optionalProductDetails = longRepository.findById(id);
+
+        Optional<ProductDetails> optionalProductDetails = detailsRepository.findById(id);
 
         if (optionalProductDetails.isEmpty()) {
             return createProduct(updatedProduct);
@@ -70,7 +74,9 @@ public class ProductServiceImpl implements ProductService {
 
         ProductDetails productToBeUpdated = optionalProductDetails.get();
         updateProduct(productToBeUpdated, updatedProduct);
-        productToBeUpdated = longRepository.save(productToBeUpdated);
+        productToBeUpdated = detailsRepository.save(productToBeUpdated);
+        elasticSearchService.update(productToBeUpdated.getProduct());
+
         return detailsMapper.toDto(productToBeUpdated);
     }
 
@@ -87,7 +93,9 @@ public class ProductServiceImpl implements ProductService {
                 fetchImagesByUrls(newProductData.images())
         );
 
-        createdProduct = longRepository.save(createdProduct);
+        createdProduct = detailsRepository.save(createdProduct);
+        elasticSearchService.save(createdProduct.getProduct());
+
         return detailsMapper.toDto(createdProduct);
     }
 
