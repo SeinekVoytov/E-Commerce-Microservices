@@ -1,6 +1,7 @@
 package org.example.productservice.dto;
 
 import lombok.Builder;
+import org.example.productservice.model.Country;
 
 import java.util.List;
 import java.util.Set;
@@ -14,7 +15,7 @@ public record ProductDetailsDto(
         Set<String> images,
         PriceDto price,
         List<CategoryDto> categories,
-        String countryManufacturer,
+        Country countryManufacturer,
         Double lengthInMeters,
         Double widthInMeters,
         Double heightInMeters,

@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Builder;
+import org.example.productservice.model.Country;
 import org.hibernate.validator.constraints.URL;
 
 import java.math.BigDecimal;
@@ -32,8 +33,7 @@ public record RequestProductDto(
      @NotNull(message = "Price currency cannot be null")
      Currency priceCurrency,
 
-     @NotBlank(message = "Country manufacturer cannot be blank")
-     String countryManufacturer,
+     Country countryManufacturer,
 
      @NotNull(message = "Category IDs set cannot be null")
      Set<@Positive(message = "Category ID must be a positive integer") Integer> categoryIds,

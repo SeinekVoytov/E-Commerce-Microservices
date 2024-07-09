@@ -122,22 +122,26 @@ public class ProductServiceImpl implements ProductService {
 
     private void updateProduct(ProductDetails toBeUpdated, RequestProductDto updated) {
 
-        toBeUpdated.setCountryManufacturer(updated.countryManufacturer());
         toBeUpdated.setLengthInMeters(updated.lengthInMeters());
         toBeUpdated.setWidthInMeters(updated.widthInMeters());
         toBeUpdated.setHeightInMeters(updated.heightInMeters());
         toBeUpdated.setGrossWeightInKg(updated.grossWeightInKg());
 
+        CountryManufacturer manufacturer = toBeUpdated.getCountryManufacturer();
+        manufacturer.setName(updated.countryManufacturer());
+
         Product innerProduct = toBeUpdated.getProduct();
         innerProduct.setName(updated.name());
         innerProduct.setNetWeightInKg(updated.netWeightInKg());
         innerProduct.setDescription(updated.description());
-        innerProduct.setBrand(updated.brand());
 
         Price price = innerProduct.getPrice();
         price.setAmount(updated.priceAmount());
         price.setCurrency(updated.priceCurrency());
         innerProduct.setPrice(price);
+
+        Brand brand = innerProduct.getBrand();
+        brand.setName(updated.brand());
 
         innerProduct.setCategories(
                 fetchCategoriesByIds(updated.categoryIds())
