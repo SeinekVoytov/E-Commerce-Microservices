@@ -1,34 +1,41 @@
 package org.example.productservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.productservice.dto.RequestProductDto;
 import org.example.productservice.dto.ProductDetailsDto;
 import org.example.productservice.dto.ProductDto;
+import org.example.productservice.dto.RequestProductDto;
 import org.example.productservice.elasticsearch.ElasticSearchService;
 import org.example.productservice.exception.CategoryNotFoundException;
 import org.example.productservice.exception.ImageNotFoundException;
-import org.example.productservice.exception.InvalidQueryParameterException;
 import org.example.productservice.exception.ProductNotFoundException;
-import org.example.productservice.mapper.*;
+import org.example.productservice.mapper.ProductDetailsMapper;
+import org.example.productservice.mapper.ProductMapper;
+import org.example.productservice.mapper.RequestProductMapper;
 import org.example.productservice.model.*;
 import org.example.productservice.repository.CategoryRepository;
 import org.example.productservice.repository.ImageRepository;
 import org.example.productservice.repository.ProductDetailsRepository;
 import org.example.productservice.repository.ProductRepository;
+import org.example.productservice.service.CategoryService;
 import org.example.productservice.service.ProductService;
-import org.springframework.data.domain.*;
+import org.example.productservice.util.PaginationUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-    private static final Set<String> AVAILABLE_SORT_PARAMETERS = Set.of("name", "price.amount");
+    private final CategoryService categoryService;
 
     private final ElasticSearchService elasticSearchService;
 
@@ -42,9 +49,22 @@ public class ProductServiceImpl implements ProductService {
     private final RequestProductMapper requestProductMapper;
 
     @Override
-    public Page<ProductDto> getAllProducts(Pageable pageable) {
-        validateSortParameters(pageable.getSort());
-        return productRepository.findAll(pageable).map(productMapper::toDto);
+    public Page<ProductDto> getAllProducts(Pageable pageable,
+                                               String category,
+                                               BigDecimal minPrice,
+                                               BigDecimal maxPrice) {
+
+        ProductService.validateSortParameters(pageable.getSort());
+        Predicate<Product> filter = createProductsFilter(minPrice, maxPrice);
+
+        if (category == null) {
+            List<Product> products = shortRepository.findAll(pageable.getSort());
+            Function<Product, ProductDto> mapper = productMapper::toDto;
+
+            return PaginationUtils.collectionToPageWithFilter(products, pageable, mapper, filter);
+        }
+
+        return categoryService.getProductsByCategory(category, pageable, filter);
     }
 
     @Override
@@ -152,12 +172,11 @@ public class ProductServiceImpl implements ProductService {
         return foundImages;
     }
 
-    private void validateSortParameters(Sort sort) {
-        for (Sort.Order order : sort) {
-            String property = order.getProperty();
-            if (!AVAILABLE_SORT_PARAMETERS.contains(property)) {
-                throw new InvalidQueryParameterException("sort", property);
-            }
-        }
+    private Predicate<Product> createProductsFilter(BigDecimal minPrice, BigDecimal maxPrice) {
+        return product -> {
+            BigDecimal priceAmount = product.getPrice().getAmount();
+            return (minPrice == null || priceAmount.compareTo(minPrice) >= 0) &&
+                    (maxPrice == null || priceAmount.compareTo(maxPrice) <= 0);
+        };
     }
 }

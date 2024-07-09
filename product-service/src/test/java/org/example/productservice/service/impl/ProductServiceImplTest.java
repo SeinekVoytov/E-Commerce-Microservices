@@ -1,6 +1,9 @@
 package org.example.productservice.service.impl;
 
-import org.example.productservice.dto.*;
+import org.example.productservice.dto.PriceDto;
+import org.example.productservice.dto.ProductDetailsDto;
+import org.example.productservice.dto.ProductDto;
+import org.example.productservice.dto.RequestProductDto;
 import org.example.productservice.exception.CategoryNotFoundException;
 import org.example.productservice.exception.ImageNotFoundException;
 import org.example.productservice.exception.InvalidQueryParameterException;
@@ -19,7 +22,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -127,7 +133,7 @@ class ProductServiceImplTest {
         assertThrows(
                 InvalidQueryParameterException.class,
                 () -> service.getAllProducts(PageRequest.of(
-                        1, 10, Sort.by(Sort.Order.asc("category")))
+                        1, 10, Sort.by(Sort.Order.asc("category"))), null, null, null
                 )
         );
 
@@ -135,22 +141,21 @@ class ProductServiceImplTest {
     }
 
     @Test
-    void getAllProductsExists() {
+    void getAllProducts__ShouldReturnListWithOneElement_WhenOneProductExists() {
 
         var pageNumber = 0;
         var pageSize = 10;
         var totalElements = 1;
 
         var pageable = PageRequest.of(pageNumber, pageSize);
-        var resultPage = new PageImpl<>(List.of(product), pageable, totalElements);
 
-        when(productRepository.findAll(any(Pageable.class)))
-                .thenReturn(resultPage);
+        when(productRepository.findAll(any(Sort.class)))
+                .thenReturn(List.of(product));
 
         when(productMapper.toDto(any(Product.class)))
                 .thenReturn(productDto);
 
-        var actual = service.getAllProducts(pageable);
+        var actual = service.getAllProducts(pageable, null, null, null);
 
         var expectedContent = List.of(productDto);
 

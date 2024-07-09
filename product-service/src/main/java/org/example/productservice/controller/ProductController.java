@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+
 @RestController
 @RequestMapping("/products")
 @RequiredArgsConstructor
@@ -19,12 +21,17 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @GetMapping()
-    public ResponseEntity<Page<ProductDto>> getPage(Pageable pageable) {
-        return new ResponseEntity<>(productService.getAllProducts(pageable), HttpStatus.OK);
+    @GetMapping
+    public ResponseEntity<Page<ProductDto>> getPage(Pageable pageable,
+                                                    @RequestParam(required = false) String category,
+                                                    @RequestParam(required = false) BigDecimal minPrice,
+                                                    @RequestParam(required = false) BigDecimal maxPrice) {
+
+        Page<ProductDto> page = productService.getAllProducts(pageable, category, minPrice, maxPrice);
+        return new ResponseEntity<>(page, HttpStatus.OK);
     }
 
-    @PostMapping()
+    @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ProductDetailsDto> createProduct(@RequestBody @Valid RequestProductDto newProductData) {
         ProductDetailsDto response = productService.createProduct(newProductData);
@@ -51,4 +58,3 @@ public class ProductController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }
-
