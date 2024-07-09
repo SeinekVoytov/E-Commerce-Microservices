@@ -4,6 +4,7 @@ import org.example.productservice.dto.PriceDto;
 import org.example.productservice.dto.ProductDetailsDto;
 import org.example.productservice.dto.ProductDto;
 import org.example.productservice.dto.RequestProductDto;
+import org.example.productservice.elasticsearch.ElasticSearchService;
 import org.example.productservice.exception.CategoryNotFoundException;
 import org.example.productservice.exception.ImageNotFoundException;
 import org.example.productservice.exception.InvalidQueryParameterException;
@@ -56,6 +57,9 @@ class ProductServiceImplTest {
     @Mock
     private RequestProductMapper requestProductMapper;
 
+    @Mock
+    private ElasticSearchService elasticSearchService;
+
     @InjectMocks
     private ProductServiceImpl service;
 
@@ -72,7 +76,7 @@ class ProductServiceImplTest {
         final String name = "name";
         final String description = "description";
         final String brand = "brand";
-        final String countryManufacturer = "countryManufacturer";
+        final Country countryManufacturer = Country.ANDORRA;
         final BigDecimal priceAmount = new BigDecimal("123.456");
         final Currency currency = Currency.getInstance("USD");
         final Double lengthInMeters = 1.0;
@@ -84,11 +88,17 @@ class ProductServiceImplTest {
         product = Product.builder()
                 .id(id)
                 .name(name)
+                .description(description)
                 .netWeightInKg(netWeightInKg)
                 .price(Price.builder()
                         .id(id)
                         .amount(priceAmount)
                         .currency(currency)
+                        .build())
+                .brand(Brand.builder()
+                        .id(id)
+                        .name(brand)
+                        .products(Collections.emptySet())
                         .build())
                 .categories(Collections.emptyList())
                 .images(Collections.emptySet())
@@ -96,6 +106,11 @@ class ProductServiceImplTest {
 
         productDetails = ProductDetails.builder()
                 .id(id)
+                .countryManufacturer(CountryManufacturer.builder()
+                        .id(id)
+                        .name(countryManufacturer)
+                        .products(Collections.emptySet())
+                        .build())
                 .lengthInMeters(lengthInMeters)
                 .widthInMeters(widthInMeters)
                 .heightInMeters(heightInMeters)
@@ -280,7 +295,7 @@ class ProductServiceImplTest {
                 Collections.emptySet(),
                 new BigDecimal("123.456"),
                 newCurrency,
-                "countryManufacturer",
+                Country.ANDORRA,
                 Collections.emptySet(),
                 newLength,
                 1.0,
@@ -466,11 +481,11 @@ class ProductServiceImplTest {
         return new RequestProductDto(
                 product.getName(),
                 product.getDescription(),
-                product.getBrand(),
+                product.getBrand().getName(),
                 new HashSet<>(),
                 product.getPrice().getAmount(),
                 product.getPrice().getCurrency(),
-                productDetails.getCountryManufacturer(),
+                productDetails.getCountryManufacturer().getName(),
                 new HashSet<>(),
                 productDetails.getLengthInMeters(),
                 productDetails.getWidthInMeters(),
