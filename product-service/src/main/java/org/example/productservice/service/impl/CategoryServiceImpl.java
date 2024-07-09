@@ -83,8 +83,7 @@ public class CategoryServiceImpl implements CategoryService {
                                                   Predicate<Product> filter) {
 
         Category category = getCategoryByIdentifier(identifier);
-        List<Product> categoryProducts = new ArrayList<>();
-        retrieveAllProductsByCategory(categoryProducts, category);
+        List<Product> categoryProducts = retrieveAllProductsByCategory(category);
 
         Comparator<Product> cmp = ProductService.getComparatorBySort(pageable.getSort());
         Function<Product, ProductDto> mapper = productMapper::toDto;
@@ -94,16 +93,17 @@ public class CategoryServiceImpl implements CategoryService {
         );
     }
 
-    private void retrieveAllProductsByCategory(List<Product> accumulator, Category category) {
+    private List<Product> retrieveAllProductsByCategory(Category category) {
+        List<Product> products = new ArrayList<>();
 
         Set<Category> childCategories = category.getChildCategories();
         if (!childCategories.isEmpty()) {
             for (Category child : childCategories) {
-                retrieveAllProductsByCategory(accumulator, child);
+                products.addAll(retrieveAllProductsByCategory(child));
             }
         }
 
-        accumulator.addAll(category.getProducts());
+        return products;
     }
 
     private Category getCategoryByIdentifier(String identifier) {
