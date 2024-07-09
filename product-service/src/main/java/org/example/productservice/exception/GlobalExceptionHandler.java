@@ -30,6 +30,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(
             {
                     InvalidQueryParameterException.class,
+                    CategoryAlreadyExistsException.class,
                     SearchTextIsTooShortException.class
             }
     )

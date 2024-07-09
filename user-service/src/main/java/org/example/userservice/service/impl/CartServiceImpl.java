@@ -31,8 +31,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.UUID;
 
 @Service
@@ -95,13 +95,13 @@ public class CartServiceImpl implements CartService {
             Cart cart = cartRepository.findByUserId(userId)
                     .orElseGet(() -> Cart.builder()
                             .userId(userId)
-                            .items(new HashSet<>())
+                            .items(new ArrayList<>())
                             .build()
                     );
 
             CartItem newCartItem = buildNewCartItem(request.productId(), request.quantity());
 
-            cart.addItem(newCartItem);
+            addItemToCartIdempotently(cart, newCartItem);
             cartRepository.save(cart);
 
             return cartContentMapper.toResponse(cart);
@@ -119,20 +119,32 @@ public class CartServiceImpl implements CartService {
 
         if (cartIdFromCookie == null) {
             cart = Cart.builder()
-                    .items(Collections.singleton(newCartItem))
+                    .items(Collections.singletonList(newCartItem))
                     .build();
         } else {
 
             cart = cartRepository.findById(cartIdFromCookie)
                     .orElseThrow(() -> new InvalidCartIdCookieException(cartIdFromCookie));
 
-            cart.addItem(newCartItem);
+            addItemToCartIdempotently(cart, newCartItem);
         }
 
         cart = cartRepository.save(cart);
         addCartIdCookie(response, cart.getId());
 
         return cartContentMapper.toResponse(cart);
+    }
+
+    private void addItemToCartIdempotently(Cart cart, CartItem item) {
+        Integer toBeAddedProductId = item.getProduct().getId();
+        cart.getItems().stream()
+                .filter(cartItem -> cartItem.getProduct().getId().equals(toBeAddedProductId))
+                .findAny()
+                .ifPresentOrElse(
+                        alreadySavedItem -> alreadySavedItem.setQuantity(
+                                alreadySavedItem.getQuantity() + item.getQuantity()
+                        ),
+                        () -> cart.getItems().add(item));
     }
 
     @Override
@@ -274,8 +286,9 @@ public class CartServiceImpl implements CartService {
 
     private CartContentResponse emptyCartContentResponse() {
         return new CartContentResponse(
-                Collections.emptySet(),
-                Collections.emptyMap()
+                Collections.emptyList(),
+                Collections.emptyMap(),
+                0
         );
     }
 }

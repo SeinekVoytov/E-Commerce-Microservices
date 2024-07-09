@@ -10,7 +10,6 @@ import java.util.Set;
 @Getter
 @Setter
 @Builder
-@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 
@@ -29,7 +28,6 @@ public class Category {
 
     @ManyToMany(mappedBy = "categories", cascade = CascadeType.PERSIST)
     @JsonIgnore
-    @ToString.Exclude
     private Set<Product> products;
 
     private String name;
