@@ -197,3 +197,32 @@ ALTER TABLE product ADD COLUMN brand VARCHAR(256) NOT NULL DEFAULT 'Unknown';
 ALTER TABLE product_details ADD COLUMN country_manufacturer VARCHAR(64) NOT NULL DEFAULT 'Unknown';
 --rollback ALTER TABLE product DROP COLUMN IF EXISTS brand;
 --rollback ALTER TABLE product_details DROP COLUMN IF EXISTS country_manufacturer;
+
+--changeset SeinekVoytov:19 dbms:postgresql
+CREATE TABLE IF NOT EXISTS brand (
+    id INT PRIMARY KEY,
+    name VARCHAR NOT NULL UNIQUE
+);
+
+CREATE SEQUENCE IF NOT EXISTS brand_seq START 1 INCREMENT 20 OWNED BY brand.id;
+
+ALTER TABLE product DROP COLUMN brand;
+ALTER TABLE product ADD COLUMN brand_id INT REFERENCES brand(id) ON DELETE SET NULL;
+
+CREATE TABLE IF NOT EXISTS country_manufacturer (
+    id INT PRIMARY KEY,
+    name VARCHAR(64) NOT NULL UNIQUE
+);
+
+CREATE SEQUENCE IF NOT EXISTS country_seq START 1 INCREMENT 20 OWNED BY country_manufacturer.id;
+
+ALTER TABLE product_details DROP COLUMN country_manufacturer;
+ALTER TABLE product_details ADD COLUMN country_manufacturer_id INT REFERENCES country_manufacturer(id) ON DELETE SET NULL;
+--rollback ALTER TABLE product DROP COLUMN IF EXISTS brand_id;
+--rollback ALTER TABLE product ADD COLUMN IF NOT EXISTS VARCHAR(256) NOT NULL DEFAULT 'Unknown';
+--rollback ALTER TABLE product_details DROP COLUMN IF EXISTS country_manufacturer_id;
+--rollback ALTER TABLE product_details ADD COLUMN country_manufacturer VARCHAR(64) NOT NULL DEFAULT 'Unknown';
+--rollback DROP SEQUENCE IF EXISTS brand_seq;
+--rollback DROP TABLE IF EXISTS brand;
+--rollback DROP TABLE IF EXISTS country_manufacturer;
+--rollback DROP SEQUENCE IF EXISTS country_seq;
