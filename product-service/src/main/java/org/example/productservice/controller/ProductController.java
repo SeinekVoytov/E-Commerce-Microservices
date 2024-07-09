@@ -1,5 +1,6 @@
 package org.example.productservice.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.productservice.dto.RequestProductDto;
 import org.example.productservice.dto.ProductDetailsDto;
@@ -20,12 +21,12 @@ public class ProductController {
 
     @GetMapping()
     public ResponseEntity<Page<ProductDto>> getPage(Pageable pageable) {
-        return new ResponseEntity<>(productService.getAllShortProduct(pageable), HttpStatus.OK);
+        return new ResponseEntity<>(productService.getAllProducts(pageable), HttpStatus.OK);
     }
 
     @PostMapping()
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ProductDetailsDto> createProduct(@RequestBody RequestProductDto newProductData) {
+    public ResponseEntity<ProductDetailsDto> createProduct(@RequestBody @Valid RequestProductDto newProductData) {
         ProductDetailsDto response = productService.createProduct(newProductData);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
@@ -38,7 +39,7 @@ public class ProductController {
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ProductDetailsDto> updateProduct(@PathVariable Integer id,
-                                                           @RequestBody RequestProductDto updatedProduct) {
+                                                           @RequestBody @Valid RequestProductDto updatedProduct) {
         ProductDetailsDto response = productService.updateProduct(id, updatedProduct);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
