@@ -19,6 +19,7 @@ import org.example.productservice.service.ProductService;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -127,10 +128,10 @@ public class ProductServiceImpl implements ProductService {
         toBeUpdated.setProduct(innerProduct);
     }
 
-    private Set<Category> fetchCategoriesByIds(Set<Integer> ids) {
+    private List<Category> fetchCategoriesByIds(List<Integer> ids) {
 
-        Set<Category> foundCategories = categoryRepository.findAllByIdIn(ids);
-        Set<Integer> foundIds = foundCategories.stream().map(Category::getId).collect(Collectors.toSet());
+        List<Category> foundCategories = categoryRepository.findAllByIdIn(ids);
+        List<Integer> foundIds = foundCategories.stream().map(Category::getId).toList();
         ids.removeAll(foundIds);
         for (Integer missedId : ids) {
             throw new CategoryNotFoundException(missedId);

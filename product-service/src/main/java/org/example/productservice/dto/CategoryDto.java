@@ -4,8 +4,7 @@ import lombok.Builder;
 
 @Builder
 public record CategoryDto (
-        String name,
-        Integer count
+        String name
 ) {
 
 }

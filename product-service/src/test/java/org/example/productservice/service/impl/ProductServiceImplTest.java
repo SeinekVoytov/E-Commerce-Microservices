@@ -83,7 +83,7 @@ class ProductServiceImplTest {
                         .amount(priceAmount)
                         .currency(currency)
                         .build())
-                .categories(Collections.emptySet())
+                .categories(Collections.emptyList())
                 .images(Collections.emptySet())
                 .build();
 
@@ -103,7 +103,7 @@ class ProductServiceImplTest {
                 description,
                 Collections.emptySet(),
                 new PriceDto(priceAmount, currency),
-                Collections.emptySet()
+                Collections.emptyList()
         );
 
         detailsDto = new ProductDetailsDto(
@@ -112,7 +112,7 @@ class ProductServiceImplTest {
                 description,
                 Collections.emptySet(),
                 new PriceDto(priceAmount, currency),
-                Collections.emptySet(),
+                Collections.emptyList(),
                 lengthInMeters,
                 widthInMeters,
                 heightInMeters,
@@ -270,7 +270,7 @@ class ProductServiceImplTest {
                 Collections.emptySet(),
                 new BigDecimal("123.456"),
                 newCurrency,
-                Collections.emptySet(),
+                Collections.emptyList(),
                 newLength,
                 1.0,
                 1.0,
@@ -278,8 +278,8 @@ class ProductServiceImplTest {
                 newGrossWeight
         );
 
-        when(categoryRepository.findAllByIdIn(any(Set.class)))
-                .thenReturn(Collections.emptySet());
+        when(categoryRepository.findAllByIdIn(any(Collection.class)))
+                .thenReturn(Collections.emptyList());
 
         when(imageRepository.findAllByUrlIn(any(Set.class)))
                 .thenReturn(Collections.emptySet());
@@ -336,7 +336,7 @@ class ProductServiceImplTest {
                 .thenReturn(productDetails);
 
         when(categoryRepository.findAllByIdIn(requestData.categoryIds()))
-                .thenReturn(Collections.emptySet());
+                .thenReturn(Collections.emptyList());
 
         assertThrows(
                 CategoryNotFoundException.class,
@@ -352,9 +352,9 @@ class ProductServiceImplTest {
         doAnswer(invocationOnMock -> invocationOnMock.<ProductDetails>getArgument(0))
                 .when(detailsRepository).save(any(ProductDetails.class));
 
-        Category categoryToBeAdded = new Category(10, null, Collections.emptySet(), Collections.emptySet(), "category");
-        when(categoryRepository.findAllByIdIn(any(Set.class)))
-                .thenReturn(Set.of(categoryToBeAdded));
+        Category categoryToBeAdded = new Category(10, null, Collections.emptySet(), Collections.emptyList(), "category");
+        when(categoryRepository.findAllByIdIn(any(Collection.class)))
+                .thenReturn(List.of(categoryToBeAdded));
 
         when(imageRepository.findAllByUrlIn(any(Set.class)))
                 .thenReturn(Collections.emptySet());
@@ -407,8 +407,8 @@ class ProductServiceImplTest {
         doAnswer(invocationOnMock -> invocationOnMock.<ProductDetails>getArgument(0))
                 .when(detailsRepository).save(any(ProductDetails.class));
 
-        when(categoryRepository.findAllByIdIn(any(Set.class)))
-                .thenReturn(Collections.emptySet());
+        when(categoryRepository.findAllByIdIn(any(Collection.class)))
+                .thenReturn(Collections.emptyList());
 
         Image imageToBeAdded = new Image(10, "someUrl");
         when(imageRepository.findAllByUrlIn(any(Set.class)))
@@ -441,8 +441,8 @@ class ProductServiceImplTest {
         doAnswer(invocationOnMock -> invocationOnMock.<ProductDetails>getArgument(0))
                 .when(detailsRepository).save(any(ProductDetails.class));
 
-        when(categoryRepository.findAllByIdIn(any(Set.class)))
-                .thenReturn(Collections.emptySet());
+        when(categoryRepository.findAllByIdIn(any(Collection.class)))
+                .thenReturn(Collections.emptyList());
 
         when(imageRepository.findAllByUrlIn(any(Set.class)))
                 .thenReturn(Collections.emptySet());
@@ -458,7 +458,7 @@ class ProductServiceImplTest {
                 new HashSet<>(),
                 product.getPrice().getAmount(),
                 product.getPrice().getCurrency(),
-                new HashSet<>(),
+                new ArrayList<>(),
                 productDetails.getLengthInMeters(),
                 productDetails.getWidthInMeters(),
                 productDetails.getHeightInMeters(),
