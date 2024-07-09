@@ -33,8 +33,6 @@ public class Product {
 
     private String description;
 
-    private String brand;
-
     @OneToMany(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "owner_id", referencedColumnName = "id")
     private Set<Image> images;
@@ -42,6 +40,9 @@ public class Product {
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "price_id", referencedColumnName = "id")
     private Price price;
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    private Brand brand;
 
     @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(name = "product_category",
