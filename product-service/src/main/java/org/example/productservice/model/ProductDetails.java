@@ -29,6 +29,9 @@ public class ProductDetails {
     @JoinColumn(name = "product_id", referencedColumnName = "id")
     private Product product;
 
+    @Column(name = "country_manufacturer")
+    private String countryManufacturer;
+
     @Column(name = "length_meters")
     private Double lengthInMeters;
 

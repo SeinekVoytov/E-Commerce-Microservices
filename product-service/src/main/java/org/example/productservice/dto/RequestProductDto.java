@@ -20,6 +20,9 @@ public record RequestProductDto(
      @NotBlank(message = "Description cannot be blank")
      String description,
 
+     @NotBlank(message = "Brand cannot be blank")
+     String brand,
+
      @NotNull(message = "Images set cannot be null")
      Set<@URL(message = "Image URL must be a valid") String> images,
 
@@ -29,6 +32,9 @@ public record RequestProductDto(
 
      @NotNull(message = "Price currency cannot be null")
      Currency priceCurrency,
+
+     @NotBlank(message = "Country manufacturer cannot be blank")
+     String countryManufacturer,
 
      @NotNull(message = "Category IDs set cannot be null")
      Set<@Positive(message = "Category ID must be a positive integer") Integer> categoryIds,
