@@ -64,7 +64,9 @@ public class Cart {
     }
 
     public void removeItemById(int itemId) {
-        items.removeIf(item -> item.getId() == itemId);
+        if (!items.removeIf(item -> item.getId() == itemId)) {
+            throw new CartItemNotFoundException();
+        }
     }
 
     @Override
