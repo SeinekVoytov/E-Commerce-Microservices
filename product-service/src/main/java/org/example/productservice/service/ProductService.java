@@ -54,9 +54,11 @@ public interface ProductService {
     }
 
     Page<ProductDto> getAllProducts(Pageable pageable,
-                                        String category,
-                                        BigDecimal minPrice,
-                                        BigDecimal maxPrice);
+                                    String category,
+                                    BigDecimal minPrice,
+                                    BigDecimal maxPrice,
+                                    String brand,
+                                    String country);
 
     ProductDetailsDto getById(int id);
 

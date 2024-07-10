@@ -56,10 +56,12 @@ public class ProductServiceImpl implements ProductService {
     public Page<ProductDto> getAllProducts(Pageable pageable,
                                            String category,
                                            BigDecimal minPrice,
-                                           BigDecimal maxPrice) {
+                                           BigDecimal maxPrice,
+                                           String brand,
+                                           String country) {
 
         ProductService.validateSortParameters(pageable.getSort());
-        Predicate<Product> filter = createProductsFilter(minPrice, maxPrice);
+        Predicate<Product> filter = createProductsFilter(minPrice, maxPrice, brand, country);
 
         if (category == null) {
             List<Product> products = productRepository.findAll(pageable.getSort());
@@ -197,27 +199,18 @@ public class ProductServiceImpl implements ProductService {
         return foundImages;
     }
 
-    private Predicate<Product> createProductsFilter(BigDecimal minPrice, BigDecimal maxPrice) {
+    private Predicate<Product> createProductsFilter(BigDecimal minPrice, BigDecimal maxPrice,
+                                                    String brand, String country) {
         return product -> {
+
             BigDecimal priceAmount = product.getPrice().getAmount();
+            String brandName = product.getBrand().getName();
+            String countryName = product.getCountryManufacturer().getName();
+
             return (minPrice == null || priceAmount.compareTo(minPrice) >= 0) &&
-                    (maxPrice == null || priceAmount.compareTo(maxPrice) <= 0);
+                    (maxPrice == null || priceAmount.compareTo(maxPrice) <= 0) &&
+                    (brand == null || brandName.equals(brand)) &&
+                    (country == null || countryName.equals(country));
         };
-    }
-
-    private void updateProductBrandAndCountry(Product product, String newCountry, String newBrand) {
-
-        CountryManufacturer updatedCountry = countryManufacturerService.updateCountryManufacturerName(
-                newCountry,
-                product.getCountryManufacturer()
-        );
-
-        Brand updatedBrand = brandService.updateBrandName(
-                newBrand,
-                product.getBrand()
-        );
-
-        product.setBrand(updatedBrand);
-        product.setCountryManufacturer(updatedCountry);
     }
 }

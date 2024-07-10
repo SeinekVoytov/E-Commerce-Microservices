@@ -25,9 +25,14 @@ public class ProductController {
     public ResponseEntity<Page<ProductDto>> getPage(Pageable pageable,
                                                     @RequestParam(required = false) String category,
                                                     @RequestParam(required = false) BigDecimal minPrice,
-                                                    @RequestParam(required = false) BigDecimal maxPrice) {
+                                                    @RequestParam(required = false) BigDecimal maxPrice,
+                                                    @RequestParam(required = false) String brand,
+                                                    @RequestParam(required = false) String country){
 
-        Page<ProductDto> page = productService.getAllProducts(pageable, category, minPrice, maxPrice);
+        Page<ProductDto> page = productService.getAllProducts(
+                pageable, category, minPrice, maxPrice, brand, country
+        );
+
         return new ResponseEntity<>(page, HttpStatus.OK);
     }
 
