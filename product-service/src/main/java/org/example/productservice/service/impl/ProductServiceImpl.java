@@ -79,9 +79,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductDto> reindex() {
         List<Product> allProducts = productRepository.findAll();
-        for (Product product : allProducts) {
-            elasticSearchService.update(product);
-        }
+        allProducts.forEach(elasticSearchService::update);
 
         return allProducts.stream()
                 .map(productMapper::toDto)
