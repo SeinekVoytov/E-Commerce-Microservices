@@ -15,9 +15,7 @@ import org.example.userservice.exception.ProductNotFoundException;
 import org.example.userservice.mapper.cart.CartContentMapper;
 import org.example.userservice.model.cart.Cart;
 import org.example.userservice.model.cart.CartItem;
-import org.example.userservice.model.product.Price;
-import org.example.userservice.model.product.Product;
-import org.example.userservice.model.product.ProductDetails;
+import org.example.userservice.model.product.*;
 import org.example.userservice.repository.cart.CartItemRepository;
 import org.example.userservice.repository.cart.CartRepository;
 import org.example.userservice.repository.product.ProductDetailsRepository;
@@ -72,6 +70,8 @@ class CartServiceImplTest {
         final int id = 1;
         final String name = "name";
         final String description = "description";
+        final String brand = "brand";
+        final String countryManufacturer = "country";
         final BigDecimal priceAmount = new BigDecimal("123.456");
         final Currency currency = Currency.getInstance("USD");
         final Double lengthInMeters = 1.0;
@@ -84,9 +84,11 @@ class CartServiceImplTest {
                 id,
                 name,
                 description,
+                brand,
+                countryManufacturer,
                 Collections.emptySet(),
                 new PriceDto(priceAmount, currency),
-                Collections.emptySet(),
+                Collections.emptyList(),
                 lengthInMeters,
                 widthInMeters,
                 heightInMeters,
@@ -103,24 +105,38 @@ class CartServiceImplTest {
                 quantity
         );
 
-        Product product = new Product(
-                id,
-                name,
-                netWeightInKg,
-                description,
-                Collections.emptySet(),
-                new Price(id, priceAmount, currency),
-                Collections.emptySet()
-        );
+        Product product = Product.builder()
+                .id(id)
+                .name(name)
+                .description(description)
+                .netWeightInKg(netWeightInKg)
+                .countryManufacturer(CountryManufacturer.builder()
+                        .id(id)
+                        .name(countryManufacturer)
+                        .products(Collections.emptySet())
+                        .build())
+                .price(Price.builder()
+                        .id(id)
+                        .amount(priceAmount)
+                        .currency(currency)
+                        .build())
+                .brand(Brand.builder()
+                        .id(id)
+                        .name(brand)
+                        .products(Collections.emptySet())
+                        .build())
+                .categories(Collections.emptyList())
+                .images(Collections.emptySet())
+                .build();
 
-        productDetails = new ProductDetails(
-                id,
-                product,
-                lengthInMeters,
-                widthInMeters,
-                heightInMeters,
-                grossWeightInKg
-        );
+        productDetails = ProductDetails.builder()
+                .id(id)
+                .lengthInMeters(lengthInMeters)
+                .widthInMeters(widthInMeters)
+                .heightInMeters(heightInMeters)
+                .grossWeightInKg(grossWeightInKg)
+                .product(product)
+                .build();
 
         httpResponseMock = mock(HttpServletResponse.class);
     }
