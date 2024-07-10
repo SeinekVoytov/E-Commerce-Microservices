@@ -16,7 +16,9 @@ import org.example.productservice.repository.CategoryRepository;
 import org.example.productservice.repository.ImageRepository;
 import org.example.productservice.repository.ProductDetailsRepository;
 import org.example.productservice.repository.ProductRepository;
+import org.example.productservice.service.BrandService;
 import org.example.productservice.service.CategoryService;
+import org.example.productservice.service.CountryManufacturerService;
 import org.example.productservice.service.ProductService;
 import org.example.productservice.util.PaginationUtils;
 import org.springframework.data.domain.Page;
@@ -36,6 +38,8 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
 
     private final CategoryService categoryService;
+    private final CountryManufacturerService countryManufacturerService;
+    private final BrandService brandService;
 
     private final ElasticSearchService elasticSearchService;
 
@@ -50,9 +54,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductDto> getAllProducts(Pageable pageable,
-                                               String category,
-                                               BigDecimal minPrice,
-                                               BigDecimal maxPrice) {
+                                           String category,
+                                           BigDecimal minPrice,
+                                           BigDecimal maxPrice) {
 
         ProductService.validateSortParameters(pageable.getSort());
         Predicate<Product> filter = createProductsFilter(minPrice, maxPrice);
@@ -106,11 +110,22 @@ public class ProductServiceImpl implements ProductService {
 
         ProductDetails createdProduct = requestProductMapper.toEntity(newProductData);
 
-        createdProduct.getProduct().setCategories(
+        Product innerProduct = createdProduct.getProduct();
+        innerProduct.setCountryManufacturer(
+                countryManufacturerService.saveOrGetExistingByName(
+                        newProductData.countryManufacturer()
+                )
+        );
+
+        innerProduct.setBrand(
+                brandService.saveOrGetExistingByName(newProductData.brand())
+        );
+
+        innerProduct.setCategories(
                 fetchCategoriesByIds(newProductData.categoryIds())
         );
 
-        createdProduct.getProduct().setImages(
+        innerProduct.setImages(
                 fetchImagesByUrls(newProductData.images())
         );
 
@@ -127,21 +142,25 @@ public class ProductServiceImpl implements ProductService {
         toBeUpdated.setHeightInMeters(updated.heightInMeters());
         toBeUpdated.setGrossWeightInKg(updated.grossWeightInKg());
 
-        CountryManufacturer manufacturer = toBeUpdated.getCountryManufacturer();
-        manufacturer.setName(updated.countryManufacturer());
-
         Product innerProduct = toBeUpdated.getProduct();
         innerProduct.setName(updated.name());
         innerProduct.setNetWeightInKg(updated.netWeightInKg());
         innerProduct.setDescription(updated.description());
 
+        innerProduct.setCountryManufacturer(
+                countryManufacturerService.updateCountryManufacturerName(
+                        updated.countryManufacturer(), innerProduct.getCountryManufacturer()
+                )
+        );
+
+        innerProduct.setBrand(
+                brandService.updateBrandName(updated.brand(), innerProduct.getBrand())
+        );
+
         Price price = innerProduct.getPrice();
         price.setAmount(updated.priceAmount());
         price.setCurrency(updated.priceCurrency());
         innerProduct.setPrice(price);
-
-        Brand brand = innerProduct.getBrand();
-        brand.setName(updated.brand());
 
         innerProduct.setCategories(
                 fetchCategoriesByIds(updated.categoryIds())
@@ -184,5 +203,21 @@ public class ProductServiceImpl implements ProductService {
             return (minPrice == null || priceAmount.compareTo(minPrice) >= 0) &&
                     (maxPrice == null || priceAmount.compareTo(maxPrice) <= 0);
         };
+    }
+
+    private void updateProductBrandAndCountry(Product product, String newCountry, String newBrand) {
+
+        CountryManufacturer updatedCountry = countryManufacturerService.updateCountryManufacturerName(
+                newCountry,
+                product.getCountryManufacturer()
+        );
+
+        Brand updatedBrand = brandService.updateBrandName(
+                newBrand,
+                product.getBrand()
+        );
+
+        product.setBrand(updatedBrand);
+        product.setCountryManufacturer(updatedCountry);
     }
 }
