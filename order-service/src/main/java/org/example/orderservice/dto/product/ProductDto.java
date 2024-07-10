@@ -12,6 +12,7 @@ public record ProductDto (
         Double netWeightInKg,
         String description,
         String brand,
+        String countryManufacturer,
         Set<String> images,
         PriceDto price,
         List<CategoryDto> categories
