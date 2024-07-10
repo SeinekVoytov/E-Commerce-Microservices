@@ -20,7 +20,7 @@ public interface ProductDetailsMapper {
     @Mapping(source = "product.images", target = "images")
     @Mapping(source = "product.price", target = "price")
     @Mapping(source = "product.categories", target = "categories")
-    @Mapping(source = "countryManufacturer.name", target = "countryManufacturer")
+    @Mapping(source = "product.countryManufacturer.name", target = "countryManufacturer")
     ProductDetailsDto toDto(ProductDetails entity);
 
     @Mapping(source = "name", target = "product.name")
@@ -30,6 +30,6 @@ public interface ProductDetailsMapper {
     @Mapping(source = "images", target = "product.images")
     @Mapping(source = "price", target = "product.price")
     @Mapping(source = "categories", target = "product.categories")
-    @Mapping(source = "countryManufacturer", target = "countryManufacturer.name")
+    @Mapping(source = "countryManufacturer", target = "product.countryManufacturer.name")
     ProductDetails toEntity(ProductDetailsDto entity);
 }

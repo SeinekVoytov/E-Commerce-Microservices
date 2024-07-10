@@ -20,6 +20,6 @@ public interface RequestProductMapper {
     @Mapping(source = "netWeightInKg", target = "product.netWeightInKg")
     @Mapping(source = "priceAmount", target = "product.price.amount")
     @Mapping(source = "priceCurrency", target = "product.price.currency")
-    @Mapping(source = "countryManufacturer", target = "countryManufacturer.name")
+    @Mapping(source = "countryManufacturer", target = "product.countryManufacturer.name")
     ProductDetails toEntity(RequestProductDto dto);
 }
