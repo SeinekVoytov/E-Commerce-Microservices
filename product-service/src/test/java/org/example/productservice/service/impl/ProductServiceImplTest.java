@@ -76,7 +76,7 @@ class ProductServiceImplTest {
         final String name = "name";
         final String description = "description";
         final String brand = "brand";
-        final Country countryManufacturer = Country.ANDORRA;
+        final String countryManufacturer = "country";
         final BigDecimal priceAmount = new BigDecimal("123.456");
         final Currency currency = Currency.getInstance("USD");
         final Double lengthInMeters = 1.0;
@@ -90,6 +90,11 @@ class ProductServiceImplTest {
                 .name(name)
                 .description(description)
                 .netWeightInKg(netWeightInKg)
+                .countryManufacturer(CountryManufacturer.builder()
+                        .id(id)
+                        .name(countryManufacturer)
+                        .products(Collections.emptySet())
+                        .build())
                 .price(Price.builder()
                         .id(id)
                         .amount(priceAmount)
@@ -106,11 +111,6 @@ class ProductServiceImplTest {
 
         productDetails = ProductDetails.builder()
                 .id(id)
-                .countryManufacturer(CountryManufacturer.builder()
-                        .id(id)
-                        .name(countryManufacturer)
-                        .products(Collections.emptySet())
-                        .build())
                 .lengthInMeters(lengthInMeters)
                 .widthInMeters(widthInMeters)
                 .heightInMeters(heightInMeters)
@@ -124,6 +124,7 @@ class ProductServiceImplTest {
                 netWeightInKg,
                 description,
                 brand,
+                countryManufacturer,
                 Collections.emptySet(),
                 new PriceDto(priceAmount, currency),
                 Collections.emptyList()
@@ -134,10 +135,10 @@ class ProductServiceImplTest {
                 name,
                 description,
                 brand,
+                countryManufacturer,
                 Collections.emptySet(),
                 new PriceDto(priceAmount, currency),
                 Collections.emptyList(),
-                countryManufacturer,
                 lengthInMeters,
                 widthInMeters,
                 heightInMeters,
@@ -295,7 +296,7 @@ class ProductServiceImplTest {
                 Collections.emptySet(),
                 new BigDecimal("123.456"),
                 newCurrency,
-                Country.ANDORRA,
+                "country",
                 Collections.emptySet(),
                 newLength,
                 1.0,
@@ -485,7 +486,7 @@ class ProductServiceImplTest {
                 new HashSet<>(),
                 product.getPrice().getAmount(),
                 product.getPrice().getCurrency(),
-                productDetails.getCountryManufacturer().getName(),
+                product.getCountryManufacturer().getName(),
                 new HashSet<>(),
                 productDetails.getLengthInMeters(),
                 productDetails.getWidthInMeters(),
