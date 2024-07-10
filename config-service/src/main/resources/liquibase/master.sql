@@ -137,7 +137,7 @@ CREATE SEQUENCE IF NOT EXISTS order_item_seq START 1 INCREMENT 50 OWNED BY order
 CREATE TABLE IF NOT EXISTS address (
     id INT PRIMARY KEY,
     city VARCHAR(64) NOT NULL,
-    countryManufacturer VARCHAR(64) NOT NULL,
+    country VARCHAR(64) NOT NULL,
     street_address TEXT NOT NULL,
     apartment TEXT NOT NULL
 );
