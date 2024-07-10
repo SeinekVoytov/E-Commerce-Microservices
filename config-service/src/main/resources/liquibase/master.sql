@@ -137,7 +137,7 @@ CREATE SEQUENCE IF NOT EXISTS order_item_seq START 1 INCREMENT 50 OWNED BY order
 CREATE TABLE IF NOT EXISTS address (
     id INT PRIMARY KEY,
     city VARCHAR(64) NOT NULL,
-    country VARCHAR(64) NOT NULL,
+    countryManufacturer VARCHAR(64) NOT NULL,
     street_address TEXT NOT NULL,
     apartment TEXT NOT NULL
 );
@@ -206,8 +206,8 @@ CREATE TABLE IF NOT EXISTS brand (
 
 CREATE SEQUENCE IF NOT EXISTS brand_seq START 1 INCREMENT 20 OWNED BY brand.id;
 
-ALTER TABLE product DROP COLUMN brand;
-ALTER TABLE product ADD COLUMN brand_id INT REFERENCES brand(id) ON DELETE SET NULL;
+ALTER TABLE product DROP COLUMN IF EXISTS brand;
+ALTER TABLE product ADD COLUMN IF NOT EXISTS brand_id INT REFERENCES brand(id) ON DELETE SET NULL;
 
 CREATE TABLE IF NOT EXISTS country_manufacturer (
     id INT PRIMARY KEY,
@@ -216,11 +216,11 @@ CREATE TABLE IF NOT EXISTS country_manufacturer (
 
 CREATE SEQUENCE IF NOT EXISTS country_seq START 1 INCREMENT 20 OWNED BY country_manufacturer.id;
 
-ALTER TABLE product_details DROP COLUMN country_manufacturer;
-ALTER TABLE product_details ADD COLUMN country_manufacturer_id INT REFERENCES country_manufacturer(id) ON DELETE SET NULL;
+ALTER TABLE product_details DROP COLUMN IF EXISTS country_manufacturer;
+ALTER TABLE product ADD COLUMN IF NOT EXISTS country_manufacturer_id INT REFERENCES country_manufacturer(id) ON DELETE SET NULL;
 --rollback ALTER TABLE product DROP COLUMN IF EXISTS brand_id;
 --rollback ALTER TABLE product ADD COLUMN IF NOT EXISTS VARCHAR(256) NOT NULL DEFAULT 'Unknown';
---rollback ALTER TABLE product_details DROP COLUMN IF EXISTS country_manufacturer_id;
+--rollback ALTER TABLE product DROP COLUMN IF EXISTS country_manufacturer_id;
 --rollback ALTER TABLE product_details ADD COLUMN country_manufacturer VARCHAR(64) NOT NULL DEFAULT 'Unknown';
 --rollback DROP SEQUENCE IF EXISTS brand_seq;
 --rollback DROP TABLE IF EXISTS brand;
