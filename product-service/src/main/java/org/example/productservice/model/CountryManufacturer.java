@@ -25,19 +25,18 @@ public class CountryManufacturer {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "country_seq")
     private Integer id;
 
-    @Enumerated(EnumType.STRING)
-    private Country name;
+    private String name;
 
     @OneToMany(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "country_manufacturer_id", referencedColumnName = "id")
-    private Set<ProductDetails> products;
+    private Set<Product> products;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        CountryManufacturer country = (CountryManufacturer) o;
-        return Objects.equals(id, country.id) && Objects.equals(name, country.name);
+        CountryManufacturer countryManufacturer = (CountryManufacturer) o;
+        return Objects.equals(id, countryManufacturer.id) && Objects.equals(name, countryManufacturer.name);
     }
 
     @Override

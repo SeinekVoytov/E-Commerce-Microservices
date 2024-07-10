@@ -29,9 +29,6 @@ public class ProductDetails {
     @JoinColumn(name = "product_id", referencedColumnName = "id")
     private Product product;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    private CountryManufacturer countryManufacturer;
-
     @Column(name = "length_meters")
     private Double lengthInMeters;
 

@@ -44,6 +44,9 @@ public class Product {
     @ManyToOne(cascade = CascadeType.PERSIST)
     private Brand brand;
 
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    private CountryManufacturer countryManufacturer;
+
     @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(name = "product_category",
             joinColumns = @JoinColumn(name = "product_id"),
@@ -63,11 +66,11 @@ public class Product {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Product product = (Product) o;
-        return Objects.equals(id, product.id) && Objects.equals(name, product.name) && Objects.equals(images, product.images) && Objects.equals(price, product.price) && Objects.equals(categories, product.categories);
+        return Objects.equals(id, product.id) && Objects.equals(name, product.name) && Objects.equals(netWeightInKg, product.netWeightInKg) && Objects.equals(description, product.description) && Objects.equals(images, product.images) && Objects.equals(price, product.price) && Objects.equals(brand, product.brand);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, images, price, categories);
+        return Objects.hash(id, name, netWeightInKg, description, images, price, brand);
     }
 }

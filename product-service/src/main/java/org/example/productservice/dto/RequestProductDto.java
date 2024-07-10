@@ -1,11 +1,7 @@
 package org.example.productservice.dto;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.*;
 import lombok.Builder;
-import org.example.productservice.model.Country;
 import org.hibernate.validator.constraints.URL;
 
 import java.math.BigDecimal;
@@ -33,7 +29,9 @@ public record RequestProductDto(
      @NotNull(message = "Price currency cannot be null")
      Currency priceCurrency,
 
-     Country countryManufacturer,
+     @NotBlank(message = "Country cannot be blank")
+     @Size(min = 2, max = 64, message = "Country length should be between 2 and 64")
+     String countryManufacturer,
 
      @NotNull(message = "Category IDs set cannot be null")
      Set<@Positive(message = "Category ID must be a positive integer") Integer> categoryIds,
