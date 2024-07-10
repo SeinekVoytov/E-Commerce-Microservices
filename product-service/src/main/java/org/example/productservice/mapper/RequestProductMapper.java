@@ -16,10 +16,10 @@ public interface RequestProductMapper {
     @Mapping(source = "categoryIds", target = "product.categories", ignore = true)
     @Mapping(source = "name", target = "product.name")
     @Mapping(source = "description", target = "product.description")
-    @Mapping(source = "brand", target = "product.brand.name")
+    @Mapping(source = "brand", target = "product.brand.name", ignore = true)
     @Mapping(source = "netWeightInKg", target = "product.netWeightInKg")
     @Mapping(source = "priceAmount", target = "product.price.amount")
     @Mapping(source = "priceCurrency", target = "product.price.currency")
-    @Mapping(source = "countryManufacturer", target = "product.countryManufacturer.name")
+    @Mapping(source = "countryManufacturer", target = "product.countryManufacturer.name", ignore = true)
     ProductDetails toEntity(RequestProductDto dto);
 }
