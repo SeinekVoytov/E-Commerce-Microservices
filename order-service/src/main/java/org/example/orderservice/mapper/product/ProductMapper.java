@@ -5,6 +5,7 @@ import org.example.orderservice.model.product.Image;
 import org.example.orderservice.model.product.Product;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -16,8 +17,12 @@ import java.util.stream.Collectors;
 )
 public interface ProductMapper {
 
+    @Mapping(source = "brand.name", target = "brand")
+    @Mapping(source = "countryManufacturer.name", target = "countryManufacturer")
     ProductDto toDto(Product entity);
 
+    @Mapping(source = "brand", target = "brand.name")
+    @Mapping(source = "countryManufacturer", target = "countryManufacturer.name")
     Product toEntity(ProductDto dto);
 
     default Set<String> imagesToUrls(Set<Image> images) {

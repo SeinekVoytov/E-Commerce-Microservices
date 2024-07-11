@@ -8,7 +8,6 @@ import java.util.Objects;
 @Getter
 @Setter
 @Builder
-
 @NoArgsConstructor
 @AllArgsConstructor
 
@@ -28,9 +27,6 @@ public class ProductDetails {
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     @JoinColumn(name = "product_id", referencedColumnName = "id")
     private Product product;
-
-    @Column(name = "country_manufacturer")
-    private String countryManufacturer;
 
     @Column(name = "length_meters")
     private Double lengthInMeters;
