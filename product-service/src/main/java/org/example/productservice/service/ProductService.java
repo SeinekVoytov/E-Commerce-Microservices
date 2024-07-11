@@ -55,9 +55,11 @@ public interface ProductService {
     }
 
     Page<ProductDto> getAllProducts(Pageable pageable,
-                                        String category,
-                                        BigDecimal minPrice,
-                                        BigDecimal maxPrice);
+                                    String category,
+                                    BigDecimal minPrice,
+                                    BigDecimal maxPrice,
+                                    String brand,
+                                    String country);
 
     List<ProductDto> search(String keyword);
 

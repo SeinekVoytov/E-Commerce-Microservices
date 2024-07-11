@@ -16,7 +16,9 @@ import org.example.productservice.repository.CategoryRepository;
 import org.example.productservice.repository.ImageRepository;
 import org.example.productservice.repository.ProductDetailsRepository;
 import org.example.productservice.repository.ProductRepository;
+import org.example.productservice.service.BrandService;
 import org.example.productservice.service.CategoryService;
+import org.example.productservice.service.CountryManufacturerService;
 import org.example.productservice.service.ProductService;
 import org.example.productservice.util.PaginationUtils;
 import org.springframework.boot.actuate.web.mappings.MappingsEndpoint;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -37,6 +40,8 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService {
 
     private final CategoryService categoryService;
+    private final CountryManufacturerService countryManufacturerService;
+    private final BrandService brandService;
 
     private final ElasticSearchService elasticSearchService;
 
@@ -51,12 +56,14 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Page<ProductDto> getAllProducts(Pageable pageable,
-                                               String category,
-                                               BigDecimal minPrice,
-                                               BigDecimal maxPrice) {
+                                           String category,
+                                           BigDecimal minPrice,
+                                           BigDecimal maxPrice,
+                                           String brand,
+                                           String country) {
 
         ProductService.validateSortParameters(pageable.getSort());
-        Predicate<Product> filter = createProductsFilter(minPrice, maxPrice);
+        Predicate<Product> filter = createProductsFilter(minPrice, maxPrice, brand, country);
 
         if (category == null) {
             List<Product> products = productRepository.findAll(pageable.getSort());
@@ -125,11 +132,22 @@ public class ProductServiceImpl implements ProductService {
 
         ProductDetails createdProduct = requestProductMapper.toEntity(newProductData);
 
-        createdProduct.getProduct().setCategories(
+        Product innerProduct = createdProduct.getProduct();
+        innerProduct.setCountryManufacturer(
+                countryManufacturerService.saveOrGetExistingByName(
+                        newProductData.countryManufacturer()
+                )
+        );
+
+        innerProduct.setBrand(
+                brandService.saveOrGetExistingByName(newProductData.brand())
+        );
+
+        innerProduct.setCategories(
                 fetchCategoriesByIds(newProductData.categoryIds())
         );
 
-        createdProduct.getProduct().setImages(
+        innerProduct.setImages(
                 fetchImagesByUrls(newProductData.images())
         );
 
@@ -141,7 +159,6 @@ public class ProductServiceImpl implements ProductService {
 
     private void updateProduct(ProductDetails toBeUpdated, RequestProductDto updated) {
 
-        toBeUpdated.setCountryManufacturer(updated.countryManufacturer());
         toBeUpdated.setLengthInMeters(updated.lengthInMeters());
         toBeUpdated.setWidthInMeters(updated.widthInMeters());
         toBeUpdated.setHeightInMeters(updated.heightInMeters());
@@ -151,7 +168,16 @@ public class ProductServiceImpl implements ProductService {
         innerProduct.setName(updated.name());
         innerProduct.setNetWeightInKg(updated.netWeightInKg());
         innerProduct.setDescription(updated.description());
-        innerProduct.setBrand(updated.brand());
+
+        innerProduct.setCountryManufacturer(
+                countryManufacturerService.updateCountryManufacturerName(
+                        updated.countryManufacturer(), innerProduct.getCountryManufacturer()
+                )
+        );
+
+        innerProduct.setBrand(
+                brandService.updateBrandName(updated.brand(), innerProduct.getBrand())
+        );
 
         Price price = innerProduct.getPrice();
         price.setAmount(updated.priceAmount());
@@ -193,11 +219,18 @@ public class ProductServiceImpl implements ProductService {
         return foundImages;
     }
 
-    private Predicate<Product> createProductsFilter(BigDecimal minPrice, BigDecimal maxPrice) {
+    private Predicate<Product> createProductsFilter(BigDecimal minPrice, BigDecimal maxPrice,
+                                                    String brand, String country) {
         return product -> {
+
             BigDecimal priceAmount = product.getPrice().getAmount();
+            String brandName = product.getBrand().getName();
+            String countryName = product.getCountryManufacturer().getName();
+
             return (minPrice == null || priceAmount.compareTo(minPrice) >= 0) &&
-                    (maxPrice == null || priceAmount.compareTo(maxPrice) <= 0);
+                    (maxPrice == null || priceAmount.compareTo(maxPrice) <= 0) &&
+                    Objects.equals(brand, brandName) &&
+                    Objects.equals(country, countryName);
         };
     }
 }

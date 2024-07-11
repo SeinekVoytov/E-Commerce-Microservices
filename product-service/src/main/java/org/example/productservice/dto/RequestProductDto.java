@@ -4,6 +4,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.Builder;
 import org.hibernate.validator.constraints.URL;
 
@@ -33,6 +34,7 @@ public record RequestProductDto(
      Currency priceCurrency,
 
      @NotBlank(message = "Country manufacturer cannot be blank")
+     @Size(min = 2, max = 64, message = "Country length should be between 2 and 64")
      String countryManufacturer,
 
      @NotNull(message = "Category IDs set cannot be null")

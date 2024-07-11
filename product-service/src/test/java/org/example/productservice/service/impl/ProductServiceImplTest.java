@@ -4,6 +4,7 @@ import org.example.productservice.dto.PriceDto;
 import org.example.productservice.dto.ProductDetailsDto;
 import org.example.productservice.dto.ProductDto;
 import org.example.productservice.dto.RequestProductDto;
+import org.example.productservice.elasticsearch.ElasticSearchService;
 import org.example.productservice.exception.CategoryNotFoundException;
 import org.example.productservice.exception.ImageNotFoundException;
 import org.example.productservice.exception.InvalidQueryParameterException;
@@ -56,6 +57,9 @@ class ProductServiceImplTest {
     @Mock
     private RequestProductMapper requestProductMapper;
 
+    @Mock
+    private ElasticSearchService elasticSearchService;
+
     @InjectMocks
     private ProductServiceImpl service;
 
@@ -72,7 +76,7 @@ class ProductServiceImplTest {
         final String name = "name";
         final String description = "description";
         final String brand = "brand";
-        final String countryManufacturer = "countryManufacturer";
+        final String countryManufacturer = "country";
         final BigDecimal priceAmount = new BigDecimal("123.456");
         final Currency currency = Currency.getInstance("USD");
         final Double lengthInMeters = 1.0;
@@ -84,11 +88,22 @@ class ProductServiceImplTest {
         product = Product.builder()
                 .id(id)
                 .name(name)
+                .description(description)
                 .netWeightInKg(netWeightInKg)
+                .countryManufacturer(CountryManufacturer.builder()
+                        .id(id)
+                        .name(countryManufacturer)
+                        .products(Collections.emptySet())
+                        .build())
                 .price(Price.builder()
                         .id(id)
                         .amount(priceAmount)
                         .currency(currency)
+                        .build())
+                .brand(Brand.builder()
+                        .id(id)
+                        .name(brand)
+                        .products(Collections.emptySet())
                         .build())
                 .categories(Collections.emptyList())
                 .images(Collections.emptySet())
@@ -109,6 +124,7 @@ class ProductServiceImplTest {
                 netWeightInKg,
                 description,
                 brand,
+                countryManufacturer,
                 Collections.emptySet(),
                 new PriceDto(priceAmount, currency),
                 Collections.emptyList()
@@ -119,10 +135,10 @@ class ProductServiceImplTest {
                 name,
                 description,
                 brand,
+                countryManufacturer,
                 Collections.emptySet(),
                 new PriceDto(priceAmount, currency),
                 Collections.emptyList(),
-                countryManufacturer,
                 lengthInMeters,
                 widthInMeters,
                 heightInMeters,
@@ -137,7 +153,7 @@ class ProductServiceImplTest {
         assertThrows(
                 InvalidQueryParameterException.class,
                 () -> service.getAllProducts(PageRequest.of(
-                        1, 10, Sort.by(Sort.Order.asc("category"))), null, null, null
+                        1, 10, Sort.by(Sort.Order.asc("category"))), null, null, null, null, null
                 )
         );
 
@@ -159,7 +175,7 @@ class ProductServiceImplTest {
         when(productMapper.toDto(any(Product.class)))
                 .thenReturn(productDto);
 
-        var actual = service.getAllProducts(pageable, null, null, null);
+        var actual = service.getAllProducts(pageable, null, null, null, null, null);
 
         var expectedContent = List.of(productDto);
 
@@ -280,7 +296,7 @@ class ProductServiceImplTest {
                 Collections.emptySet(),
                 new BigDecimal("123.456"),
                 newCurrency,
-                "countryManufacturer",
+                "country",
                 Collections.emptySet(),
                 newLength,
                 1.0,
@@ -466,11 +482,11 @@ class ProductServiceImplTest {
         return new RequestProductDto(
                 product.getName(),
                 product.getDescription(),
-                product.getBrand(),
+                product.getBrand().getName(),
                 new HashSet<>(),
                 product.getPrice().getAmount(),
                 product.getPrice().getCurrency(),
-                productDetails.getCountryManufacturer(),
+                product.getCountryManufacturer().getName(),
                 new HashSet<>(),
                 productDetails.getLengthInMeters(),
                 productDetails.getWidthInMeters(),
