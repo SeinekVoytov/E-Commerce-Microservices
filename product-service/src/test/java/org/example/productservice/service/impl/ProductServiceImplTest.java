@@ -17,6 +17,8 @@ import org.example.productservice.repository.CategoryRepository;
 import org.example.productservice.repository.ImageRepository;
 import org.example.productservice.repository.ProductDetailsRepository;
 import org.example.productservice.repository.ProductRepository;
+import org.example.productservice.service.BrandService;
+import org.example.productservice.service.CountryManufacturerService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +37,12 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceImplTest {
+
+    @Mock
+    private BrandService brandService;
+
+    @Mock
+    private CountryManufacturerService countryManufacturerService;
 
     @Mock
     private ProductDetailsRepository detailsRepository;
@@ -161,7 +169,7 @@ class ProductServiceImplTest {
     }
 
     @Test
-    void getAllProducts__ShouldReturnListWithOneElement_WhenOneProductExists() {
+    void getAllProducts_ShouldReturnListWithOneElement_WhenOneProductExists() {
 
         var pageNumber = 0;
         var pageSize = 10;

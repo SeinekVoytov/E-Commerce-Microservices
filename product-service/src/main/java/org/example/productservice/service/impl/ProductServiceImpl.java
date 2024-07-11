@@ -229,8 +229,8 @@ public class ProductServiceImpl implements ProductService {
 
             return (minPrice == null || priceAmount.compareTo(minPrice) >= 0) &&
                     (maxPrice == null || priceAmount.compareTo(maxPrice) <= 0) &&
-                    Objects.equals(brand, brandName) &&
-                    Objects.equals(country, countryName);
+                    (brand == null || brandName.equals(brand)) &&
+                    (country == null || countryName.equals(country));
         };
     }
 }
