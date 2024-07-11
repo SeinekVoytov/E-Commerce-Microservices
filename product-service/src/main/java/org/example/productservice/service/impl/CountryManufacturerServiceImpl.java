@@ -6,6 +6,8 @@ import org.example.productservice.repository.CountryManufacturerRepository;
 import org.example.productservice.service.CountryManufacturerService;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class CountryManufacturerServiceImpl implements CountryManufacturerService {
@@ -23,7 +25,7 @@ public class CountryManufacturerServiceImpl implements CountryManufacturerServic
     public CountryManufacturer updateCountryManufacturerName(String updatedName, CountryManufacturer toBeUpdated) {
 
         String toBeUpdatedName = toBeUpdated.getName();
-        if (!updatedName.equals(toBeUpdatedName)) {
+        if (Objects.equals(updatedName, toBeUpdatedName)) {
              return saveOrGetExistingByName(updatedName);
         }
 

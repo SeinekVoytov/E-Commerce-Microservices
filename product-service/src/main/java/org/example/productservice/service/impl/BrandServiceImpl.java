@@ -6,6 +6,8 @@ import org.example.productservice.repository.BrandRepository;
 import org.example.productservice.service.BrandService;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 public class BrandServiceImpl implements BrandService {
@@ -23,7 +25,7 @@ public class BrandServiceImpl implements BrandService {
     public Brand updateBrandName(String updatedName, Brand toBeUpdated) {
 
         String toBeUpdatedName = toBeUpdated.getName();
-        if (!updatedName.equals(toBeUpdatedName)) {
+        if (Objects.equals(updatedName, toBeUpdatedName)) {
             return saveOrGetExistingByName(updatedName);
         }
 

@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -209,8 +210,8 @@ public class ProductServiceImpl implements ProductService {
 
             return (minPrice == null || priceAmount.compareTo(minPrice) >= 0) &&
                     (maxPrice == null || priceAmount.compareTo(maxPrice) <= 0) &&
-                    (brand == null || brandName.equals(brand)) &&
-                    (country == null || countryName.equals(country));
+                    Objects.equals(brand, brandName) &&
+                    Objects.equals(country, countryName);
         };
     }
 }
