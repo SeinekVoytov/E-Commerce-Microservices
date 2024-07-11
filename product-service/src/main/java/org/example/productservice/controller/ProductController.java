@@ -13,6 +13,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/products")
@@ -29,6 +30,19 @@ public class ProductController {
 
         Page<ProductDto> page = productService.getAllProducts(pageable, category, minPrice, maxPrice);
         return new ResponseEntity<>(page, HttpStatus.OK);
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<ProductDto>> search(@RequestParam String keyword) {
+        List<ProductDto> foundProducts = productService.search(keyword);
+        return new ResponseEntity<>(foundProducts, HttpStatus.OK);
+    }
+
+    @PostMapping("/reindex")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<List<ProductDto>> reindex() {
+        List<ProductDto> reindexed = productService.reindex();
+        return new ResponseEntity<>(reindexed, HttpStatus.OK);
     }
 
     @PostMapping

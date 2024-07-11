@@ -19,6 +19,7 @@ import org.example.productservice.repository.ProductRepository;
 import org.example.productservice.service.CategoryService;
 import org.example.productservice.service.ProductService;
 import org.example.productservice.util.PaginationUtils;
+import org.springframework.boot.actuate.web.mappings.MappingsEndpoint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -65,6 +66,24 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return categoryService.getProductsByCategory(category, pageable, filter);
+    }
+
+    @Override
+    public List<ProductDto> search(String keyword) {
+        List<Integer> matchedProductsId = elasticSearchService.search(keyword);
+        return productRepository.findAllById(matchedProductsId).stream()
+                .map(productMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public List<ProductDto> reindex() {
+        List<Product> allProducts = productRepository.findAll();
+        allProducts.forEach(elasticSearchService::update);
+
+        return allProducts.stream()
+                .map(productMapper::toDto)
+                .toList();
     }
 
     @Override
