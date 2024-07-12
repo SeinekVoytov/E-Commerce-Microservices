@@ -1,15 +1,14 @@
 package org.example.userservice.mapper.cart;
 
 import org.example.userservice.dto.cart.CartContentResponse;
-import org.example.userservice.model.cart.Cart;
-import org.example.userservice.model.cart.CartItem;
-import org.example.userservice.model.product.Price;
+import org.example.userservice.dto.product.PriceDto;
+import org.example.userservice.model.Cart;
+import org.example.userservice.model.CartItem;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
 import java.math.BigDecimal;
-import java.util.Currency;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,13 +29,13 @@ public interface CartContentMapper {
     )
     CartContentResponse toResponse(Cart cart);
 
-    default Map<Currency, BigDecimal> computeTotalPrices(Cart cart) {
+    default Map<String, BigDecimal> computeTotalPrices(Cart cart) {
 
-        Map<Currency, BigDecimal> totalPrices = new HashMap<>();
+        Map<String, BigDecimal> totalPrices = new HashMap<>();
         for (CartItem item : cart.getItems()) {
-            Price itemPrice = item.getProduct().getProduct().getPrice();
-            BigDecimal totalPrice = itemPrice.getAmount().multiply(new BigDecimal(item.getQuantity()));
-            totalPrices.merge(itemPrice.getCurrency(), totalPrice, BigDecimal::add);
+            PriceDto itemPrice = item.getProduct().getPrice();
+            BigDecimal totalPrice = itemPrice.amount().multiply(new BigDecimal(item.getQuantity()));
+            totalPrices.merge(itemPrice.currency(), totalPrice, BigDecimal::add);
         }
 
         return totalPrices;
