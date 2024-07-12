@@ -22,17 +22,15 @@ public interface CartService {
                                    HttpServletResponse response);
 
     CartContentResponse updateItemQuantity(Jwt jwt,
-                                        int itemId,
+                                        UUID itemId,
                                         UpdateQuantityRequest request,
                                         UUID cartIdFromCookie,
                                         HttpServletResponse response);
 
     CartContentResponse deleteItemFromCart(Jwt jwt,
-                                        int itemId,
+                                        UUID itemId,
                                         UUID cartIdFromCookie,
                                         HttpServletResponse response);
-
-    void deleteExpiredCarts();
 
     OrderResponse order(Jwt jwt, OrderRequest request);
 

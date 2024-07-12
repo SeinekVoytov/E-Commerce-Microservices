@@ -44,7 +44,7 @@ public class CartController {
 
     @PatchMapping("/items/{itemId}")
     public ResponseEntity<CartContentResponse> updateItemQuantity(@AuthenticationPrincipal Jwt jwt,
-                                                                  @PathVariable Integer itemId,
+                                                                  @PathVariable UUID itemId,
                                                                   @RequestBody @Valid UpdateQuantityRequest request,
                                                                   @CookieValue(name = "cartId", required = false) UUID cartId,
                                                                   HttpServletResponse response) {
@@ -55,7 +55,7 @@ public class CartController {
 
     @DeleteMapping("/items/{itemId}")
     public ResponseEntity<CartContentResponse> deleteCartItem(@AuthenticationPrincipal Jwt jwt,
-                                                              @PathVariable Integer itemId,
+                                                              @PathVariable UUID itemId,
                                                               @CookieValue(name = "cartId", required = false) UUID cartId,
                                                               HttpServletResponse response) {
 
