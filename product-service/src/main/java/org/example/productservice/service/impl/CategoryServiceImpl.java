@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.productservice.dto.*;
 import org.example.productservice.exception.CategoryAlreadyExistsException;
 import org.example.productservice.exception.CategoryNotFoundException;
+import org.example.productservice.exception.InvalidCategorySelectorException;
 import org.example.productservice.mapper.CategoryMapper;
 import org.example.productservice.mapper.ProductMapper;
 import org.example.productservice.model.Category;
@@ -31,9 +32,12 @@ public class CategoryServiceImpl implements CategoryService {
     private final ProductMapper productMapper;
 
     @Override
-    public Set<CategoryWithChildrenDto> getRootCategories() {
-        return categoryRepository.findAllByParentCategoryIsNull().stream()
-                .map(categoryMapper::toDtoWithChildren)
+    public Set<?> getAllCategories(boolean withParents, boolean withChildren) {
+
+        Function<Category, ?> mappingFunction = createMappingFunction(withParents, withChildren);
+
+        return categoryRepository.findAll().stream()
+                .map(mappingFunction)
                 .collect(Collectors.toSet());
     }
 
@@ -116,4 +120,23 @@ public class CategoryServiceImpl implements CategoryService {
                     .orElseThrow(() -> new CategoryNotFoundException(identifier));
         }
     }
+
+    private Function<Category, ?> createMappingFunction(boolean withParents,
+                                                        boolean withChildren) {
+
+        if (withParents && withChildren) {
+            throw new InvalidCategorySelectorException();
+        }
+
+        if (withParents) {
+            return categoryMapper::toDtoWithParent;
+        }
+
+        if (withChildren) {
+            return categoryMapper::toDtoWithChildren;
+        }
+
+        return categoryMapper::toDto;
+    }
+
 }

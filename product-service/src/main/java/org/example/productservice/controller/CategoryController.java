@@ -22,8 +22,9 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<Set<CategoryWithChildrenDto>> getRootCategories() {
-        return ResponseEntity.ok(categoryService.getRootCategories());
+    public ResponseEntity<Set<?>> getAllCategories(@RequestParam(required = false) boolean withParents,
+                                                   @RequestParam(required = false) boolean withChildren) {
+        return ResponseEntity.ok(categoryService.getAllCategories(withParents, withChildren));
     }
 
     @PostMapping

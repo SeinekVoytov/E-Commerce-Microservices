@@ -10,7 +10,7 @@ import java.util.function.Predicate;
 
 public interface CategoryService {
 
-    Set<CategoryWithChildrenDto> getRootCategories();
+    Set<?> getAllCategories(boolean withParents, boolean withChildren);
 
     CategoryWithParentDto createCategory(RequestCategoryDto data);
 
