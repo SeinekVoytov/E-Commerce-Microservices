@@ -27,6 +27,16 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.getAllCategories(withParents, withChildren));
     }
 
+    @GetMapping("/{identifier}")
+    public ResponseEntity<?> getCategoryByIdentifier(@PathVariable String identifier,
+                                                     @RequestParam(required = false) boolean withParents,
+                                                     @RequestParam(required = false) boolean withChildren) {
+
+        return ResponseEntity.ok(
+                categoryService.getCategoryByIdentifier(identifier, withParents, withChildren)
+        );
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<CategoryWithParentDto> createCategory(@RequestBody @Valid RequestCategoryDto data) {

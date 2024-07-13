@@ -12,6 +12,10 @@ public interface CategoryService {
 
     Set<?> getAllCategories(boolean withParents, boolean withChildren);
 
+    Object getCategoryByIdentifier(String identifier,
+                                   boolean withParents,
+                                   boolean withChildren);
+
     CategoryWithParentDto createCategory(RequestCategoryDto data);
 
     CategoryWithChildrenDto deleteCategory(String identifier);

@@ -42,6 +42,16 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    public Object getCategoryByIdentifier(String identifier,
+                                          boolean withParents,
+                                          boolean withChildren) {
+
+        Category foundCategory = getCategoryByIdentifier(identifier);
+        Function<Category, ?> mappingFunction = createMappingFunction(withParents, withChildren);
+        return mappingFunction.apply(foundCategory);
+    }
+
+    @Override
     public CategoryWithParentDto createCategory(RequestCategoryDto data) {
 
         if (categoryRepository.existsByName(data.name())) {
