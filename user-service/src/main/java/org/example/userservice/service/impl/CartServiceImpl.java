@@ -7,14 +7,10 @@ import org.example.userservice.communication.ProductServiceCommunicator;
 import org.example.userservice.dto.cart.CartContentResponse;
 import org.example.userservice.dto.cart.CartItemRequest;
 import org.example.userservice.dto.cart.UpdateQuantityRequest;
-import org.example.userservice.dto.order.OrderRequest;
-import org.example.userservice.dto.order.OrderResponse;
 import org.example.userservice.dto.product.ProductDetailsDto;
-import org.example.userservice.exception.CartIsEmptyException;
 import org.example.userservice.exception.CartNotFoundException;
 import org.example.userservice.exception.InvalidCartIdCookieException;
-import org.example.userservice.mapper.cart.CartContentMapper;
-import org.example.userservice.mapper.order.OrderResponseMapper;
+import org.example.userservice.mapper.CartContentMapper;
 import org.example.userservice.model.Cart;
 import org.example.userservice.model.CartItem;
 import org.example.userservice.repository.CartRepository;
@@ -35,7 +31,6 @@ public class CartServiceImpl implements CartService {
     private final ProductServiceCommunicator communicator;
 
     private final CartContentMapper cartContentMapper;
-    private final OrderResponseMapper orderResponseMapper;
 
     @Override
     public CartContentResponse getCartItems(Jwt jwt,
@@ -170,23 +165,6 @@ public class CartServiceImpl implements CartService {
         }
 
         return cart;
-    }
-
-    @Override
-    public OrderResponse order(Jwt jwt, OrderRequest request) {
-
-        UUID userId = retrieveUserIdFromJwt(jwt);
-        Cart cart = cartRepository.findByUserId(userId)
-                .orElseThrow(CartNotFoundException::new);
-
-        if (cart.isEmpty()) {
-            throw new CartIsEmptyException();
-        }
-
-        CartContentResponse cartContent = cartContentMapper.toResponse(cart);
-        clearCart(cart);
-
-        return orderResponseMapper.mapToOrderResponse(request, cartContent);
     }
 
     private void clearCart(Cart cart) {

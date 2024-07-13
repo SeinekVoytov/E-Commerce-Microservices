@@ -32,8 +32,6 @@ public interface CartService {
                                         UUID cartIdFromCookie,
                                         HttpServletResponse response);
 
-    OrderResponse order(Jwt jwt, OrderRequest request);
-
     default UUID retrieveUserIdFromJwt(Jwt jwt) {
         return UUID.fromString(jwt.getSubject());
     }

@@ -1,4 +1,4 @@
-package org.example.userservice.mapper.cart;
+package org.example.userservice.mapper;
 
 import org.example.userservice.dto.cart.CartItemResponse;
 import org.example.userservice.dto.product.PriceDto;
