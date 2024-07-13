@@ -35,7 +35,8 @@ public class GlobalExceptionHandler {
             {
                     InvalidQueryParameterException.class,
                     CategoryAlreadyExistsException.class,
-                    SearchTextIsTooShortException.class
+                    SearchTextIsTooShortException.class,
+                    InvalidCategorySelectorException.class
             }
     )
     public ResponseEntity<ErrorObject> handleInvalidQueryParameterException(Exception exc) {
