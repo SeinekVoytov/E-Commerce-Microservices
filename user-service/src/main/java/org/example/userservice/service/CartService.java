@@ -4,8 +4,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.example.userservice.dto.cart.CartContentResponse;
 import org.example.userservice.dto.cart.CartItemRequest;
 import org.example.userservice.dto.cart.UpdateQuantityRequest;
-import org.example.userservice.dto.order.OrderRequest;
-import org.example.userservice.dto.order.OrderResponse;
 import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.UUID;
