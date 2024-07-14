@@ -1,8 +1,7 @@
 package org.example.productservice.elasticsearch.document;
 
-public record ProductDocument(
+public record CategoryDocument(
         Integer id,
-        String name,
-        String description
+        String name
 ) implements Document {
 }
