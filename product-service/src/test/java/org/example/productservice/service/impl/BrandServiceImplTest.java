@@ -27,10 +27,6 @@ class BrandServiceImplTest {
     @InjectMocks
     private BrandServiceImpl brandService;
 
-    @BeforeEach
-    void setUp() {
-    }
-
     @Test
     void saveOrGetExistingByName_ShouldReturnExistingBrand_WhenBrandIsFoundByName() {
 
