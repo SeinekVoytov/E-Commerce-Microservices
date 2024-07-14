@@ -6,7 +6,7 @@ import co.elastic.clients.elasticsearch.core.SearchResponse;
 import lombok.RequiredArgsConstructor;
 import org.example.productservice.elasticsearch.document.CategoryDocument;
 import org.example.productservice.elasticsearch.document.Document;
-import org.example.productservice.elasticsearch.exception.ProductUpdatingException;
+import org.example.productservice.elasticsearch.exception.ElasticSearchSearchingException;
 import org.example.productservice.elasticsearch.exception.SearchTextIsTooShortException;
 import org.example.productservice.elasticsearch.mapper.CategoryDocumentMapper;
 import org.example.productservice.elasticsearch.service.AbstractElasticSearchService;
@@ -65,7 +65,7 @@ public class CategorySearchService extends AbstractElasticSearchService<Category
                     .toList();
 
         } catch (IOException e) {
-            throw new ProductUpdatingException();
+            throw new ElasticSearchSearchingException(e);
         }
     }
 }

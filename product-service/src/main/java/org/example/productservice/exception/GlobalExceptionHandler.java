@@ -1,7 +1,8 @@
 package org.example.productservice.exception;
 
-import org.example.productservice.elasticsearch.exception.ProductIndexingException;
-import org.example.productservice.elasticsearch.exception.ProductUpdatingException;
+import org.example.productservice.elasticsearch.exception.ElasticSearchIndexingException;
+import org.example.productservice.elasticsearch.exception.ElasticSearchSearchingException;
+import org.example.productservice.elasticsearch.exception.ElasticSearchUpdatingException;
 import org.example.productservice.elasticsearch.exception.SearchTextIsTooShortException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,11 +64,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(
             {
-                    ProductIndexingException.class,
-                    ProductUpdatingException.class
+                    ElasticSearchIndexingException.class,
+                    ElasticSearchUpdatingException.class,
+                    ElasticSearchSearchingException.class
             }
     )
-    public ResponseEntity<ErrorObject> handleProductIndexingException(ProductIndexingException exc) {
+    public ResponseEntity<ErrorObject> handleProductIndexingException(ElasticSearchIndexingException exc) {
         return new ResponseEntity<>(
                 buildErrorObject(HttpStatus.INTERNAL_SERVER_ERROR.value(), exc.getMessage()),
                 HttpStatus.INTERNAL_SERVER_ERROR

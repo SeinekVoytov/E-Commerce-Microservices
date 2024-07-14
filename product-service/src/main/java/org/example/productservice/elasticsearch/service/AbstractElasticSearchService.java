@@ -2,8 +2,8 @@ package org.example.productservice.elasticsearch.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import org.example.productservice.elasticsearch.document.Document;
-import org.example.productservice.elasticsearch.exception.ProductIndexingException;
-import org.example.productservice.elasticsearch.exception.ProductUpdatingException;
+import org.example.productservice.elasticsearch.exception.ElasticSearchIndexingException;
+import org.example.productservice.elasticsearch.exception.ElasticSearchUpdatingException;
 
 import java.io.IOException;
 
@@ -24,7 +24,7 @@ public abstract class AbstractElasticSearchService<Model>
                     .document(document)
             );
         } catch (IOException e) {
-            throw new ProductIndexingException();
+            throw new ElasticSearchIndexingException(e);
         }
     }
 
@@ -39,7 +39,7 @@ public abstract class AbstractElasticSearchService<Model>
                             .docAsUpsert(true),
                     updatedDoc.getClass());
         } catch (IOException e) {
-            throw new ProductUpdatingException();
+            throw new ElasticSearchUpdatingException(e);
         }
     }
 }
