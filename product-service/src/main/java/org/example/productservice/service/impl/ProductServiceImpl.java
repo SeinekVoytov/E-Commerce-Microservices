@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.productservice.dto.ProductDetailsDto;
 import org.example.productservice.dto.ProductDto;
 import org.example.productservice.dto.RequestProductDto;
-import org.example.productservice.elasticsearch.ElasticSearchService;
+import org.example.productservice.elasticsearch.service.impl.ProductSearchService;
 import org.example.productservice.exception.CategoryNotFoundException;
 import org.example.productservice.exception.ImageNotFoundException;
 import org.example.productservice.exception.ProductNotFoundException;
@@ -21,14 +21,12 @@ import org.example.productservice.service.CategoryService;
 import org.example.productservice.service.CountryManufacturerService;
 import org.example.productservice.service.ProductService;
 import org.example.productservice.util.PaginationUtils;
-import org.springframework.boot.actuate.web.mappings.MappingsEndpoint;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -43,7 +41,7 @@ public class ProductServiceImpl implements ProductService {
     private final CountryManufacturerService countryManufacturerService;
     private final BrandService brandService;
 
-    private final ElasticSearchService elasticSearchService;
+    private final ProductSearchService productSearchService;
 
     private final ProductRepository productRepository;
     private final ProductDetailsRepository detailsRepository;
@@ -77,7 +75,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDto> search(String keyword) {
-        List<Integer> matchedProductsId = elasticSearchService.search(keyword);
+        List<Integer> matchedProductsId = productSearchService.search(keyword);
         return productRepository.findAllById(matchedProductsId).stream()
                 .map(productMapper::toDto)
                 .toList();
@@ -86,7 +84,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductDto> reindex() {
         List<Product> allProducts = productRepository.findAll();
-        allProducts.forEach(elasticSearchService::update);
+        allProducts.forEach(productSearchService::update);
 
         return allProducts.stream()
                 .map(productMapper::toDto)
@@ -122,7 +120,7 @@ public class ProductServiceImpl implements ProductService {
         ProductDetails productToBeUpdated = optionalProductDetails.get();
         updateProduct(productToBeUpdated, updatedProduct);
         productToBeUpdated = detailsRepository.save(productToBeUpdated);
-        elasticSearchService.update(productToBeUpdated.getProduct());
+        productSearchService.update(productToBeUpdated.getProduct());
 
         return detailsMapper.toDto(productToBeUpdated);
     }
@@ -152,7 +150,7 @@ public class ProductServiceImpl implements ProductService {
         );
 
         createdProduct = detailsRepository.save(createdProduct);
-        elasticSearchService.save(createdProduct.getProduct());
+        productSearchService.save(createdProduct.getProduct());
 
         return detailsMapper.toDto(createdProduct);
     }

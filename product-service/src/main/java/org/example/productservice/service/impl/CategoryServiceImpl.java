@@ -2,6 +2,7 @@ package org.example.productservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.example.productservice.dto.*;
+import org.example.productservice.elasticsearch.service.impl.CategorySearchService;
 import org.example.productservice.exception.CategoryAlreadyExistsException;
 import org.example.productservice.exception.CategoryNotFoundException;
 import org.example.productservice.exception.InvalidCategorySelectorException;
@@ -28,6 +29,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
 
+    private final CategorySearchService categorySearchService;
+
     private final CategoryMapper categoryMapper;
     private final ProductMapper productMapper;
 
@@ -39,6 +42,24 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryRepository.findAll().stream()
                 .map(mappingFunction)
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public List<CategoryDto> search(String keyword) {
+        List<Integer> matchedCategoryIds = categorySearchService.search(keyword);
+        return categoryRepository.findAllByIdIn(matchedCategoryIds).stream()
+                .map(categoryMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public List<CategoryDto> reindex() {
+        List<Category> allCategories = categoryRepository.findAll();
+        allCategories.forEach(categorySearchService::update);
+
+        return allCategories.stream()
+                .map(categoryMapper::toDto)
+                .toList();
     }
 
     @Override

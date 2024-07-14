@@ -12,10 +12,9 @@ import org.springframework.data.domain.Sort;
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
-public interface ProductService {
+public interface ProductService extends SearchService<ProductDto> {
 
     Map<String, Comparator<Product>> AVAILABLE_SORT_PARAMETERS =
             Map.of(
@@ -60,10 +59,6 @@ public interface ProductService {
                                     BigDecimal maxPrice,
                                     String brand,
                                     String country);
-
-    List<ProductDto> search(String keyword);
-
-    List<ProductDto> reindex();
 
     ProductDetailsDto getById(int id);
 

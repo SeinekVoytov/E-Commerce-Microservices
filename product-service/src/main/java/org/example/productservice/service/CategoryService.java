@@ -8,7 +8,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.Set;
 import java.util.function.Predicate;
 
-public interface CategoryService {
+public interface CategoryService extends SearchService<CategoryDto> {
 
     Set<?> getAllCategories(boolean withParents, boolean withChildren);
 
