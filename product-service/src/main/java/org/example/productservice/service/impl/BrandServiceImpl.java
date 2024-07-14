@@ -25,7 +25,7 @@ public class BrandServiceImpl implements BrandService {
     public Brand updateBrandName(String updatedName, Brand toBeUpdated) {
 
         String toBeUpdatedName = toBeUpdated.getName();
-        if (Objects.equals(updatedName, toBeUpdatedName)) {
+        if (!Objects.equals(updatedName, toBeUpdatedName)) {
             return saveOrGetExistingByName(updatedName);
         }
 
