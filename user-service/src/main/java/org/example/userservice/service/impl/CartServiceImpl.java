@@ -193,8 +193,7 @@ public class CartServiceImpl implements CartService {
                 .orElseThrow(() -> new InvalidCartIdCookieException(userId));
 
         cartToBeAssigned.setUserId(userId);
-        cartToBeAssigned = cartRepository.save(cartToBeAssigned);
-        System.out.println(1);
+        cartRepository.save(cartToBeAssigned);
     }
 
     private void verifyCartIdCookie(UUID cookieVal, UUID userId, HttpServletResponse response) {
