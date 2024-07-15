@@ -1,7 +1,11 @@
 package org.example.productservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.example.productservice.dto.*;
+import org.example.productservice.dto.CategoryWithChildrenDto;
+import org.example.productservice.dto.CategoryWithParentDto;
+import org.example.productservice.dto.ProductDto;
+import org.example.productservice.dto.RequestCategoryDto;
+import org.example.productservice.dto.UpdateCategoryDto;
 import org.example.productservice.exception.CategoryAlreadyExistsException;
 import org.example.productservice.exception.CategoryNotFoundException;
 import org.example.productservice.mapper.CategoryMapper;
@@ -16,7 +20,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -65,6 +73,9 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryWithParentDto updateCategory(String identifier, UpdateCategoryDto data) {
         Category categoryToBeUpdated = getCategoryByIdentifier(identifier);
+        if (categoryRepository.existsByName(data.name())) {
+            throw new CategoryAlreadyExistsException(data.name());
+        }
         categoryToBeUpdated.setName(data.name());
         categoryToBeUpdated = categoryRepository.save(categoryToBeUpdated);
         return categoryMapper.toDtoWithParent(categoryToBeUpdated);
