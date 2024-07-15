@@ -4,7 +4,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
@@ -17,7 +16,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 @Configuration
-@EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
@@ -25,10 +23,14 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.oauth2ResourceServer(
-                oauth2Configurer -> oauth2Configurer.jwt(
-                        customizer -> customizer.jwtAuthenticationConverter(jwtConverter())
+                        oauth2Configurer -> oauth2Configurer.jwt(
+                                customizer -> customizer.jwtAuthenticationConverter(jwtConverter())
+                        )
                 )
-        );
+                .authorizeHttpRequests(
+                        authManager -> authManager
+                                .anyRequest().authenticated()
+                );
 
         return http.build();
     }
