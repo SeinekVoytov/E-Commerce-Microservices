@@ -1,34 +1,25 @@
-package org.example.userservice.model.cart;
+package org.example.userservice.model;
 
-import jakarta.persistence.*;
-import lombok.*;
-import org.example.userservice.model.product.ProductDetails;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.example.userservice.dto.product.ProductDetailsDto;
 
 import java.util.Objects;
+import java.util.UUID;
 
 @Getter
 @Setter
 @Builder
-
 @NoArgsConstructor
 @AllArgsConstructor
-
-@Entity
-@Table(name = "cart_item")
 public class CartItem {
 
-    @Id
-    @SequenceGenerator(
-            name = "cart_item_seq",
-            sequenceName = "cart_item_seq",
-            allocationSize = 75
-    )
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "cart_item_seq")
-    private Integer id;
+    private UUID id;
 
-    @OneToOne
-    @JoinColumn(name = "product_id", referencedColumnName = "id")
-    private ProductDetails product;
+    private ProductDetailsDto product;
 
     private Integer quantity;
 

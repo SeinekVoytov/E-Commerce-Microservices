@@ -12,7 +12,13 @@ import org.example.productservice.exception.ProductNotFoundException;
 import org.example.productservice.mapper.ProductDetailsMapper;
 import org.example.productservice.mapper.ProductMapper;
 import org.example.productservice.mapper.RequestProductMapper;
-import org.example.productservice.model.*;
+import org.example.productservice.model.Brand;
+import org.example.productservice.model.Category;
+import org.example.productservice.model.CountryManufacturer;
+import org.example.productservice.model.Image;
+import org.example.productservice.model.Price;
+import org.example.productservice.model.Product;
+import org.example.productservice.model.ProductDetails;
 import org.example.productservice.repository.CategoryRepository;
 import org.example.productservice.repository.ImageRepository;
 import org.example.productservice.repository.ProductDetailsRepository;
@@ -30,10 +36,26 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Currency;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceImplTest {
