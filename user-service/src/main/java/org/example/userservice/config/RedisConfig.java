@@ -1,9 +1,5 @@
 package org.example.userservice.config;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import lombok.RequiredArgsConstructor;
 import org.example.userservice.model.Cart;
 import org.springframework.context.annotation.Bean;
