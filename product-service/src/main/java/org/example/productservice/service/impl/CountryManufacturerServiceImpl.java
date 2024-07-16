@@ -25,7 +25,7 @@ public class CountryManufacturerServiceImpl implements CountryManufacturerServic
     public CountryManufacturer updateCountryManufacturerName(String updatedName, CountryManufacturer toBeUpdated) {
 
         String toBeUpdatedName = toBeUpdated.getName();
-        if (Objects.equals(updatedName, toBeUpdatedName)) {
+        if (!Objects.equals(updatedName, toBeUpdatedName)) {
              return saveOrGetExistingByName(updatedName);
         }
 
