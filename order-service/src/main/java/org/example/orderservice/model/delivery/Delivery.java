@@ -1,4 +1,4 @@
-package org.example.orderservice.model.order.delivery;
+package org.example.orderservice.model.delivery;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;

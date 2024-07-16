@@ -1,4 +1,4 @@
-package org.example.orderservice.model.order.delivery;
+package org.example.orderservice.model.delivery;
 
 public enum DeliveryType {
     STANDARD, EXPRESS, SAME_DAY, NEXT_DAY, SCHEDULED, IN_STORE_PICKUP

@@ -1,4 +1,4 @@
-package org.example.orderservice.mapper.order;
+package org.example.orderservice.mapper;
 
 import org.example.orderservice.dto.order.OrderItemDto;
 import org.example.orderservice.mapper.product.ProductDetailsMapper;

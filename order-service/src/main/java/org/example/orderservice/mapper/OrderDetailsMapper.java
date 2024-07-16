@@ -1,4 +1,4 @@
-package org.example.orderservice.mapper.order;
+package org.example.orderservice.mapper;
 
 import org.example.orderservice.dto.order.ResponseOrderDetailsDto;
 import org.example.orderservice.model.OrderDetails;
