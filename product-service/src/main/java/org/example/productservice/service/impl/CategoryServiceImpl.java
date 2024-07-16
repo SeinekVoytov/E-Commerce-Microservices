@@ -1,6 +1,7 @@
 package org.example.productservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.example.productservice.dto.CategoryDto;
 import org.example.productservice.elasticsearch.service.impl.CategorySearchService;
 import org.example.productservice.dto.CategoryWithChildrenDto;
 import org.example.productservice.dto.CategoryWithParentDto;
