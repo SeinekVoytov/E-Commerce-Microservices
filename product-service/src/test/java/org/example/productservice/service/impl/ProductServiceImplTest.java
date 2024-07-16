@@ -4,7 +4,7 @@ import org.example.productservice.dto.PriceDto;
 import org.example.productservice.dto.ProductDetailsDto;
 import org.example.productservice.dto.ProductDto;
 import org.example.productservice.dto.RequestProductDto;
-import org.example.productservice.elasticsearch.ElasticSearchService;
+import org.example.productservice.elasticsearch.service.impl.ProductSearchService;
 import org.example.productservice.exception.CategoryNotFoundException;
 import org.example.productservice.exception.ImageNotFoundException;
 import org.example.productservice.exception.InvalidQueryParameterException;
@@ -88,7 +88,7 @@ class ProductServiceImplTest {
     private RequestProductMapper requestProductMapper;
 
     @Mock
-    private ElasticSearchService elasticSearchService;
+    private ProductSearchService productSearchService;
 
     @InjectMocks
     private ProductServiceImpl service;

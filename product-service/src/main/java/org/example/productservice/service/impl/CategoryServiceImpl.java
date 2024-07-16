@@ -1,6 +1,7 @@
 package org.example.productservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.example.productservice.elasticsearch.service.impl.CategorySearchService;
 import org.example.productservice.dto.CategoryWithChildrenDto;
 import org.example.productservice.dto.CategoryWithParentDto;
 import org.example.productservice.dto.ProductDto;
@@ -8,6 +9,7 @@ import org.example.productservice.dto.RequestCategoryDto;
 import org.example.productservice.dto.UpdateCategoryDto;
 import org.example.productservice.exception.CategoryAlreadyExistsException;
 import org.example.productservice.exception.CategoryNotFoundException;
+import org.example.productservice.exception.InvalidCategorySelectorException;
 import org.example.productservice.mapper.CategoryMapper;
 import org.example.productservice.mapper.ProductMapper;
 import org.example.productservice.model.Category;
@@ -35,14 +37,48 @@ public class CategoryServiceImpl implements CategoryService {
 
     private final CategoryRepository categoryRepository;
 
+    private final CategorySearchService categorySearchService;
+
     private final CategoryMapper categoryMapper;
     private final ProductMapper productMapper;
 
     @Override
-    public Set<CategoryWithChildrenDto> getRootCategories() {
-        return categoryRepository.findAllByParentCategoryIsNull().stream()
-                .map(categoryMapper::toDtoWithChildren)
+    public Set<?> getAllCategories(boolean withParents, boolean withChildren) {
+
+        Function<Category, ?> mappingFunction = createMappingFunction(withParents, withChildren);
+
+        return categoryRepository.findAll().stream()
+                .map(mappingFunction)
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public List<CategoryDto> search(String keyword) {
+        List<Integer> matchedCategoryIds = categorySearchService.search(keyword);
+        return categoryRepository.findAllByIdIn(matchedCategoryIds).stream()
+                .map(categoryMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public List<CategoryDto> reindex() {
+        List<Category> allCategories = categoryRepository.findAll().stream()
+                .peek(categorySearchService::update)
+                .toList();
+
+        return allCategories.stream()
+                .map(categoryMapper::toDto)
+                .toList();
+    }
+
+    @Override
+    public Object getCategoryByIdentifier(String identifier,
+                                          boolean withParents,
+                                          boolean withChildren) {
+
+        Category foundCategory = getCategoryByIdentifier(identifier);
+        Function<Category, ?> mappingFunction = createMappingFunction(withParents, withChildren);
+        return mappingFunction.apply(foundCategory);
     }
 
     @Override
@@ -127,4 +163,23 @@ public class CategoryServiceImpl implements CategoryService {
                     .orElseThrow(() -> new CategoryNotFoundException(identifier));
         }
     }
+
+    private Function<Category, ?> createMappingFunction(boolean withParents,
+                                                        boolean withChildren) {
+
+        if (withParents && withChildren) {
+            throw new InvalidCategorySelectorException();
+        }
+
+        if (withParents) {
+            return categoryMapper::toDtoWithParent;
+        }
+
+        if (withChildren) {
+            return categoryMapper::toDtoWithChildren;
+        }
+
+        return categoryMapper::toDto;
+    }
+
 }

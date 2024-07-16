@@ -1,57 +1,47 @@
-package org.example.productservice.elasticsearch;
+package org.example.productservice.elasticsearch.service.impl;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch._types.query_dsl.TextQueryType;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import lombok.RequiredArgsConstructor;
+import org.example.productservice.elasticsearch.document.Document;
 import org.example.productservice.elasticsearch.document.ProductDocument;
-import org.example.productservice.elasticsearch.exception.ProductIndexingException;
-import org.example.productservice.elasticsearch.exception.ProductUpdatingException;
+import org.example.productservice.elasticsearch.exception.ElasticSearchSearchingException;
 import org.example.productservice.elasticsearch.exception.SearchTextIsTooShortException;
 import org.example.productservice.elasticsearch.mapper.ProductDocumentMapper;
+import org.example.productservice.elasticsearch.service.AbstractElasticSearchService;
 import org.example.productservice.model.Product;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Function;
 
 @Service
 @RequiredArgsConstructor
-public class ElasticSearchService {
+public class ProductSearchService extends AbstractElasticSearchService<Product> {
 
     private static final String PRODUCT_INDEX = "product";
 
     private final ElasticsearchClient client;
     private final ProductDocumentMapper productDocumentMapper;
 
-    public void save(Product product) {
-        try {
-            ProductDocument document = productDocumentMapper.toDocument(product);
-            client.index(i -> i
-                    .index(PRODUCT_INDEX)
-                    .id(String.valueOf(document.id()))
-                    .document(document)
-            );
-        } catch (IOException e) {
-            throw new ProductIndexingException();
-        }
+    @Override
+    public Function<Product, Document> getMapper() {
+        return productDocumentMapper::toDocument;
     }
 
-    public void update(Product updated) {
-        try {
-            ProductDocument updatedDoc = productDocumentMapper.toDocument(updated);
-
-            client.update(u -> u
-                            .index(PRODUCT_INDEX)
-                            .id(String.valueOf(updatedDoc.id()))
-                            .doc(updatedDoc)
-                            .docAsUpsert(true),
-                    ProductDocument.class);
-        } catch (IOException e) {
-            throw new ProductUpdatingException();
-        }
+    @Override
+    protected String getIndexName() {
+        return PRODUCT_INDEX;
     }
 
+    @Override
+    protected ElasticsearchClient getClient() {
+        return client;
+    }
+
+    @Override
     public List<Integer> search(String searchText) {
 
         if (searchText.length() < 3) {
@@ -75,7 +65,7 @@ public class ElasticSearchService {
                     .toList();
 
         } catch (IOException e) {
-            throw new ProductUpdatingException();
+            throw new ElasticSearchSearchingException(e);
         }
     }
 }

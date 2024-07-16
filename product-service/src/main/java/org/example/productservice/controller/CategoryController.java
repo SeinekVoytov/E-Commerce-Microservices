@@ -2,6 +2,7 @@ package org.example.productservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.productservice.dto.CategoryDto;
 import org.example.productservice.dto.CategoryWithChildrenDto;
 import org.example.productservice.dto.CategoryWithParentDto;
 import org.example.productservice.dto.RequestCategoryDto;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -22,8 +24,32 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public ResponseEntity<Set<CategoryWithChildrenDto>> getRootCategories() {
-        return ResponseEntity.ok(categoryService.getRootCategories());
+    public ResponseEntity<Set<?>> getAllCategories(@RequestParam(required = false) boolean withParents,
+                                                   @RequestParam(required = false) boolean withChildren) {
+        return ResponseEntity.ok(categoryService.getAllCategories(withParents, withChildren));
+    }
+
+    @GetMapping("search")
+    public ResponseEntity<List<CategoryDto>> search(@RequestParam String keyword) {
+        List<CategoryDto> foundCategories = categoryService.search(keyword);
+        return ResponseEntity.ok(foundCategories);
+    }
+
+    @PostMapping("/reindex")
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<List<CategoryDto>> reindex() {
+        List<CategoryDto> reindexed = categoryService.reindex();
+        return ResponseEntity.ok(reindexed);
+    }
+
+    @GetMapping("/{identifier}")
+    public ResponseEntity<?> getCategoryByIdentifier(@PathVariable String identifier,
+                                                     @RequestParam(required = false) boolean withParents,
+                                                     @RequestParam(required = false) boolean withChildren) {
+
+        return ResponseEntity.ok(
+                categoryService.getCategoryByIdentifier(identifier, withParents, withChildren)
+        );
     }
 
     @PostMapping
