@@ -54,8 +54,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> reindex() {
-        List<Category> allCategories = categoryRepository.findAll();
-        allCategories.forEach(categorySearchService::update);
+        List<Category> allCategories = categoryRepository.findAll().stream()
+                .peek(categorySearchService::update)
+                .toList();
 
         return allCategories.stream()
                 .map(categoryMapper::toDto)

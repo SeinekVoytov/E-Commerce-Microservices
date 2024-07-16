@@ -83,8 +83,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductDto> reindex() {
-        List<Product> allProducts = productRepository.findAll();
-        allProducts.forEach(productSearchService::update);
+        List<Product> allProducts = productRepository.findAll().stream()
+                .peek(productSearchService::update)
+                .toList();
 
         return allProducts.stream()
                 .map(productMapper::toDto)
