@@ -226,3 +226,7 @@ ALTER TABLE product ADD COLUMN IF NOT EXISTS country_manufacturer_id INT REFEREN
 --rollback DROP TABLE IF EXISTS brand;
 --rollback DROP TABLE IF EXISTS country_manufacturer;
 --rollback DROP SEQUENCE IF EXISTS country_seq;
+
+--changeset SeinekVoytov:20 dbms:postgresql
+ALTER TABLE order_item DROP CONSTRAINT order_item_item_id_fkey;
+--rollback ALTER TABLE order_item ADD CONSTRAINT order_item_item_id_fkey FOREIGN KEY (item_id) REFERENCES product_details(id);
