@@ -1,7 +1,7 @@
 package org.example.orderservice.mapper.order;
 
-import org.example.orderservice.dto.order.OrderDetailsDto;
-import org.example.orderservice.model.order.OrderDetails;
+import org.example.orderservice.dto.order.ResponseOrderDetailsDto;
+import org.example.orderservice.model.OrderDetails;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -16,5 +16,5 @@ public interface OrderDetailsMapper {
     @Mapping(source = "order.userId", target = "userId")
     @Mapping(source = "order.delivery", target = "delivery")
     @Mapping(source = "order.items", target = "items")
-    OrderDetailsDto toDto(OrderDetails entity);
+    ResponseOrderDetailsDto toDto(OrderDetails entity);
 }

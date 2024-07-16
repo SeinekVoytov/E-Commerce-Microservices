@@ -1,7 +1,7 @@
 package org.example.orderservice.mapper.order;
 
-import org.example.orderservice.dto.order.OrderDto;
-import org.example.orderservice.model.order.Order;
+import org.example.orderservice.dto.order.ResponseOrderDto;
+import org.example.orderservice.model.Order;
 import org.mapstruct.InjectionStrategy;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -16,7 +16,7 @@ import java.util.Set;
 public interface OrderMapper {
 
     @Mapping(source = "delivery.status", target = "status")
-    OrderDto toDto(Order entity);
+    ResponseOrderDto toDto(Order entity);
 
-    Set<OrderDto> setToDtos(Set<Order> entities);
+    Set<ResponseOrderDto> setToDtos(Set<Order> entities);
 }
