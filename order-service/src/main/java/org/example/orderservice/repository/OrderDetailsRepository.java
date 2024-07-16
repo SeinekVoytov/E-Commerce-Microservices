@@ -1,6 +1,6 @@
 package org.example.orderservice.repository;
 
-import org.example.orderservice.model.order.OrderDetails;
+import org.example.orderservice.model.OrderDetails;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
