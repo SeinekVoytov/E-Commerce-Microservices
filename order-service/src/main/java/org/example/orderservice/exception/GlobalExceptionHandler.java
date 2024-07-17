@@ -24,7 +24,10 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(
-            InvalidQueryParameterException.class
+            {
+                    InvalidQueryParameterException.class,
+                    CartIsEmptyException.class
+            }
     )
     public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus400(InvalidQueryParameterException exc) {
         return new ResponseEntity<>(
