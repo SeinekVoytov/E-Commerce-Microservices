@@ -1,8 +1,8 @@
-package org.example.orderservice.model.order.delivery;
+package org.example.orderservice.model;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -15,9 +15,9 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.JdbcType;
-import org.hibernate.dialect.PostgreSQLEnumJdbcType;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.Instant;
 import java.util.Objects;
 
 @Getter
@@ -27,40 +27,36 @@ import java.util.Objects;
 @AllArgsConstructor
 
 @Entity
-@Table(name = "delivery")
-public class Delivery {
+@Table(name = "order_details")
+public class OrderDetails {
 
     @Id
     @SequenceGenerator(
-            name = "delivery_seq",
-            sequenceName = "delivery_seq",
+            name = "order_details_seq",
+            sequenceName = "order_details_seq",
             allocationSize = 20
     )
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "delivery_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_details_seq")
     private Integer id;
 
-    @Enumerated
-    @JdbcType(PostgreSQLEnumJdbcType.class)
-    private DeliveryType type;
-
-    @Enumerated
-    @JdbcType(PostgreSQLEnumJdbcType.class)
-    private DeliveryStatus status;
-
     @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    @JoinColumn(name = "fee_id", referencedColumnName = "id")
-    private Fee fee;
+    @JoinColumn(name = "order_id", referencedColumnName = "id")
+    private Order order;
+
+    @Column(name = "created_at")
+    @CreationTimestamp
+    private Instant createdAt;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Delivery delivery = (Delivery) o;
-        return Objects.equals(id, delivery.id) && type == delivery.type && status == delivery.status && Objects.equals(fee, delivery.fee);
+        OrderDetails that = (OrderDetails) o;
+        return Objects.equals(id, that.id) && Objects.equals(order, that.order);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, type, status, fee);
+        return Objects.hash(id, order);
     }
 }

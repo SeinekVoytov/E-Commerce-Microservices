@@ -1,11 +1,10 @@
-package org.example.orderservice.model.order;
+package org.example.orderservice.model;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
@@ -13,7 +12,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.orderservice.model.product.ProductDetails;
 
 import java.util.Objects;
 
@@ -35,9 +33,8 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_item_seq")
     private Integer id;
 
-    @OneToOne
-    @JoinColumn(name = "item_id", referencedColumnName = "id")
-    private ProductDetails item;
+    @Column(name = "item_id")
+    private Integer itemId;
 
     private Integer quantity;
 
@@ -46,11 +43,11 @@ public class OrderItem {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         OrderItem orderItem = (OrderItem) o;
-        return Objects.equals(id, orderItem.id) && Objects.equals(item, orderItem.item) && Objects.equals(quantity, orderItem.quantity);
+        return Objects.equals(id, orderItem.id) && Objects.equals(itemId, orderItem.itemId) && Objects.equals(quantity, orderItem.quantity);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, item, quantity);
+        return Objects.hash(id, itemId, quantity);
     }
 }

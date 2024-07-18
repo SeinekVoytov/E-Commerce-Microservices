@@ -1,4 +1,4 @@
-package org.example.orderservice.model.order;
+package org.example.orderservice.model;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -16,7 +16,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.example.orderservice.model.order.delivery.Delivery;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -54,6 +54,7 @@ public class Order {
     private Set<OrderItem> items;
 
     @Column(name = "created_at")
+    @CreationTimestamp
     private Instant createdAt;
 
     @Override

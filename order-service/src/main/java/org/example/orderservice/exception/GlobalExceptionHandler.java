@@ -11,9 +11,12 @@ import java.util.Date;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(
-            OrderNotFoundException.class
+            {
+                    OrderNotFoundException.class,
+                    CartNotFoundException.class
+            }
     )
-    public ResponseEntity<ErrorObject> handleOrderNotFoundException(OrderNotFoundException exc) {
+    public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus404(Exception exc) {
         return new ResponseEntity<>(
                 buildErrorObject(HttpStatus.NOT_FOUND.value(), exc.getMessage()),
                 HttpStatus.NOT_FOUND
@@ -21,12 +24,25 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(
-            InvalidQueryParameterException.class
+            {
+                    InvalidQueryParameterException.class,
+                    CartIsEmptyException.class
+            }
     )
-    public ResponseEntity<ErrorObject> handleInvalidQueryParameterException(InvalidQueryParameterException exc) {
+    public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus400(Exception exc) {
         return new ResponseEntity<>(
                 buildErrorObject(HttpStatus.BAD_REQUEST.value(), exc.getMessage()),
                 HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(
+            AccessTokenExpiredException.class
+    )
+    public ResponseEntity<ErrorObject> handleAccessTokenExpiredException(AccessTokenExpiredException exc) {
+        return new ResponseEntity<>(
+                buildErrorObject(HttpStatus.UNAUTHORIZED.value(), exc.getMessage()),
+                HttpStatus.UNAUTHORIZED
         );
     }
 

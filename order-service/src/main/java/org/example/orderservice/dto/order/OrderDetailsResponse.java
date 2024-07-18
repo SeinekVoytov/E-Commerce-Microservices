@@ -1,17 +1,18 @@
 package org.example.orderservice.dto.order;
 
-import org.example.orderservice.dto.order.delivery.DeliveryDto;
-
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public record OrderDetailsDto (
+public record OrderDetailsResponse(
         Integer id,
         UUID userId,
         DeliveryDto delivery,
-        AddressDto address,
         Set<OrderItemDto> items,
+        Integer totalItems,
+        Map<String, BigDecimal> totalPrices,
         Instant createdAt
 ) {
 }
