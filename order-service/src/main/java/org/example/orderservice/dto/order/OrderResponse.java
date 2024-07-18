@@ -2,6 +2,8 @@ package org.example.orderservice.dto.order;
 
 import org.example.orderservice.model.DeliveryStatus;
 
+import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -9,6 +11,7 @@ public record OrderResponse(
         Integer id,
         UUID userId,
         DeliveryStatus status,
-        Set<OrderItemDto> items
+        Set<OrderItemDto> items,
+        Map<String, BigDecimal> totalPrices
 ) {
 }

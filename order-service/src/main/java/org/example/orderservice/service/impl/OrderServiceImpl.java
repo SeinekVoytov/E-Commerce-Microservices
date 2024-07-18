@@ -1,6 +1,7 @@
 package org.example.orderservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.example.orderservice.communication.ProductServiceCommunicator;
 import org.example.orderservice.communication.UserServiceCommunicator;
 import org.example.orderservice.dto.cart.CartContentResponse;
 import org.example.orderservice.dto.order.OrderDetailsResponse;
@@ -17,6 +18,7 @@ import org.example.orderservice.model.Delivery;
 import org.example.orderservice.model.DeliveryStatus;
 import org.example.orderservice.model.Order;
 import org.example.orderservice.model.OrderDetails;
+import org.example.orderservice.model.OrderItem;
 import org.example.orderservice.model.PickUpPoint;
 import org.example.orderservice.repository.OrderDetailsRepository;
 import org.example.orderservice.repository.OrderRepository;
@@ -28,6 +30,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -42,7 +46,8 @@ public class OrderServiceImpl implements OrderService {
     private final OrderDetailsRepository orderDetailsRepository;
     private final PickUpPointRepository pickUpPointRepository;
 
-    private final UserServiceCommunicator communicator;
+    private final UserServiceCommunicator userServiceCommunicator;
+    private final ProductServiceCommunicator productServiceCommunicator;
 
     private final OrderMapper orderMapper;
     private final OrderItemMapper orderItemMapper;
@@ -54,7 +59,12 @@ public class OrderServiceImpl implements OrderService {
 
         validateSortParameters(pageable.getSort());
         UUID userId = retrieveUserIdFromJwt(jwt);
-        return orderRepository.findAllByUserId(userId, pageable).map(orderMapper::toDto);
+        return orderRepository.findAllByUserId(userId, pageable)
+                .map(order -> orderMapper.toDto(
+                        order,
+                        productServiceCommunicator.getProductsByIds(
+                                getAllProductIds(order.getItems())).products())
+                );
     }
 
     @Override
@@ -62,6 +72,7 @@ public class OrderServiceImpl implements OrderService {
         UUID userId = retrieveUserIdFromJwt(jwt);
         OrderDetails requestedOrder = orderDetailsRepository.findOrderLongByIdAndUserId(orderId, userId)
                 .orElseThrow(OrderNotFoundException::new);
+
         return detailsMapper.toDto(requestedOrder);
     }
 
@@ -82,7 +93,7 @@ public class OrderServiceImpl implements OrderService {
                         () -> new PickUpPointNotFoundException(request.pickUpPointId())
                 );
 
-        CartContentResponse cartContent = communicator.getCartContent(jwt.getTokenValue());
+        CartContentResponse cartContent = userServiceCommunicator.getCartContent(jwt.getTokenValue());
         if (cartContent.items().isEmpty()) {
             throw new CartIsEmptyException();
         }
@@ -105,6 +116,10 @@ public class OrderServiceImpl implements OrderService {
         orderDetails = orderDetailsRepository.save(orderDetails);
 
         return detailsMapper.toDtoFromCartContentAndEntity(cartContent, orderDetails);
+    }
+
+    private List<Integer> getAllProductIds(Collection<OrderItem> orderItems) {
+        return orderItems.stream().map(OrderItem::getItemId).distinct().toList();
     }
 
     private void validateSortParameters(Sort sort) {
