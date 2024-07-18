@@ -1,6 +1,7 @@
 package org.example.productservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.example.productservice.dto.BulkProductsResponse;
 import org.example.productservice.dto.ProductDetailsDto;
 import org.example.productservice.dto.ProductDto;
 import org.example.productservice.dto.RequestProductDto;
@@ -157,7 +158,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductDetailsDto> getProductsByIds(List<Integer> ids) {
+    public BulkProductsResponse getProductsByIds(List<Integer> ids) {
         List<ProductDetails> foundProducts = detailsRepository.findAllById(ids);
 
         if (foundProducts.size() != ids.size()) {
@@ -170,7 +171,9 @@ public class ProductServiceImpl implements ProductService {
             throw new ProductNotFoundException(ids);
         }
 
-        return foundProducts.stream().map(detailsMapper::toDto).toList();
+        return new BulkProductsResponse(
+                foundProducts.stream().map(detailsMapper::toDto).toList()
+        );
     }
 
     private void updateProduct(ProductDetails toBeUpdated, RequestProductDto updated) {

@@ -1,5 +1,6 @@
 package org.example.productservice.service;
 
+import org.example.productservice.dto.BulkProductsResponse;
 import org.example.productservice.dto.ProductDetailsDto;
 import org.example.productservice.dto.ProductDto;
 import org.example.productservice.dto.RequestProductDto;
@@ -69,5 +70,5 @@ public interface ProductService extends SearchService<ProductDto> {
 
     ProductDetailsDto updateProduct(int id, RequestProductDto updatedProduct);
 
-    List<ProductDetailsDto> getProductsByIds(List<Integer> ids);
+    BulkProductsResponse getProductsByIds(List<Integer> ids);
 }
