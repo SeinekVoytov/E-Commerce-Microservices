@@ -13,7 +13,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(
             {
                     OrderNotFoundException.class,
-                    CartNotFoundException.class
+                    CartNotFoundException.class,
+                    ProductNotFoundException.class
             }
     )
     public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus404(Exception exc) {
