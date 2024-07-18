@@ -24,9 +24,7 @@ public class UserServiceCommunicator {
 
     public CartContentResponse getCartContent(String accessToken) {
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.set("Authorization", "Bearer " + accessToken);
-        HttpEntity<String> httpEntity = new HttpEntity<>(headers);
+        HttpEntity<String> httpEntity = getAuthorizationHttpEntity(accessToken);
         String url = String.format("%s/cart/items", baseUrl);
 
         try {
@@ -38,5 +36,28 @@ public class UserServiceCommunicator {
                 default -> throw new IllegalStateException("Unexpected value: " + e.getStatusCode());
             }
         }
+    }
+
+    public CartContentResponse clearCart(String accessToken) {
+
+        HttpEntity<String> httpEntity = getAuthorizationHttpEntity(accessToken);
+        String url = String.format("%s/cart/clear", baseUrl);
+
+        try {
+            return restTemplate.exchange(url, HttpMethod.POST, httpEntity, CartContentResponse.class).getBody();
+        } catch (HttpClientErrorException e) {
+            switch (e.getStatusCode()) {
+                case HttpStatus.UNAUTHORIZED -> throw new AccessTokenExpiredException();
+                case HttpStatus.NOT_FOUND -> throw new CartNotFoundException();
+                default -> throw new IllegalStateException("Unexpected value: " + e.getStatusCode());
+            }
+        }
+
+    }
+
+    private HttpEntity<String> getAuthorizationHttpEntity(String accessToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+        return new HttpEntity<>(headers);
     }
 }

@@ -87,6 +87,8 @@ public class OrderServiceImpl implements OrderService {
             throw new CartIsEmptyException();
         }
 
+        communicator.clearCart(jwt.getTokenValue());
+
         OrderDetails orderDetails = OrderDetails.builder()
                 .order(Order.builder()
                         .userId(retrieveUserIdFromJwt(jwt))
