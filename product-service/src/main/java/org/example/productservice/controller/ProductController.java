@@ -34,20 +34,20 @@ public class ProductController {
                 pageable, category, minPrice, maxPrice, brand, country
         );
 
-        return new ResponseEntity<>(page, HttpStatus.OK);
+        return ResponseEntity.ok(page);
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<ProductDto>> search(@RequestParam String keyword) {
         List<ProductDto> foundProducts = productService.search(keyword);
-        return new ResponseEntity<>(foundProducts, HttpStatus.OK);
+        return ResponseEntity.ok(foundProducts);
     }
 
     @PostMapping("/reindex")
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<List<ProductDto>> reindex() {
         List<ProductDto> reindexed = productService.reindex();
-        return new ResponseEntity<>(reindexed, HttpStatus.OK);
+        return ResponseEntity.ok(reindexed);
     }
 
     @PostMapping
@@ -74,7 +74,7 @@ public class ProductController {
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ProductDetailsDto> deleteProduct(@PathVariable Integer id) {
         ProductDetailsDto result = productService.deleteById(id);
-        return new ResponseEntity<>(result, HttpStatus.OK);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/bulk")
