@@ -95,7 +95,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDetailsDto getById(int id) {
         ProductDetails productDetails = detailsRepository.findById(id)
-                .orElseThrow(ProductNotFoundException::new);
+                .orElseThrow(() -> new ProductNotFoundException(id));
 
         return detailsMapper.toDto(productDetails);
     }
@@ -103,7 +103,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDetailsDto deleteById(int id) {
         ProductDetails productToBeDeleted = detailsRepository.findById(id)
-                .orElseThrow(ProductNotFoundException::new);
+                .orElseThrow(() -> new ProductNotFoundException(id));
 
         detailsRepository.delete(productToBeDeleted);
         return detailsMapper.toDto(productToBeDeleted);
@@ -154,6 +154,23 @@ public class ProductServiceImpl implements ProductService {
         productSearchService.save(createdProduct.getProduct());
 
         return detailsMapper.toDto(createdProduct);
+    }
+
+    @Override
+    public List<ProductDetailsDto> getProductsByIds(List<Integer> ids) {
+        List<ProductDetails> foundProducts = detailsRepository.findAllById(ids);
+
+        if (foundProducts.size() != ids.size()) {
+            ids.removeAll(
+                    foundProducts.stream()
+                    .map(ProductDetails::getId)
+                    .toList()
+            );
+
+            throw new ProductNotFoundException(ids);
+        }
+
+        return foundProducts.stream().map(detailsMapper::toDto).toList();
     }
 
     private void updateProduct(ProductDetails toBeUpdated, RequestProductDto updated) {

@@ -76,4 +76,10 @@ public class ProductController {
         ProductDetailsDto result = productService.deleteById(id);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
+
+    @GetMapping("/bulk")
+    public ResponseEntity<List<ProductDetailsDto>> bulkProducts(@RequestParam List<Integer> ids) {
+        List<ProductDetailsDto> result = productService.getProductsByIds(ids);
+        return ResponseEntity.ok(result);
+    }
 }
