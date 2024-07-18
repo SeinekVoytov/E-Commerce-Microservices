@@ -2,6 +2,7 @@ package org.example.productservice.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.example.productservice.dto.BulkProductsResponse;
 import org.example.productservice.dto.RequestProductDto;
 import org.example.productservice.dto.ProductDetailsDto;
 import org.example.productservice.dto.ProductDto;
@@ -78,8 +79,8 @@ public class ProductController {
     }
 
     @GetMapping("/bulk")
-    public ResponseEntity<List<ProductDetailsDto>> bulkProducts(@RequestParam List<Integer> ids) {
-        List<ProductDetailsDto> result = productService.getProductsByIds(ids);
+    public ResponseEntity<BulkProductsResponse> bulkProducts(@RequestParam List<Integer> ids) {
+        BulkProductsResponse result = productService.getProductsByIds(ids);
         return ResponseEntity.ok(result);
     }
 }
