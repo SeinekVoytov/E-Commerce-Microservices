@@ -68,4 +68,13 @@ public class CartController {
         CartContentResponse result = cartService.deleteItemFromCart(jwt, itemId, cartId, response);
         return ResponseEntity.ok(result);
     }
+
+    @PostMapping("/clear")
+    public ResponseEntity<CartContentResponse> clearCart(@AuthenticationPrincipal Jwt jwt,
+                                                         @CookieValue(name = "cartId", required = false) UUID cartId,
+                                                         HttpServletResponse response) {
+
+        CartContentResponse result = cartService.clearCart(jwt, cartId, response);
+        return ResponseEntity.ok(result);
+    }
 }
