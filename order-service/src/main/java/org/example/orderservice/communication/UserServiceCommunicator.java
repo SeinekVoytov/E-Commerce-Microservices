@@ -19,7 +19,7 @@ public class UserServiceCommunicator {
 
     private final RestTemplate restTemplate;
 
-    @Value("USER_SERVICE_BASE_URL")
+    @Value("${USER_SERVICE_BASE_URL}")
     private String baseUrl;
 
     public CartContentResponse getCartContent(String accessToken) {

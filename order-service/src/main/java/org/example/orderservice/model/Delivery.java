@@ -1,6 +1,6 @@
-package org.example.orderservice.model.delivery;
+package org.example.orderservice.model;
 
-import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -39,28 +39,24 @@ public class Delivery {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "delivery_seq")
     private Integer id;
 
-    @Enumerated
-    @JdbcType(PostgreSQLEnumJdbcType.class)
-    private DeliveryType type;
+    @OneToOne
+    @JoinColumn(name = "pick_up_point_id", referencedColumnName = "id")
+    private PickUpPoint pickUpPoint;
 
     @Enumerated
     @JdbcType(PostgreSQLEnumJdbcType.class)
     private DeliveryStatus status;
-
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    @JoinColumn(name = "fee_id", referencedColumnName = "id")
-    private Fee fee;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Delivery delivery = (Delivery) o;
-        return Objects.equals(id, delivery.id) && type == delivery.type && status == delivery.status && Objects.equals(fee, delivery.fee);
+        return Objects.equals(id, delivery.id) && Objects.equals(pickUpPoint, delivery.pickUpPoint) && status == delivery.status;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, type, status, fee);
+        return Objects.hash(id, pickUpPoint, status);
     }
 }

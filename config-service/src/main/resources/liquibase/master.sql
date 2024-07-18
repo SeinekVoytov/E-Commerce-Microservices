@@ -229,4 +229,53 @@ ALTER TABLE product ADD COLUMN IF NOT EXISTS country_manufacturer_id INT REFEREN
 
 --changeset SeinekVoytov:20 dbms:postgresql
 ALTER TABLE order_item DROP CONSTRAINT order_item_item_id_fkey;
+ALTER TABLE order_item ADD COLUMN temp_item_id uuid;
+UPDATE order_item SET temp_item_id = gen_random_uuid();
+ALTER TABLE order_item DROP COLUMN item_id;
+ALTER TABLE order_item RENAME COLUMN temp_item_id TO item_id;
+
+ALTER TABLE delivery DROP COLUMN type;
+DROP TYPE delivery_type;
+ALTER TABLE delivery DROP COLUMN fee_id;
+DROP TABLE fee;
+
+CREATE TABLE pick_up_point (
+    id uuid PRIMARY KEY,
+    address TEXT NOT NULL
+);
+
+ALTER TABLE delivery ADD COLUMN pick_up_point_id UUID REFERENCES pick_up_point(id);
+ALTER TABLE delivery ALTER COLUMN status SET DEFAULT 'ORDER_RECEIVED';
 --rollback ALTER TABLE order_item ADD CONSTRAINT order_item_item_id_fkey FOREIGN KEY (item_id) REFERENCES product_details(id);
+--rollback ALTER TABLE order_item ADD COLUMN item_id INT;
+--rollback ALTER TABLE order_item DROP COLUMN temp_item_id;
+--rollback ALTER TABLE order_item ADD CONSTRAINT order_item_item_id_fkey FOREIGN KEY (item_id) REFERENCES product_details(id);
+--rollback CREATE TYPE delivery_type AS ENUM ('STANDARD', 'EXPRESS', 'SAME_DAY', 'NEXT_DAY', 'SCHEDULED', 'IN_STORE_PICKING');
+--rollback ALTER TABLE delivery ADD COLUMN type delivery_type NOT NULL;
+--rollback DROP TABLE pick_up_point;
+--rollback CREATE TABLE fee (id INT PRIMARY KEY, amount DECIMAL NOT NULL CHECK ( amount > 0 ), currency CHARACTER(3) NOT NULL);
+--rollback ALTER TABLE delivery ADD COLUMN fee_id INT REFERENCES fee(id);
+--rollback ALTER TABLE delivery DROP COLUMN pick_up_point_id;
+
+--changeset SeinekVoytov:21 dbms:postgresql
+ALTER TABLE order_item DROP COLUMN item_id;
+ALTER TABLE order_item ADD COLUMN item_id INT NOT NULL DEFAULT trunc(random());
+--rollback ALTER TABLE order_item DROP COLUMN item_id;
+--rollback ALTER TABLE order_item ADD COLUMN item_id uuid NOT NULL DEFAULT gen_random_uuid();
+
+--changeset SeinekVoytov:22 dbms:postgresql
+ALTER TABLE order_item ALTER COLUMN item_id DROP DEFAULT;
+--rollback ALTER TABLE order_item ALTER COLUMN item_id SET DEFAULT trunc(random());
+
+--changeset SeinekVoytov:23 dbms:postgresql
+ALTER TABLE order_details DROP CONSTRAINT order_details_address_id_fkey;
+ALTER TABLE order_details DROP COLUMN address_id;
+DROP TABLE address;
+--rollback CREATE TABLE IF NOT EXISTS address (
+--rollback     id INT PRIMARY KEY,
+--rollback     city VARCHAR(64) NOT NULL,
+--rollback     country VARCHAR(64) NOT NULL,
+--rollback     street_address TEXT NOT NULL,
+--rollback     apartment TEXT NOT NULL
+--rollback );
+--rollback ALTER TABLE order_details ADD COLUMN INT address_id REFERENCES address(id);

@@ -16,7 +16,7 @@ public class GlobalExceptionHandler {
                     CartNotFoundException.class
             }
     )
-    public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus404(OrderNotFoundException exc) {
+    public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus404(Exception exc) {
         return new ResponseEntity<>(
                 buildErrorObject(HttpStatus.NOT_FOUND.value(), exc.getMessage()),
                 HttpStatus.NOT_FOUND
@@ -29,7 +29,7 @@ public class GlobalExceptionHandler {
                     CartIsEmptyException.class
             }
     )
-    public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus400(InvalidQueryParameterException exc) {
+    public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus400(Exception exc) {
         return new ResponseEntity<>(
                 buildErrorObject(HttpStatus.BAD_REQUEST.value(), exc.getMessage()),
                 HttpStatus.BAD_REQUEST

@@ -15,6 +15,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.util.Objects;
@@ -42,11 +43,8 @@ public class OrderDetails {
     @JoinColumn(name = "order_id", referencedColumnName = "id")
     private Order order;
 
-    @OneToOne(cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    @JoinColumn(name = "address_id", referencedColumnName = "id")
-    private Address address;
-
     @Column(name = "created_at")
+    @CreationTimestamp
     private Instant createdAt;
 
     @Override
@@ -54,11 +52,11 @@ public class OrderDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         OrderDetails that = (OrderDetails) o;
-        return Objects.equals(id, that.id) && Objects.equals(order, that.order) && Objects.equals(address, that.address) && Objects.equals(createdAt, that.createdAt);
+        return Objects.equals(id, that.id) && Objects.equals(order, that.order);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, order, address, createdAt);
+        return Objects.hash(id, order);
     }
 }

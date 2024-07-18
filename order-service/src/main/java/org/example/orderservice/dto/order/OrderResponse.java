@@ -1,6 +1,6 @@
 package org.example.orderservice.dto.order;
 
-import org.example.orderservice.model.delivery.DeliveryStatus;
+import org.example.orderservice.model.DeliveryStatus;
 
 import java.util.Set;
 import java.util.UUID;
