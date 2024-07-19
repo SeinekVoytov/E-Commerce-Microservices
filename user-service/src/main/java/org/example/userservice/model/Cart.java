@@ -19,7 +19,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 
-@RedisHash("cart")
+@RedisHash(value = "cart", timeToLive = 3600L)
 public class Cart {
 
     @Id
