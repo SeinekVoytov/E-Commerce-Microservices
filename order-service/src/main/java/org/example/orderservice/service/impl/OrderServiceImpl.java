@@ -63,17 +63,19 @@ public class OrderServiceImpl implements OrderService {
                 .map(order -> orderMapper.toDto(
                         order,
                         productServiceCommunicator.getProductsByIds(
-                                getAllProductIds(order.getItems())).products())
+                                getAllProductIds(order.getItems())
+                        ).products())
                 );
     }
 
     @Override
     public OrderDetailsResponse getUserOrderDetailsById(Jwt jwt, int orderId) {
         UUID userId = retrieveUserIdFromJwt(jwt);
-        OrderDetails requestedOrder = orderDetailsRepository.findOrderLongByIdAndUserId(orderId, userId)
-                .orElseThrow(OrderNotFoundException::new);
 
-        return detailsMapper.toDto(requestedOrder);
+        return mapToResponse(
+                orderDetailsRepository.findOrderLongByIdAndUserId(orderId, userId)
+                        .orElseThrow(OrderNotFoundException::new)
+        );
     }
 
     @Override
@@ -82,7 +84,7 @@ public class OrderServiceImpl implements OrderService {
         OrderDetails orderToBeDeleted = orderDetailsRepository.findOrderLongByIdAndUserId(orderId, userId)
                 .orElseThrow(OrderNotFoundException::new);
         orderDetailsRepository.delete(orderToBeDeleted);
-        return detailsMapper.toDto(orderToBeDeleted);
+        return mapToResponse(orderToBeDeleted);
     }
 
     @Override
@@ -116,6 +118,15 @@ public class OrderServiceImpl implements OrderService {
         orderDetails = orderDetailsRepository.save(orderDetails);
 
         return detailsMapper.toDtoFromCartContentAndEntity(cartContent, orderDetails);
+    }
+
+    private OrderDetailsResponse mapToResponse(OrderDetails entity) {
+        return detailsMapper.toDto(
+                entity,
+                productServiceCommunicator.getProductsByIds(
+                        getAllProductIds(entity.getOrder().getItems())
+                ).products()
+        );
     }
 
     private List<Integer> getAllProductIds(Collection<OrderItem> orderItems) {
