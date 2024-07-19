@@ -44,11 +44,15 @@ public class CategoryServiceImpl implements CategoryService {
     private final ProductMapper productMapper;
 
     @Override
-    public Set<?> getAllCategories(boolean withParents, boolean withChildren) {
+    public Set<?> getAllCategories(boolean withParents, boolean withChildren, boolean root) {
 
         Function<Category, ?> mappingFunction = createMappingFunction(withParents, withChildren);
 
-        return categoryRepository.findAll().stream()
+        List<Category> requestedCateogries = (root) ?
+                categoryRepository.findAllByParentCategoryIsNull() :
+                categoryRepository.findAll();
+
+        return requestedCateogries.stream()
                 .map(mappingFunction)
                 .collect(Collectors.toSet());
     }

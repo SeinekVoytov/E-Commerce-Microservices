@@ -25,8 +25,9 @@ public class CategoryController {
 
     @GetMapping
     public ResponseEntity<Set<?>> getAllCategories(@RequestParam(required = false) boolean withParents,
-                                                   @RequestParam(required = false) boolean withChildren) {
-        return ResponseEntity.ok(categoryService.getAllCategories(withParents, withChildren));
+                                                   @RequestParam(required = false) boolean withChildren,
+                                                   @RequestParam(required = false) boolean root) {
+        return ResponseEntity.ok(categoryService.getAllCategories(withParents, withChildren, root));
     }
 
     @GetMapping("search")
