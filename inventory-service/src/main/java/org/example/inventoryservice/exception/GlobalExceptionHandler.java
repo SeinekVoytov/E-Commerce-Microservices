@@ -11,7 +11,10 @@ import java.util.Date;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(
-            InventoryItemAlreadyExistsException.class
+            {
+                    InventoryItemAlreadyExistsException.class,
+                    NotSufficientAmountOfProductException.class
+            }
     )
     public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus400(Exception exc) {
         return new ResponseEntity<>(
