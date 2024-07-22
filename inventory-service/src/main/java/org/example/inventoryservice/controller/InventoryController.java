@@ -25,7 +25,7 @@ public class InventoryController {
 
     private final InventoryItemService inventoryItemService;
 
-    @GetMapping("items")
+    @GetMapping("/items")
     public ResponseEntity<InventoryResponse> getInventory() {
         return ResponseEntity.ok(inventoryItemService.getAllInventory());
     }
