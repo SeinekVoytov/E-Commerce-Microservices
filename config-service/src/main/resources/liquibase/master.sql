@@ -279,3 +279,14 @@ DROP TABLE address;
 --rollback     apartment TEXT NOT NULL
 --rollback );
 --rollback ALTER TABLE order_details ADD COLUMN INT address_id REFERENCES address(id);
+
+--changeset SeinekVoytov:24 dbms:postgresql
+CREATE TABLE inventory_item (
+    id INT PRIMARY KEY,
+    product_id INT NOT NULL UNIQUE,
+    quantity INT NOT NULL CHECK ( quantity >= 0 )
+);
+
+CREATE SEQUENCE inventory_item_seq START 1 INCREMENT 50 OWNED BY inventory_item.id;
+--rollback DROP SEQUENCE inventory_item_seq;
+--rollback DROP TABLE inventory_item;
