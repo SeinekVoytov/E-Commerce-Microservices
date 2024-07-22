@@ -1,5 +1,6 @@
 package org.example.productservice.service;
 
+import org.example.productservice.dto.BulkProductsResponse;
 import org.example.productservice.dto.ProductDetailsDto;
 import org.example.productservice.dto.ProductDto;
 import org.example.productservice.dto.RequestProductDto;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.Sort;
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 public interface ProductService extends SearchService<ProductDto> {
@@ -67,4 +69,6 @@ public interface ProductService extends SearchService<ProductDto> {
     ProductDetailsDto deleteById(int id);
 
     ProductDetailsDto updateProduct(int id, RequestProductDto updatedProduct);
+
+    BulkProductsResponse getProductsByIds(List<Integer> ids);
 }

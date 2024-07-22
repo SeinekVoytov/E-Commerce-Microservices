@@ -33,7 +33,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         authManager -> authManager
                                 .requestMatchers(
-                                        HttpMethod.GET, "/products", "products/{id}", "/categories", "/categories/{identifier}"
+                                        HttpMethod.GET, "/products", "products/{id}", "/products/bulk", "/categories", "/categories/{identifier}"
                                 ).permitAll()
                                 .anyRequest().authenticated()
                 );
