@@ -2,8 +2,10 @@ package org.example.orderservice.communication;
 
 import lombok.RequiredArgsConstructor;
 import org.example.orderservice.dto.cart.CartContentResponse;
+import org.example.orderservice.dto.product.BulkProductsResponse;
 import org.example.orderservice.exception.AccessTokenExpiredException;
 import org.example.orderservice.exception.CartNotFoundException;
+import org.example.orderservice.exception.ProductNotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
