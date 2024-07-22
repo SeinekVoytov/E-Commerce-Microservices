@@ -10,7 +10,7 @@ import java.util.function.Predicate;
 
 public interface CategoryService extends SearchService<CategoryDto> {
 
-    Set<?> getAllCategories(boolean withParents, boolean withChildren);
+    Set<?> getAllCategories(boolean withParents, boolean withChildren, boolean root);
 
     Object getCategoryByIdentifier(String identifier,
                                    boolean withParents,
