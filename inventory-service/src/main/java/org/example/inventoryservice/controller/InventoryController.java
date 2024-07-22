@@ -1,5 +1,6 @@
 package org.example.inventoryservice.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.inventoryservice.dto.InventoryItemRequest;
 import org.example.inventoryservice.dto.InventoryItemResponse;
@@ -38,7 +39,7 @@ public class InventoryController {
 
     @PostMapping("/items")
     public ResponseEntity<InventoryItemResponse> createInventoryItem(
-            @RequestBody InventoryItemRequest request
+            @Valid @RequestBody InventoryItemRequest request
     ) {
         InventoryItemResponse result = inventoryItemService.addInventoryItem(request);
         return new ResponseEntity<>(result, HttpStatus.CREATED);
@@ -47,7 +48,7 @@ public class InventoryController {
     @PatchMapping("/items/{productId}")
     public ResponseEntity<InventoryItemResponse> updateInventoryItemQuantity(
             @PathVariable Integer productId,
-            @RequestBody UpdateInventoryItemQuantityRequest request
+            @Valid @RequestBody UpdateInventoryItemQuantityRequest request
     ) {
         InventoryItemResponse result =
                 inventoryItemService.updateInventoryItemQuantity(productId, request);
