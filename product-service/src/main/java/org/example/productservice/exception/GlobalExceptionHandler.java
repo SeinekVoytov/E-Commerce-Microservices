@@ -6,13 +6,11 @@ import org.example.productservice.elasticsearch.exception.ElasticSearchUpdatingE
 import org.example.productservice.elasticsearch.exception.SearchTextIsTooShortException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import javax.naming.AuthenticationException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,31 +20,36 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(
             {
-                    ProductNotFoundException.class,
-                    CategoryNotFoundException.class,
-                    ImageNotFoundException.class
-            }
-    )
-    public ResponseEntity<ErrorObject> handleProductNotFoundException(Exception exc) {
-        return new ResponseEntity<>(
-                buildErrorObject(HttpStatus.NOT_FOUND.value(), exc.getMessage()),
-                HttpStatus.NOT_FOUND
-        );
-    }
-
-    @ExceptionHandler(
-            {
                     InvalidQueryParameterException.class,
                     CategoryAlreadyExistsException.class,
                     SearchTextIsTooShortException.class,
                     InvalidCategorySelectorException.class
             }
     )
-    public ResponseEntity<ErrorObject> handleInvalidQueryParameterException(Exception exc) {
-        return new ResponseEntity<>(
-                buildErrorObject(HttpStatus.BAD_REQUEST.value(), exc.getMessage()),
-                HttpStatus.BAD_REQUEST
-        );
+    public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus400(Exception exc) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, exc.getMessage());
+    }
+
+    @ExceptionHandler(
+            {
+                    ProductNotFoundException.class,
+                    CategoryNotFoundException.class,
+                    ImageNotFoundException.class
+            }
+    )
+    public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus404(Exception exc) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, exc.getMessage());
+    }
+
+    @ExceptionHandler(
+            {
+                    ElasticSearchIndexingException.class,
+                    ElasticSearchUpdatingException.class,
+                    ElasticSearchSearchingException.class
+            }
+    )
+    public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus500(ElasticSearchIndexingException exc) {
+        return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR, exc.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -58,31 +61,13 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        return new ResponseEntity<>(
-                buildErrorObject(HttpStatus.BAD_REQUEST.value(), errors.toString()),
-                HttpStatus.BAD_REQUEST
-          );
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, errors.toString());
     }
 
-    @ExceptionHandler(
-            {
-                    ElasticSearchIndexingException.class,
-                    ElasticSearchUpdatingException.class,
-                    ElasticSearchSearchingException.class
-            }
-    )
-    public ResponseEntity<ErrorObject> handleProductIndexingException(ElasticSearchIndexingException exc) {
+    private ResponseEntity<ErrorObject> buildErrorResponse(HttpStatus status, String message) {
         return new ResponseEntity<>(
-                buildErrorObject(HttpStatus.INTERNAL_SERVER_ERROR.value(), exc.getMessage()),
-                HttpStatus.INTERNAL_SERVER_ERROR
-        );
-    }
-
-    private ErrorObject buildErrorObject(int statusCode, String message) {
-        return new ErrorObject(
-                statusCode,
-                message,
-                new Date()
+                new ErrorObject(status.value(), message, new Date()),
+                status
         );
     }
 }

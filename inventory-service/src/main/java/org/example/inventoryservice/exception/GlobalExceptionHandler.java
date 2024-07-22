@@ -21,20 +21,14 @@ public class GlobalExceptionHandler {
             }
     )
     public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus400(Exception exc) {
-        return new ResponseEntity<>(
-                buildErrorObject(HttpStatus.BAD_REQUEST.value(), exc.getMessage()),
-                HttpStatus.BAD_REQUEST
-        );
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, exc.getMessage());
     }
 
     @ExceptionHandler(
             InventoryItemNotFoundException.class
     )
     public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus404(Exception exc) {
-        return new ResponseEntity<>(
-                buildErrorObject(HttpStatus.NOT_FOUND.value(), exc.getMessage()),
-                HttpStatus.NOT_FOUND
-        );
+        return buildErrorResponse(HttpStatus.NOT_FOUND, exc.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -46,17 +40,13 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        return new ResponseEntity<>(
-                buildErrorObject(HttpStatus.BAD_REQUEST.value(), errors.toString()),
-                HttpStatus.BAD_REQUEST
-        );
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, errors.toString());
     }
 
-    private ErrorObject buildErrorObject(int statusCode, String message) {
-        return new ErrorObject(
-                statusCode,
-                message,
-                new Date()
+    private ResponseEntity<ErrorObject> buildErrorResponse(HttpStatus status, String message) {
+        return new ResponseEntity<>(
+                new ErrorObject(status.value(), message, new Date()),
+                status
         );
     }
 }
