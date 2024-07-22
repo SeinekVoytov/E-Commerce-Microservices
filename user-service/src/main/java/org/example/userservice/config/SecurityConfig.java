@@ -36,7 +36,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(
                         authManager -> authManager
                                 .requestMatchers(HttpMethod.GET, "/cart/items").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/cart/items").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/cart/items", "/cart/clear").permitAll()
                                 .requestMatchers(HttpMethod.PATCH, "/cart/items/{itemId}").permitAll()
                                 .requestMatchers(HttpMethod.DELETE, "/cart/items/{itemId}").permitAll()
                                 .anyRequest().authenticated()

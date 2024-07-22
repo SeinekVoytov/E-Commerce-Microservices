@@ -30,6 +30,10 @@ public interface CartService {
                                         UUID cartIdFromCookie,
                                         HttpServletResponse response);
 
+    CartContentResponse clearCart(Jwt jwt,
+                                  UUID cartIdFromCookie,
+                                  HttpServletResponse response);
+
     default UUID retrieveUserIdFromJwt(Jwt jwt) {
         return UUID.fromString(jwt.getSubject());
     }

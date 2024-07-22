@@ -139,6 +139,16 @@ public class CartServiceImpl implements CartService {
         return cartContentMapper.toResponse(cart);
     }
 
+    @Override
+    public CartContentResponse clearCart(Jwt jwt,
+                                         UUID cartIdFromCookie,
+                                         HttpServletResponse response) {
+
+        Cart cart = retrieveCart(jwt, cartIdFromCookie, response);
+        clearCart(cart);
+        return cartContentMapper.toResponse(cart);
+    }
+
     private Cart retrieveCart(Jwt jwt,
                               UUID cartIdFromCookie,
                               HttpServletResponse response) {
