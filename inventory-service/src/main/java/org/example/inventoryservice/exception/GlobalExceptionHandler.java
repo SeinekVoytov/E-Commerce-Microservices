@@ -11,6 +11,16 @@ import java.util.Date;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(
+            InventoryItemAlreadyExistsException.class
+    )
+    public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus400(Exception exc) {
+        return new ResponseEntity<>(
+                buildErrorObject(HttpStatus.BAD_REQUEST.value(), exc.getMessage()),
+                HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(
             InventoryItemNotFoundException.class
     )
     public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus404(Exception exc) {
