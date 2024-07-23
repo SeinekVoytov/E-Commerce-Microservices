@@ -22,10 +22,10 @@ import org.example.productservice.service.CategoryService;
 import org.example.productservice.service.CountryManufacturerService;
 import org.example.productservice.service.ProductService;
 import org.example.productservice.util.PaginationUtils;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
 
-    private final BeanFactory beanFactory;
+    private final TransactionTemplate transactionTemplate;
 
     private final CategoryService categoryService;
     private final CountryManufacturerService countryManufacturerService;
@@ -117,47 +117,49 @@ public class ProductServiceImpl implements ProductService {
     public ProductDetailsDto updateProduct(int id, RequestProductDto updatedProduct) {
 
         Optional<ProductDetails> optionalProductDetails = detailsRepository.findById(id);
+        return transactionTemplate.execute(status -> {
 
-        if (optionalProductDetails.isEmpty()) {
-            return beanFactory.getBean(ProductService.class).createProduct(updatedProduct);
-        }
+            if (optionalProductDetails.isEmpty()) {
+                return createProduct(updatedProduct);
+            }
 
-        ProductDetails productToBeUpdated = optionalProductDetails.get();
-        updateProduct(productToBeUpdated, updatedProduct);
-        productToBeUpdated = detailsRepository.save(productToBeUpdated);
-        productSearchService.update(productToBeUpdated.getProduct());
-
-        return detailsMapper.toDto(productToBeUpdated);
+            ProductDetails productToBeUpdated = optionalProductDetails.get();
+            updateProduct(productToBeUpdated, updatedProduct);
+            productToBeUpdated = detailsRepository.save(productToBeUpdated);
+            productSearchService.update(productToBeUpdated.getProduct());
+            return detailsMapper.toDto(productToBeUpdated);
+        });
     }
 
     @Override
     public ProductDetailsDto createProduct(RequestProductDto newProductData) {
+        return transactionTemplate.execute(status -> {
 
-        ProductDetails createdProduct = requestProductMapper.toEntity(newProductData);
+            ProductDetails createdProduct = requestProductMapper.toEntity(newProductData);
+            Product innerProduct = createdProduct.getProduct();
+            innerProduct.setCountryManufacturer(
+                    countryManufacturerService.saveOrGetExistingByName(
+                            newProductData.countryManufacturer()
+                    )
+            );
 
-        Product innerProduct = createdProduct.getProduct();
-        innerProduct.setCountryManufacturer(
-                countryManufacturerService.saveOrGetExistingByName(
-                        newProductData.countryManufacturer()
-                )
-        );
+            innerProduct.setBrand(
+                    brandService.saveOrGetExistingByName(newProductData.brand())
+            );
 
-        innerProduct.setBrand(
-                brandService.saveOrGetExistingByName(newProductData.brand())
-        );
+            innerProduct.setCategories(
+                    fetchCategoriesByIds(newProductData.categoryIds())
+            );
 
-        innerProduct.setCategories(
-                fetchCategoriesByIds(newProductData.categoryIds())
-        );
+            innerProduct.setImages(
+                    fetchImagesByUrls(newProductData.images())
+            );
 
-        innerProduct.setImages(
-                fetchImagesByUrls(newProductData.images())
-        );
+            createdProduct = detailsRepository.save(createdProduct);
+            productSearchService.save(createdProduct.getProduct());
 
-        createdProduct = detailsRepository.save(createdProduct);
-        productSearchService.save(createdProduct.getProduct());
-
-        return detailsMapper.toDto(createdProduct);
+            return detailsMapper.toDto(createdProduct);
+        });
     }
 
     @Override

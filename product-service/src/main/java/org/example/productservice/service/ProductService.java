@@ -65,12 +65,10 @@ public interface ProductService extends SearchService<ProductDto> {
 
     ProductDetailsDto getById(int id);
 
-    @Transactional
     ProductDetailsDto createProduct(RequestProductDto newProductData);
 
     ProductDetailsDto deleteById(int id);
 
-    @Transactional
     ProductDetailsDto updateProduct(int id, RequestProductDto updatedProduct);
 
     BulkProductsResponse getProductsByIds(List<Integer> ids);
