@@ -1,6 +1,7 @@
 package org.example.productservice.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.example.productservice.communication.service.InventoryServiceCommunicator;
 import org.example.productservice.dto.BulkProductsResponse;
 import org.example.productservice.dto.ProductDetailsDto;
 import org.example.productservice.dto.ProductDto;
@@ -12,7 +13,11 @@ import org.example.productservice.exception.ProductNotFoundException;
 import org.example.productservice.mapper.ProductDetailsMapper;
 import org.example.productservice.mapper.ProductMapper;
 import org.example.productservice.mapper.RequestProductMapper;
-import org.example.productservice.model.*;
+import org.example.productservice.model.Category;
+import org.example.productservice.model.Image;
+import org.example.productservice.model.Price;
+import org.example.productservice.model.Product;
+import org.example.productservice.model.ProductDetails;
 import org.example.productservice.repository.CategoryRepository;
 import org.example.productservice.repository.ImageRepository;
 import org.example.productservice.repository.ProductDetailsRepository;
@@ -24,6 +29,7 @@ import org.example.productservice.service.ProductService;
 import org.example.productservice.util.PaginationUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -46,6 +52,8 @@ public class ProductServiceImpl implements ProductService {
     private final BrandService brandService;
 
     private final ProductSearchService productSearchService;
+
+    private final InventoryServiceCommunicator inventoryServiceCommunicator;
 
     private final ProductRepository productRepository;
     private final ProductDetailsRepository detailsRepository;
@@ -114,13 +122,13 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDetailsDto updateProduct(int id, RequestProductDto updatedProduct) {
+    public ProductDetailsDto updateProduct(int id, RequestProductDto updatedProduct, Jwt jwt) {
 
         Optional<ProductDetails> optionalProductDetails = detailsRepository.findById(id);
         return transactionTemplate.execute(status -> {
 
             if (optionalProductDetails.isEmpty()) {
-                return createProduct(updatedProduct);
+                return createProduct(updatedProduct, jwt);
             }
 
             ProductDetails productToBeUpdated = optionalProductDetails.get();
@@ -132,7 +140,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public ProductDetailsDto createProduct(RequestProductDto newProductData) {
+    public ProductDetailsDto createProduct(RequestProductDto newProductData, Jwt jwt) {
         return transactionTemplate.execute(status -> {
 
             ProductDetails createdProduct = requestProductMapper.toEntity(newProductData);
@@ -156,6 +164,9 @@ public class ProductServiceImpl implements ProductService {
             );
 
             createdProduct = detailsRepository.save(createdProduct);
+            inventoryServiceCommunicator.requestNewInventoryItem(
+                    createdProduct.getId(), newProductData.inventoryQuantity(), jwt.getTokenValue()
+            );
             productSearchService.save(createdProduct.getProduct());
 
             return detailsMapper.toDto(createdProduct);

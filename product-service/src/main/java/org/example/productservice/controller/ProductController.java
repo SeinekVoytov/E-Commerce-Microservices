@@ -11,6 +11,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.data.domain.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -53,8 +55,9 @@ public class ProductController {
 
     @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ProductDetailsDto> createProduct(@RequestBody @Valid RequestProductDto newProductData) {
-        ProductDetailsDto response = productService.createProduct(newProductData);
+    public ResponseEntity<ProductDetailsDto> createProduct(@AuthenticationPrincipal Jwt jwt,
+                                                           @RequestBody @Valid RequestProductDto newProductData) {
+        ProductDetailsDto response = productService.createProduct(newProductData, jwt);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -65,9 +68,10 @@ public class ProductController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ProductDetailsDto> updateProduct(@PathVariable Integer id,
+    public ResponseEntity<ProductDetailsDto> updateProduct(@AuthenticationPrincipal Jwt jwt,
+                                                           @PathVariable Integer id,
                                                            @RequestBody @Valid RequestProductDto updatedProduct) {
-        ProductDetailsDto response = productService.updateProduct(id, updatedProduct);
+        ProductDetailsDto response = productService.updateProduct(id, updatedProduct, jwt);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
