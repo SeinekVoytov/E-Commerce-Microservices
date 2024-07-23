@@ -22,6 +22,7 @@ import org.example.productservice.service.CategoryService;
 import org.example.productservice.service.CountryManufacturerService;
 import org.example.productservice.service.ProductService;
 import org.example.productservice.util.PaginationUtils;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,8 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
+
+    private final BeanFactory beanFactory;
 
     private final CategoryService categoryService;
     private final CountryManufacturerService countryManufacturerService;
@@ -116,7 +119,7 @@ public class ProductServiceImpl implements ProductService {
         Optional<ProductDetails> optionalProductDetails = detailsRepository.findById(id);
 
         if (optionalProductDetails.isEmpty()) {
-            return createProduct(updatedProduct);
+            return beanFactory.getBean(ProductService.class).createProduct(updatedProduct);
         }
 
         ProductDetails productToBeUpdated = optionalProductDetails.get();

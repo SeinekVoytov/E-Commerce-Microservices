@@ -9,6 +9,7 @@ import org.example.productservice.model.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
@@ -64,10 +65,12 @@ public interface ProductService extends SearchService<ProductDto> {
 
     ProductDetailsDto getById(int id);
 
+    @Transactional
     ProductDetailsDto createProduct(RequestProductDto newProductData);
 
     ProductDetailsDto deleteById(int id);
 
+    @Transactional
     ProductDetailsDto updateProduct(int id, RequestProductDto updatedProduct);
 
     BulkProductsResponse getProductsByIds(List<Integer> ids);

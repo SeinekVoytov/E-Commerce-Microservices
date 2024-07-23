@@ -25,12 +25,14 @@ import org.example.productservice.repository.ProductDetailsRepository;
 import org.example.productservice.repository.ProductRepository;
 import org.example.productservice.service.BrandService;
 import org.example.productservice.service.CountryManufacturerService;
+import org.example.productservice.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -59,6 +61,9 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceImplTest {
+
+    @Mock
+    private BeanFactory beanFactory;
 
     @Mock
     private BrandService brandService;
@@ -293,6 +298,9 @@ class ProductServiceImplTest {
 
         when(requestProductMapper.toEntity(requestData))
                 .thenReturn(productDetails);
+
+        when(beanFactory.getBean(ProductService.class))
+                .thenReturn(service);
 
         var actual = service.updateProduct(testingId, requestData);
 
