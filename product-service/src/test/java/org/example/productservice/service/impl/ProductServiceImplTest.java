@@ -25,17 +25,18 @@ import org.example.productservice.repository.ProductDetailsRepository;
 import org.example.productservice.repository.ProductRepository;
 import org.example.productservice.service.BrandService;
 import org.example.productservice.service.CountryManufacturerService;
-import org.example.productservice.service.ProductService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.BeanFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -54,6 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -63,7 +65,7 @@ import static org.mockito.Mockito.when;
 class ProductServiceImplTest {
 
     @Mock
-    private BeanFactory beanFactory;
+    private TransactionTemplate transactionTemplate;
 
     @Mock
     private BrandService brandService;
@@ -286,6 +288,7 @@ class ProductServiceImplTest {
     @Test
     void updateProduct_ShouldCreateNewProduct_WhenNonExistentIdSpecified() {
 
+        setUpTransactionTemplateMock();
         var testingId = productDetails.getId();
         when(detailsRepository.findById(testingId))
                 .thenReturn(Optional.empty());
@@ -298,9 +301,6 @@ class ProductServiceImplTest {
 
         when(requestProductMapper.toEntity(requestData))
                 .thenReturn(productDetails);
-
-        when(beanFactory.getBean(ProductService.class))
-                .thenReturn(service);
 
         var actual = service.updateProduct(testingId, requestData);
 
@@ -318,6 +318,7 @@ class ProductServiceImplTest {
     @Test
     void updateProduct_ShouldReturnUpdatedProductConvertedToDto_WhenExistentIdSpecified() {
 
+        setUpTransactionTemplateMock();
         var testingId = productDetails.getId();
         when(detailsRepository.findById(testingId))
                 .thenReturn(Optional.of(productDetails));
@@ -368,6 +369,7 @@ class ProductServiceImplTest {
     @Test
     void createProduct_ShouldReturnCreatedProductConvertedToDto_WhenNewProductDataIsSpecified() {
 
+        setUpTransactionTemplateMock();
         setUpMocksForCreateProductWithEmptyImagesAndCategories();
 
         productDetails.getProduct().setImages(null);
@@ -394,6 +396,7 @@ class ProductServiceImplTest {
     @Test
     void createProduct_ShouldThrowCategoryNotFoundException_WhenCategoryNotFoundById() {
 
+        setUpTransactionTemplateMock();
         var requestData = buildRequestData();
         requestData.categoryIds().add(1);
 
@@ -414,6 +417,7 @@ class ProductServiceImplTest {
     @Test
     void createProduct_ShouldCreateNewProductWithOneCategory_WhenExistentCategoryIdSpecified() {
 
+        setUpTransactionTemplateMock();
         doAnswer(invocationOnMock -> invocationOnMock.<ProductDetails>getArgument(0))
                 .when(detailsRepository).save(any(ProductDetails.class));
 
@@ -449,6 +453,7 @@ class ProductServiceImplTest {
     @Test
     void createProduct_ShouldThrowImageNotFoundException_WhenImageNotFoundByUrl() {
 
+        setUpTransactionTemplateMock();
         var requestData = buildRequestData();
         requestData.images().add("someUrl");
 
@@ -469,6 +474,7 @@ class ProductServiceImplTest {
     @Test
     void createProduct_ShouldCreateNewProductWithOneImage_WhenExistentImageUrlSpecified() {
 
+        setUpTransactionTemplateMock();
         doAnswer(invocationOnMock -> invocationOnMock.<ProductDetails>getArgument(0))
                 .when(detailsRepository).save(any(ProductDetails.class));
 
@@ -514,6 +520,15 @@ class ProductServiceImplTest {
 
         when(detailsMapper.toDto(any(ProductDetails.class)))
                 .thenReturn(detailsDto);
+    }
+
+    private void setUpTransactionTemplateMock() {
+        when(transactionTemplate.execute(any(TransactionCallback.class)))
+                .thenAnswer(invocationOnMock -> {
+                    TransactionCallback<ProductDetailsDto> callback =
+                            (TransactionCallback<ProductDetailsDto>) invocationOnMock.getArguments()[0];
+                    return callback.doInTransaction(mock(TransactionStatus.class));
+                });
     }
 
     private RequestProductDto buildRequestData() {
