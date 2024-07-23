@@ -332,7 +332,8 @@ class ProductServiceImplTest {
                 1.0,
                 1.0,
                 1.0,
-                newGrossWeight
+                newGrossWeight,
+                100
         );
 
         when(categoryRepository.findAllByIdIn(any(Collection.class)))
@@ -522,7 +523,8 @@ class ProductServiceImplTest {
                 productDetails.getWidthInMeters(),
                 productDetails.getHeightInMeters(),
                 product.getNetWeightInKg(),
-                productDetails.getGrossWeightInKg()
+                productDetails.getGrossWeightInKg(),
+                100
         );
     }
 }
