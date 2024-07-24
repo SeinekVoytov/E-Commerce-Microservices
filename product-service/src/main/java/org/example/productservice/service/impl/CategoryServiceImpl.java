@@ -48,11 +48,11 @@ public class CategoryServiceImpl implements CategoryService {
 
         Function<Category, ?> mappingFunction = createMappingFunction(withParents, withChildren);
 
-        List<Category> requestedCateogries = (root) ?
+        List<Category> requestedCategories = (root) ?
                 categoryRepository.findAllByParentCategoryIsNull() :
                 categoryRepository.findAll();
 
-        return requestedCateogries.stream()
+        return requestedCategories.stream()
                 .map(mappingFunction)
                 .collect(Collectors.toSet());
     }
