@@ -58,7 +58,11 @@ public record RequestProductDto(
 
      @NotNull(message = "Gross weight cannot be null")
      @DecimalMin(value = "0", inclusive = false, message = "Gross weight must be greater than zero")
-     Double grossWeightInKg
+     Double grossWeightInKg,
+
+     @NotNull(message = "Inventory quantity cannot be null")
+     @Positive(message = "Inventory quantity must be a positive integer")
+     Integer inventoryQuantity
 ) {
 
 }

@@ -1,5 +1,6 @@
 package org.example.productservice.service.impl;
 
+import org.example.productservice.communication.service.InventoryServiceCommunicator;
 import org.example.productservice.dto.PriceDto;
 import org.example.productservice.dto.ProductDetailsDto;
 import org.example.productservice.dto.ProductDto;
@@ -34,6 +35,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -43,6 +45,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -52,6 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -59,6 +63,11 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ProductServiceImplTest {
+
+    private final Jwt jwt = mockJwt();
+
+    @Mock
+    private InventoryServiceCommunicator inventoryServiceCommunicator;
 
     @Mock
     private BrandService brandService;
@@ -294,7 +303,7 @@ class ProductServiceImplTest {
         when(requestProductMapper.toEntity(requestData))
                 .thenReturn(productDetails);
 
-        var actual = service.updateProduct(testingId, requestData);
+        var actual = service.updateProduct(testingId, requestData, jwt);
 
         assertAll(
                 () -> assertNotNull(productDetails.getProduct().getImages()),
@@ -332,7 +341,8 @@ class ProductServiceImplTest {
                 1.0,
                 1.0,
                 1.0,
-                newGrossWeight
+                newGrossWeight,
+                100
         );
 
         when(categoryRepository.findAllByIdIn(any(Collection.class)))
@@ -347,7 +357,7 @@ class ProductServiceImplTest {
         when(detailsMapper.toDto(productDetails))
                 .thenReturn(detailsDto);
 
-        service.updateProduct(testingId, requestData);
+        service.updateProduct(testingId, requestData, jwt);
 
         assertAll(
                 () -> assertEquals(newName, productDetails.getProduct().getName()),
@@ -370,7 +380,7 @@ class ProductServiceImplTest {
         when(requestProductMapper.toEntity(requestData))
                 .thenReturn(productDetails);
 
-        var actual = service.createProduct(requestData);
+        var actual = service.createProduct(requestData, jwt);
 
         assertAll(
                 () -> assertNotNull(productDetails.getProduct().getImages()),
@@ -397,7 +407,7 @@ class ProductServiceImplTest {
 
         assertThrows(
                 CategoryNotFoundException.class,
-                () -> service.createProduct(requestData)
+                () -> service.createProduct(requestData, jwt)
         );
 
         verify(detailsRepository, never()).save(any(ProductDetails.class));
@@ -427,7 +437,7 @@ class ProductServiceImplTest {
         when(detailsMapper.toDto(any(ProductDetails.class)))
                 .thenReturn(detailsDto);
 
-        var actual = service.createProduct(requestData);
+        var actual = service.createProduct(requestData, jwt);
 
         assertAll(
                 () -> assertNotNull(productDetails.getProduct().getImages()),
@@ -452,7 +462,7 @@ class ProductServiceImplTest {
 
         assertThrows(
                 ImageNotFoundException.class,
-                () -> service.createProduct(requestData)
+                () -> service.createProduct(requestData, jwt)
         );
 
         verify(detailsRepository, never()).save(any(ProductDetails.class));
@@ -482,7 +492,7 @@ class ProductServiceImplTest {
         when(detailsMapper.toDto(any(ProductDetails.class)))
                 .thenReturn(detailsDto);
 
-        var actual = service.createProduct(requestData);
+        var actual = service.createProduct(requestData, jwt);
 
         assertAll(
                 () -> assertNotNull(productDetails.getProduct().getImages()),
@@ -522,7 +532,14 @@ class ProductServiceImplTest {
                 productDetails.getWidthInMeters(),
                 productDetails.getHeightInMeters(),
                 product.getNetWeightInKg(),
-                productDetails.getGrossWeightInKg()
+                productDetails.getGrossWeightInKg(),
+                100
         );
+    }
+
+    private Jwt mockJwt() {
+        Jwt jwt = mock(Jwt.class);
+        when(jwt.getSubject()).thenReturn(UUID.randomUUID().toString());
+        return jwt;
     }
 }

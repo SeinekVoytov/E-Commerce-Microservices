@@ -9,6 +9,7 @@ import org.example.productservice.model.Product;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.math.BigDecimal;
 import java.util.Comparator;
@@ -64,11 +65,11 @@ public interface ProductService extends SearchService<ProductDto> {
 
     ProductDetailsDto getById(int id);
 
-    ProductDetailsDto createProduct(RequestProductDto newProductData);
+    ProductDetailsDto createProduct(RequestProductDto newProductData, Jwt jwt);
 
     ProductDetailsDto deleteById(int id);
 
-    ProductDetailsDto updateProduct(int id, RequestProductDto updatedProduct);
+    ProductDetailsDto updateProduct(int id, RequestProductDto updatedProduct, Jwt jwt);
 
     BulkProductsResponse getProductsByIds(List<Integer> ids);
 }
