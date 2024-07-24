@@ -12,46 +12,36 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(
             {
+                    InvalidQueryParameterException.class,
+                    CartIsEmptyException.class
+            }
+    )
+    public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus400(Exception exc) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, exc.getMessage());
+    }
+
+    @ExceptionHandler(
+            AccessTokenExpiredException.class
+    )
+    public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus401(Exception exc) {
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED, exc.getMessage());
+    }
+
+    @ExceptionHandler(
+            {
                     OrderNotFoundException.class,
                     CartNotFoundException.class,
                     ProductNotFoundException.class
             }
     )
     public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus404(Exception exc) {
-        return new ResponseEntity<>(
-                buildErrorObject(HttpStatus.NOT_FOUND.value(), exc.getMessage()),
-                HttpStatus.NOT_FOUND
-        );
+        return buildErrorResponse(HttpStatus.NOT_FOUND, exc.getMessage());
     }
 
-    @ExceptionHandler(
-            {
-                    InvalidQueryParameterException.class,
-                    CartIsEmptyException.class
-            }
-    )
-    public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus400(Exception exc) {
+    private ResponseEntity<ErrorObject> buildErrorResponse(HttpStatus status, String message) {
         return new ResponseEntity<>(
-                buildErrorObject(HttpStatus.BAD_REQUEST.value(), exc.getMessage()),
-                HttpStatus.BAD_REQUEST
-        );
-    }
-
-    @ExceptionHandler(
-            AccessTokenExpiredException.class
-    )
-    public ResponseEntity<ErrorObject> handleAccessTokenExpiredException(AccessTokenExpiredException exc) {
-        return new ResponseEntity<>(
-                buildErrorObject(HttpStatus.UNAUTHORIZED.value(), exc.getMessage()),
-                HttpStatus.UNAUTHORIZED
-        );
-    }
-
-    private ErrorObject buildErrorObject(int statusCode, String message) {
-        return new ErrorObject(
-                statusCode,
-                message,
-                new Date()
+                new ErrorObject(status.value(), message, new Date()),
+                status
         );
     }
 }

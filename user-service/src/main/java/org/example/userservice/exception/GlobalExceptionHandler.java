@@ -15,23 +15,24 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(
-            {ProductNotFoundException.class, CartItemNotFoundException.class, CartNotFoundException.class}
+            {
+                    InvalidCartIdCookieException.class,
+                    CartIsEmptyException.class
+            }
     )
-    public ResponseEntity<ErrorObject> handleNotFoundExceptions(Exception exc) {
-        return new ResponseEntity<>(
-                buildErrorObject(HttpStatus.NOT_FOUND.value(), exc.getMessage()),
-                HttpStatus.NOT_FOUND
-        );
+    public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus400(Exception exc) {
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, exc.getMessage());
     }
 
     @ExceptionHandler(
-            {InvalidCartIdCookieException.class, CartIsEmptyException.class}
+            {
+                    ProductNotFoundException.class,
+                    CartItemNotFoundException.class,
+                    CartNotFoundException.class
+            }
     )
-    public ResponseEntity<ErrorObject> handleInvalidCartIdException(Exception exc) {
-        return new ResponseEntity<>(
-                buildErrorObject(HttpStatus.BAD_REQUEST.value(), exc.getMessage()),
-                HttpStatus.BAD_REQUEST
-        );
+    public ResponseEntity<ErrorObject> handleExceptionWithResponseStatus404(Exception exc) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, exc.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -43,17 +44,13 @@ public class GlobalExceptionHandler {
             errors.put(fieldName, errorMessage);
         });
 
-        return new ResponseEntity<>(
-                buildErrorObject(HttpStatus.BAD_REQUEST.value(), errors.toString()),
-                HttpStatus.BAD_REQUEST
-        );
+        return buildErrorResponse(HttpStatus.BAD_REQUEST, errors.toString());
     }
 
-    private ErrorObject buildErrorObject(int statusCode, String message) {
-        return new ErrorObject(
-                statusCode,
-                message,
-                new Date()
+    private ResponseEntity<ErrorObject> buildErrorResponse(HttpStatus status, String message) {
+        return new ResponseEntity<>(
+                new ErrorObject(status.value(), message, new Date()),
+                status
         );
     }
 }
